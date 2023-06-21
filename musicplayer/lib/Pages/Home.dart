@@ -1,0 +1,109 @@
+import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:on_audio_query/on_audio_query.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  final OnAudioQuery _audioQuery = OnAudioQuery();
+  final player = AudioPlayer();
+
+  Future<bool> requestPermission() async {
+    if (await Permission.storage.isDenied) {
+      await Permission.storage.request();
+      return true;
+    } else {
+      return true;
+    }
+  }
+
+  bool hasPermission = false;
+  @override
+  void initState() {
+    requestPermission().then((value) {
+      setState(() {
+        hasPermission = value;
+      });
+    });
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          elevation: 8,
+          title: const Text("Player"),
+        ),
+        body: !hasPermission
+            ? const Text("No Content Found")
+            : SafeArea(
+                child: FutureBuilder<List<SongModel>>(
+                  // Default values:
+                  future: _audioQuery.querySongs(
+                    sortType: SongSortType.DATE_ADDED,
+                    orderType: OrderType.DESC_OR_GREATER,
+                    uriType: UriType.EXTERNAL,
+                    ignoreCase: true,
+                  ),
+                  builder: (context, item) {
+                    if (item.hasError) {
+                      return Text(item.error.toString());
+                    }
+
+                    if (item.data == null) {
+                      return const CircularProgressIndicator();
+                    }
+
+                    if (item.data!.isEmpty) return const Text("Nothing found!");
+
+                    return ListView.builder(
+                      itemCount: item.data!.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          onTap: () async {
+                            String? path = item.data![index].uri;
+                            await player.setAudioSource(
+                              AudioSource.uri(
+                                Uri.parse(path!),
+                                tag: MediaItem(
+                                  id: index.toString(),
+                                  title: item.data![index].title,
+                                  artist: item.data![index].artist,
+                                ),
+                              ),
+                            );
+                            await player.play();
+                          },
+
+                          title: Text(item.data![index].title),
+                          subtitle:
+                              Text(item.data![index].artist ?? "No Artist"),
+
+                          dense: false,
+
+                          // This Widget will query/load image.
+                          // You can use/create your own widget/method using [queryArtwork].
+                          leading: QueryArtworkWidget(
+                            controller: _audioQuery,
+                            id: item.data![index].id,
+                            type: ArtworkType.AUDIO,
+                            nullArtworkWidget:
+                                Image.asset("lib/assets/img/NotFound.JPG"),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ));
+  }
+}
