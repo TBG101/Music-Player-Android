@@ -1,9 +1,6 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-
-import 'package:audio_service/audio_service.dart';
 
 Future<AudioHandler> initAudioService() async {
   return await AudioService.init(
@@ -47,7 +44,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
     _player.setAudioSource(
         AudioSource.uri(Uri.parse(_mediaItem.id), tag: _mediaItem));
-
+    _player.
     play();
   }
 

@@ -42,6 +42,10 @@ dependencies:
   audio_service: ^0.18.10
   get_it: ^7.6.0
   path_provider: ^2.0.15
+  lecle_flutter_absolute_path: ^0.0.2+1
+  flutter_media_metadata: ^1.0.0
+  
+
 
   
 

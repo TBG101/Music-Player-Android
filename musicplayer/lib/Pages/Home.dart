@@ -2,15 +2,13 @@ import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:get_it/get_it.dart';
 import 'package:just_audio/just_audio.dart';
-
+import 'package:lecle_flutter_absolute_path/lecle_flutter_absolute_path.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import '../services/audioHandler.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -22,7 +20,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final OnAudioQuery _audioQuery = OnAudioQuery();
   final player = AudioPlayer();
-  final audio = AudioPlayerHandler();
+
   final _audioHandler = GetIt.instance<AudioHandler>();
 
   Future<bool> requestPermission() async {
@@ -80,11 +78,22 @@ class _HomeState extends State<Home> {
                       itemBuilder: (context, index) {
                         return ListTile(
                           onTap: () async {
-                            String? path = item.data![index].uri;
+                            String? _path = item.data![index].uri;
+
+                            // var x = File.fromUri(Uri.parse(_path!));
+
+                            // print(x.path);
+
+                            // String? filePath =
+                            //     await LecleFlutterAbsolutePath.getAbsolutePath(
+                            //             fileExtension: "mp3", uri: _path!)
+                            //         .then((value) {
+                            //   print(value);
+                            //   return value;
+                            // });
 
                             var _item = MediaItem(
-                              id: path!,
-                              
+                              id: _path!,
                               title: item.data![index].title,
                               artist: item.data![index].artist,
                               album: item.data![index].album,
