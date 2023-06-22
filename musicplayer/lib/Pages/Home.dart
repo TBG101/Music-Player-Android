@@ -1,8 +1,16 @@
+import 'dart:io';
+
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
+
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../services/audioHandler.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,6 +22,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final OnAudioQuery _audioQuery = OnAudioQuery();
   final player = AudioPlayer();
+  final audio = AudioPlayerHandler();
+  final _audioHandler = GetIt.instance<AudioHandler>();
 
   Future<bool> requestPermission() async {
     if (await Permission.storage.isDenied) {
@@ -41,7 +51,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
         appBar: AppBar(
           elevation: 8,
-          title: const Text("Player"),
+          title: const Text("data"),
         ),
         body: !hasPermission
             ? const Text("No Content Found")
@@ -60,7 +70,7 @@ class _HomeState extends State<Home> {
                     }
 
                     if (item.data == null) {
-                      return const CircularProgressIndicator();
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     if (item.data!.isEmpty) return const Text("Nothing found!");
@@ -71,17 +81,18 @@ class _HomeState extends State<Home> {
                         return ListTile(
                           onTap: () async {
                             String? path = item.data![index].uri;
-                            await player.setAudioSource(
-                              AudioSource.uri(
-                                Uri.parse(path!),
-                                tag: MediaItem(
-                                  id: index.toString(),
-                                  title: item.data![index].title,
-                                  artist: item.data![index].artist,
-                                ),
-                              ),
+
+                            var _item = MediaItem(
+                              id: path!,
+                              
+                              title: item.data![index].title,
+                              artist: item.data![index].artist,
+                              album: item.data![index].album,
+                              duration: Duration(
+                                  milliseconds:
+                                      item.data![index].duration ?? 0),
                             );
-                            await player.play();
+                            _audioHandler.playMediaItem(_item);
                           },
 
                           title: Text(item.data![index].title),

@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio_background/just_audio_background.dart';
-import 'package:musicplayer/Pages/home.dart';
+import 'package:musicplayer/services/service_locator.dart';
 
-Future<void> main() async {
-  await JustAudioBackground.init(
-      androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
-      androidNotificationChannelName: 'Audio playback',
-      androidNotificationOngoing: true,
-      androidNotificationChannelDescription: "zaefazefzae",
-      notificationColor: Colors.amber);
+import 'Pages/Home.dart';
+
+void main() async {
+  await setupServiceLocator();
   runApp(const MyApp());
 }
 
