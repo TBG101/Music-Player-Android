@@ -37,6 +37,7 @@ class _HomeState extends State<Home> {
   bool hasPermission = false;
   @override
   void initState() {
+    controller.getSongs();
     requestPermission().then((value) {
       setState(() {
         hasPermission = value;
@@ -54,84 +55,62 @@ class _HomeState extends State<Home> {
           title: const Text("data"),
         ),
         body: !hasPermission
-            ? const Text("No Content Found")
+            ? const Center(child: Text("NO PERMISSION"))
             : SafeArea(
-                child: FutureBuilder<List<SongModel>>(
-                  // Default values:
-                  future: _audioQuery.querySongs(
-                    sortType: SongSortType.DATE_ADDED,
-                    orderType: OrderType.DESC_OR_GREATER,
-                    uriType: UriType.EXTERNAL,
-                    ignoreCase: true,
-                  ),
-                  builder: (context, item) {
-                    if (item.hasError) {
-                      return Text(item.error.toString());
-                    }
+                child: ListView.builder(
+                itemCount: controller.musicList.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: () async {
+                      Uri? art = null;
+                      await _audioQuery
+                          .queryArtwork(
+                              controller.musicList[index].id, ArtworkType.AUDIO,
+                              format: ArtworkFormat.JPEG,
+                              size: 500,
+                              quality: 500)
+                          .then((value) async {
+                        if (value == null) return;
+                        var savePath = await getApplicationDocumentsDirectory();
 
-                    if (item.data == null) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+                        await File(
+                                "${savePath.path}${controller.musicList[index].title}.jpg")
+                            .writeAsBytes(value)
+                            .then((value) => art = (value.uri));
+                      });
+                      String? _path = controller.musicList[index].uri;
 
-                    if (item.data!.isEmpty) return const Text("Nothing found!");
+                      var _item = MediaItem(
+                        id: _path!,
+                        title: controller.musicList[index].title,
+                        artist: controller.musicList[index].artist,
+                        album: controller.musicList[index].album,
+                        artUri: art,
+                        duration: Duration(
+                            milliseconds:
+                                controller.musicList[index].duration ?? 0),
+                      );
 
-                    return ListView.builder(
-                      itemCount: item.data!.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          onTap: () async {
-                            Uri? art = null;
-                            await _audioQuery
-                                .queryArtwork(
-                                    item.data![index].id, ArtworkType.AUDIO,
-                                    format: ArtworkFormat.JPEG,
-                                    size: 500,
-                                    quality: 500)
-                                .then((value) async {
-                              if (value == null) return;
-                              var savePath =
-                                  await getApplicationDocumentsDirectory();
+                      _audioHandler.playMediaItem(_item);
+                    },
 
-                              await File(
-                                      "${savePath.path}${item.data![index].title}.jpg")
-                                  .writeAsBytes(value!)
-                                  .then((value) => art = (value.uri));
-                            });
-                            String? _path = item.data![index].uri;
+                    title: Text(controller.musicList[index].title),
+                    subtitle:
+                        Text(controller.musicList[index].artist ?? "No Artist"),
 
-                            var _item = MediaItem(
-                              id: _path!,
-                              title: item.data![index].title,
-                              artist: item.data![index].artist,
-                              album: item.data![index].album,
-                              artUri: art,
-                              duration: Duration(
-                                  milliseconds:
-                                      item.data![index].duration ?? 0),
-                            );
-                            _audioHandler.playMediaItem(_item);
-                          },
+                    dense: false,
 
-                          title: Text(item.data![index].title),
-                          subtitle:
-                              Text(item.data![index].artist ?? "No Artist"),
-
-                          dense: false,
-
-                          // This Widget will query/load image.
-                          // You can use/create your own widget/method using [queryArtwork].
-                          leading: QueryArtworkWidget(
-                            controller: _audioQuery,
-                            id: item.data![index].id,
-                            type: ArtworkType.AUDIO,
-                            nullArtworkWidget:
-                                Image.asset("lib/assets/img/NotFound.JPG"),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ));
+                    // This Widget will query/load image.
+                    // You can use/create your own widget/method using [queryArtwork].
+                    leading: QueryArtworkWidget(
+                      controller: _audioQuery,
+                      id: controller.musicList![index].id,
+                      type: ArtworkType.AUDIO,
+                      nullArtworkWidget:
+                          Image.asset("lib/assets/img/NotFound.JPG"),
+                    ),
+                  );
+                },
+              )));
   }
 }
