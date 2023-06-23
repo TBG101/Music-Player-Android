@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 class MusicController extends GetxController {
   final OnAudioQuery _audioQuery = OnAudioQuery();
   RxList<SongModel> musicList = <SongModel>[].obs;
-  final RxBool _hasError = false.obs;
+  RxBool hasError = false.obs;
 
   final _audioHandler =
       GetIt.instance<AudioHandler>(); // could be changed with getx
@@ -30,15 +30,20 @@ class MusicController extends GetxController {
       });
     } on Exception catch (e) {
       debugPrint(e.toString());
-      _hasError.value = true;
+      hasError.value = true;
     }
   }
 
   void playSong(int index) async {
     Uri? art = null;
     await _audioQuery
-        .queryArtwork(musicList[index].id, ArtworkType.AUDIO,
-            format: ArtworkFormat.JPEG, size: 500, quality: 500)
+        .queryArtwork(
+            musicList[index].id,
+            ArtworkType
+                .AUDIO, // artwork getter could be imporved for perfomance
+            format: ArtworkFormat.JPEG,
+            size: 500,
+            quality: 500)
         .then((value) async {
       if (value == null) return;
       var savePath = await getApplicationDocumentsDirectory();
@@ -58,6 +63,15 @@ class MusicController extends GetxController {
       duration: Duration(milliseconds: musicList[index].duration ?? 0),
     );
 
-    _audioHandler.playMediaItem(_item);
+    _audioHandler.playMediaItem(_item); // play the song
+  }
+
+  Widget artWorkGetter(int index) {
+    return QueryArtworkWidget(
+      controller: _audioQuery,
+      id: musicList[index].id,
+      type: ArtworkType.AUDIO,
+      nullArtworkWidget: Image.asset("lib/assets/img/NotFound.JPG"),
+    );
   }
 }
