@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:musicplayer/controllers/MusicController.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -17,8 +18,10 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final OnAudioQuery _audioQuery = OnAudioQuery();
-  final player = AudioPlayer();
+  final MusicController controller =
+      Get.put(MusicController()); // music GetX controller
+
+  final OnAudioQuery _audioQuery = OnAudioQuery(); // audio query to get music
 
   final _audioHandler = GetIt.instance<AudioHandler>();
 

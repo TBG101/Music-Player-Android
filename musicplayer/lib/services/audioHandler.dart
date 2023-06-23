@@ -44,8 +44,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
     _player.setAudioSource(
         AudioSource.uri(Uri.parse(_mediaItem.id), tag: _mediaItem));
-    _player.
-    play();
+    _player.play();
   }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {

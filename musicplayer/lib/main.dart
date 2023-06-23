@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:musicplayer/services/service_locator.dart';
 
 import 'Pages/Home.dart';
 
 void main() async {
   await setupServiceLocator();
-  runApp(const MyApp());
+  runApp(const GetMaterialApp(home: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
