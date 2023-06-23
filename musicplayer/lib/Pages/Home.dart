@@ -77,7 +77,7 @@ class _HomeState extends State<Home> {
                       itemBuilder: (context, index) {
                         return ListTile(
                           onTap: () async {
-                            Uri? art;
+                            Uri? art = null;
                             await _audioQuery
                                 .queryArtwork(
                                     item.data![index].id, ArtworkType.AUDIO,
