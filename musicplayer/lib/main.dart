@@ -1,12 +1,18 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:musicplayer/services/service_locator.dart';
+import 'package:get/get.dart';
+import 'package:musicplayer/services/audioHandler.dart';
 
-import 'Pages/Home.dart';
+import 'Pages/HomePage/Home.dart';
 
 void main() async {
-  await setupServiceLocator();
-  runApp(const GetMaterialApp(home: MyApp()));
+  WidgetsFlutterBinding.ensureInitialized();
+
+  Get.put<AudioHandler>(await initAudioService(), permanent: true);
+
+  runApp(const GetMaterialApp(
+    home: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {

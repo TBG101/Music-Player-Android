@@ -3,19 +3,31 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_it/get_it.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
 class MusicController extends GetxController {
   final OnAudioQuery _audioQuery = OnAudioQuery();
-  RxList<SongModel> musicList = <SongModel>[].obs;
-  RxBool hasError = false.obs;
 
-  final _audioHandler =
-      GetIt.instance<AudioHandler>(); // could be changed with getx
+  final RxList<SongModel> musicList = <SongModel>[].obs;
 
-  void getSongs() {
+  final RxBool hasError = false.obs;
+  late AudioHandler audioHandler;
+
+  final Rxn<MediaItem> song = Rxn<MediaItem>();
+
+  initHandler() {
+    audioHandler = Get.find<AudioHandler>();
+  }
+
+  GetSongPlaying() {
+    return song;
+  }
+
+  // var audioHandler =
+  //     GetIt.instance<AudioHandler>(); // could be changed with getx
+
+  void getSongs() async {
     try {
       _audioQuery
           .querySongs(
@@ -25,16 +37,20 @@ class MusicController extends GetxController {
         ignoreCase: true,
       )
           .then((songsList) {
-        musicList.value = songsList;
-        musicList.refresh();
+        for (var element in songsList) {
+          if (element.duration! > 60000) {
+            musicList.add(element);
+            musicList.refresh();
+          }
+        }
       });
-    } on Exception catch (e) {
+    } catch (e) {
       debugPrint(e.toString());
       hasError.value = true;
     }
   }
 
-  void playSong(int index) async {
+  saveArtImage(int index) async {
     Uri? art = null;
     await _audioQuery
         .queryArtwork(
@@ -52,8 +68,12 @@ class MusicController extends GetxController {
           .writeAsBytes(value)
           .then((value) => art = (value.uri));
     });
-    String? _path = musicList[index].uri;
+    return art;
+  }
 
+  void playSong(int index) async {
+    String? _path = musicList[index].uri;
+    Uri? art = await saveArtImage(index);
     var _item = MediaItem(
       id: _path!,
       title: musicList[index].title,
@@ -63,10 +83,18 @@ class MusicController extends GetxController {
       duration: Duration(milliseconds: musicList[index].duration ?? 0),
     );
 
-    _audioHandler.playMediaItem(_item); // play the song
+    audioHandler.playMediaItem(_item); // play the song
   }
 
+  itemPlaying() {
+    audioHandler.mediaItem.listen((item) {
+      song.value = item;
+    });
+  }
+  
+
   Widget artWorkGetter(int index) {
+    // artwork widget in Home Page
     return QueryArtworkWidget(
       controller: _audioQuery,
       id: musicList[index].id,

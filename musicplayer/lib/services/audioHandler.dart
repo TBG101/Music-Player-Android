@@ -1,6 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:musicplayer/controllers/MusicController.dart';
 
 Future<AudioHandler> initAudioService() async {
   return await AudioService.init(
@@ -16,7 +18,11 @@ Future<AudioHandler> initAudioService() async {
 }
 
 class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
-  final _player = AudioPlayer();
+  final _player = AudioPlayer(); // instance that allows me to play music
+
+  final MusicController controller =
+      Get.put(MusicController()); // music controller
+
   AudioPlayerHandler() {
     _notifyAudioHandlerAboutPlaybackEvents();
     _listenForDurationChanges();
@@ -48,6 +54,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
+    
     _player.playbackEventStream.listen((PlaybackEvent event) {
       final playing = _player.playing;
       playbackState.add(playbackState.value.copyWith(
