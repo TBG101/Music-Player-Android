@@ -43,6 +43,7 @@ class MusicController extends GetxController {
             musicList.refresh();
           }
         }
+        update();
       });
     } catch (e) {
       debugPrint(e.toString());
@@ -91,7 +92,6 @@ class MusicController extends GetxController {
       song.value = item;
     });
   }
-  
 
   Widget artWorkGetter(int index) {
     // artwork widget in Home Page
