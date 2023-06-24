@@ -31,6 +31,7 @@ class _HomeState extends State<Home> {
   void initState() {
     controller.initHandler();
     controller.getSongs();
+    controller.getState();
     controller.itemPlaying();
 
     requestPermission().then((value) {
@@ -58,7 +59,10 @@ class _HomeState extends State<Home> {
         elevation: 8,
         toolbarHeight: 70,
         title: AnimSearchBar(
-          color: Colors.white38,
+          color: Colors.transparent,
+          searchIconColor: Colors.white,
+          prefixIcon: const Icon(Icons.search_rounded),
+          boxShadow: false,
           onSubmitted: (String) {},
           onSuffixTap: null,
           textController: x,
@@ -77,7 +81,7 @@ class _HomeState extends State<Home> {
                     : Stack(
                         children: [
                           ListView.builder(
-                            itemCount: controller.musicList.length,
+                            itemCount: controller.musicList.length ,
                             itemBuilder: (context, index) {
                               return ListTile(
                                   onTap: () async {
@@ -89,9 +93,6 @@ class _HomeState extends State<Home> {
                                       controller.musicList[index].artist ??
                                           "No Artist"),
                                   dense: false,
-
-                                  // This Widget will query/load image.
-                                  // You can use/create your own widget/method using [queryArtwork].
                                   leading: controller.artWorkGetter(index));
                             },
                           ),

@@ -15,12 +15,13 @@ class MusicController extends GetxController {
   late AudioHandler audioHandler;
 
   final Rxn<MediaItem> song = Rxn<MediaItem>();
+  final Rxn<PlaybackState> playbackState = Rxn<PlaybackState>();
 
   initHandler() {
     audioHandler = Get.find<AudioHandler>();
   }
 
-  GetSongPlaying() {
+  getSongPlaying() {
     return song;
   }
 
@@ -90,6 +91,13 @@ class MusicController extends GetxController {
   itemPlaying() {
     audioHandler.mediaItem.listen((item) {
       song.value = item;
+    });
+  }
+
+  getState() {
+    audioHandler.playbackState.listen((PlaybackState state) {
+      playbackState.value = state;
+      print(state.playing);
     });
   }
 

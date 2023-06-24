@@ -53,34 +53,40 @@ class SongPlayingWdiget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                AspectRatio(aspectRatio: 1, child: Obx(() => artUri())),
+                AspectRatio(aspectRatio: 1, child: artUri()),
                 Padding(
                   padding: const EdgeInsets.only(left: 14),
                   child: SizedBox(
                     width: 205,
                     height: 60,
-                    child: Obx(
-                      () => Text(
-                        controller.song.value == null
-                            ? "Null"
-                            : controller.song.value!.title,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: const TextStyle(fontSize: 16),
-                        textAlign: TextAlign.start,
-                        softWrap: true,
-                      ),
+                    child: Text(
+                      controller.song.value == null
+                          ? "Null"
+                          : controller.song.value!.title,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: const TextStyle(fontSize: 16),
+                      textAlign: TextAlign.start,
+                      softWrap: true,
                     ),
                   ),
+                ),
+                Obx(
+                  () => IconButton(
+                      padding: const EdgeInsets.all(0),
+                      onPressed: () {
+                        controller.playbackState.value!.playing
+                            ? controller.audioHandler.pause()
+                            : controller.audioHandler.play();
+                      },
+                      icon: Icon(controller.playbackState.value!.playing
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded)),
                 ),
                 IconButton(
                     padding: const EdgeInsets.all(0),
                     onPressed: () {},
-                    icon: const Icon(Icons.pause_rounded)),
-                IconButton(
-                    padding: const EdgeInsets.all(0),
-                    onPressed: () {},
-                    icon: const Icon(Icons.skip_next_rounded))
+                    icon: const Icon(Icons.skip_next_rounded)),
               ]),
         ),
       ),

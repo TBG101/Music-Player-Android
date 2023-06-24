@@ -54,7 +54,6 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
-    
     _player.playbackEventStream.listen((PlaybackEvent event) {
       final playing = _player.playing;
       playbackState.add(playbackState.value.copyWith(
