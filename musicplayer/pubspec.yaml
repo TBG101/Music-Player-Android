@@ -43,7 +43,9 @@ dependencies:
   get_it: ^7.6.0
   path_provider: ^2.0.15
   get: ^4.6.5
-  animation_search_bar: ^0.0.10
+  flutter_riverpod: ^2.3.6
+
+
 
 
   
@@ -73,6 +75,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - lib/assets/img/NotFound.JPG
+    - lib/assets/search.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

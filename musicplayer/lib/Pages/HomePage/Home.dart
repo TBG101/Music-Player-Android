@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/SongPlayingWidget.dart';
+import 'package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart';
 import 'package:musicplayer/controllers/MusicController.dart';
 
 import 'package:permission_handler/permission_handler.dart';
@@ -50,18 +53,81 @@ class _HomeState extends State<Home> {
     }
   }
 
+  String artistSetter(int index) {
+    if (controller.textController.value.text.isEmpty) {
+      if (controller.musicList[index].artist == "<unknown>") return "No Artist";
+      return controller.musicList[index].artist ?? "";
+    } else {
+      if (controller.filteredList[index].artist == "<unknown>")
+        return "No Artist";
+      return controller.filteredList[index].artist ?? "";
+    }
+  }
+
+  Widget titleWidget() {
+    return RichText(
+      overflow: TextOverflow.clip,
+      textAlign: TextAlign.end,
+      textDirection: TextDirection.rtl,
+      softWrap: true,
+      maxLines: 1,
+      textScaleFactor: 1,
+      text: const TextSpan(
+        text: 'My ',
+        style: TextStyle(color: Colors.white, fontSize: 23),
+        children: <TextSpan>[
+          TextSpan(
+              text: 'Music',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.purpleAccent)),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget appbarWdget() {
+    return PreferredSize(
+        preferredSize: const Size(double.infinity, 60),
+        child: SafeArea(
+            child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 2),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+              ),
+              alignment: Alignment.center,
+              child: AnimationSearchBar(
+                onChanged: (text) {
+                  controller.filterList();
+                },
+                onClosed: () {
+                  controller.textController.value.text = "";
+
+                  controller.filterList();
+                },
+                closeIconColor: Colors.white,
+                isBackButtonVisible: false,
+                duration: const Duration(milliseconds: 250),
+                previousScreen: null,
+                backIconColor: Colors.black,
+                centerTitle: 'My Music',
+                searchIconColor: Colors.white,
+                centerTitleStyle:
+                    const TextStyle(color: Colors.white, fontSize: 18),
+                searchTextEditingController: controller.textController.value,
+                horizontalPadding: 5,
+                centerWidget: titleWidget(),
+              ),
+            ),
+          ),
+        )));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          elevation: 8,
-          toolbarHeight: 70,
-          title: TextField(
-            controller: controller.textController.value,
-            onChanged: (value) {
-              controller.filterList();
-            },
-          )),
+      appBar: appbarWdget(),
       body: GetBuilder<MusicController>(builder: (controller) {
         return SafeArea(
             child: controller.hasError.isTrue
@@ -86,12 +152,7 @@ class _HomeState extends State<Home> {
                                           .textController.value.text.isEmpty
                                       ? controller.musicList[index].title
                                       : controller.filteredList[index].title),
-                                  subtitle: Text(controller
-                                          .textController.value.text.isEmpty
-                                      ? controller.musicList[index].artist ??
-                                          "No Artist"
-                                      : controller.filteredList[index].artist ??
-                                          "No Artist"),
+                                  subtitle: Text(artistSetter(index)),
                                   dense: false,
                                   leading: controller.artWorkGetter(index));
                             },

@@ -29,7 +29,7 @@ class MusicController extends GetxController {
     return song;
   }
 
-  void getSongs() async {
+  void getSongs() {
     try {
       _audioQuery
           .querySongs(
@@ -45,6 +45,22 @@ class MusicController extends GetxController {
             musicList.refresh();
           }
         }
+        // var lst = <MediaItem>[];
+        // for (var index = 0; index < musicList.length; index++) {
+        //   String? _path = musicList[index].uri;
+        //   var _item = MediaItem(
+        //     id: _path!,
+        //     title: musicList[index].title,
+        //     artist: musicList[index].artist ?? " ",
+        //     album: musicList[index].album,
+        //     artUri: null,
+        //     duration: Duration(milliseconds: musicList[index].duration ?? 0),
+        //   );
+        //   lst.add(_item);
+        // }
+        // print(lst.length);
+        // print(lst.first);
+        // audioHandler.addQueueItems(lst);
         update();
       });
     } catch (e) {
@@ -58,9 +74,11 @@ class MusicController extends GetxController {
     if (textController.value.text.isNotEmpty) {
       for (var element in musicList) {
         if (element.title
-            .toLowerCase()
-            .contains(textController.value.text.toLowerCase())) {
-          print(element.title);
+                .toLowerCase()
+                .contains(textController.value.text.toLowerCase()) ||
+            element.artist!
+                .toLowerCase()
+                .contains(textController.value.text.toLowerCase())) {
           filteredList.add(element);
         }
       }
@@ -86,8 +104,8 @@ class MusicController extends GetxController {
             ArtworkType
                 .AUDIO, // artwork getter could be imporved for perfomance
             format: ArtworkFormat.JPEG,
-            size: 500,
-            quality: 500)
+            size: 350,
+            quality: 350)
         .then((value) async {
       if (value == null) return;
       var savePath = await getApplicationDocumentsDirectory();
@@ -113,7 +131,7 @@ class MusicController extends GetxController {
     var _item = MediaItem(
       id: _path!,
       title: songs[index].title,
-      artist: songs[index].artist,
+      artist: songs[index].artist ?? " ",
       album: songs[index].album,
       artUri: art,
       duration: Duration(milliseconds: songs[index].duration ?? 0),

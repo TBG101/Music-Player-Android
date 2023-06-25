@@ -19,6 +19,7 @@ Future<AudioHandler> initAudioService() async {
 
 class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   final _player = AudioPlayer(); // instance that allows me to play music
+  final _playlist = ConcatenatingAudioSource(children: []);
 
   final MusicController controller =
       Get.put(MusicController()); // music controller
@@ -26,11 +27,45 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   AudioPlayerHandler() {
     _notifyAudioHandlerAboutPlaybackEvents();
     _listenForDurationChanges();
+    _loadEmptyPlaylist();
+  }
+
+  Future<void> _loadEmptyPlaylist() async {
+    try {
+      await _player.setAudioSource(_playlist);
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  @override
+  Future<void> addQueueItems(List<MediaItem> mediaItems) {
+    // TODO: implement addQueueItems
+
+    final audioSource = mediaItems.map(
+      (e) {
+        return AudioSource.uri(Uri.parse(e.id), tag: e);
+      },
+    );
+    _playlist.addAll(audioSource.toList());
+
+    final newQueue = queue.value..addAll(mediaItems);
+    queue.add(newQueue);
+
+    return super.addQueueItems(mediaItems);
   }
 
   @override
   Future<void> play() async {
     await _player.play();
+  }
+
+  @override
+  Future<void> skipToNext() {
+    // TODO: implement skipToNext
+    print("next");
+    print(_player.hasNext);
+    return super.skipToNext();
   }
 
   @override
@@ -52,6 +87,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
         AudioSource.uri(Uri.parse(_mediaItem.id), tag: _mediaItem));
     _player.play();
   }
+  
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {

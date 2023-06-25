@@ -11,6 +11,7 @@ void main() async {
   Get.put<AudioHandler>(await initAudioService(), permanent: true);
 
   runApp(const GetMaterialApp(
+    debugShowCheckedModeBanner: false,
     home: MyApp(),
   ));
 }
