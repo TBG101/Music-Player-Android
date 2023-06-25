@@ -43,8 +43,7 @@ dependencies:
   get_it: ^7.6.0
   path_provider: ^2.0.15
   get: ^4.6.5
-  anim_search_bar: ^2.0.3
-  
+  animation_search_bar: ^0.0.10
 
 
   

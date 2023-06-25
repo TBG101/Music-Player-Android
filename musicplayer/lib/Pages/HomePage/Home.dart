@@ -1,4 +1,3 @@
-import 'package:anim_search_bar/anim_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/SongPlayingWidget.dart';
@@ -51,25 +50,18 @@ class _HomeState extends State<Home> {
     }
   }
 
-  var x = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 8,
-        toolbarHeight: 70,
-        title: AnimSearchBar(
-          color: Colors.transparent,
-          searchIconColor: Colors.white,
-          prefixIcon: const Icon(Icons.search_rounded),
-          boxShadow: false,
-          onSubmitted: (String) {},
-          onSuffixTap: null,
-          textController: x,
-          width: 400,
-          rtl: true,
-        ),
-      ),
+          elevation: 8,
+          toolbarHeight: 70,
+          title: TextField(
+            controller: controller.textController.value,
+            onChanged: (value) {
+              controller.filterList();
+            },
+          )),
       body: GetBuilder<MusicController>(builder: (controller) {
         return SafeArea(
             child: controller.hasError.isTrue
@@ -81,27 +73,38 @@ class _HomeState extends State<Home> {
                     : Stack(
                         children: [
                           ListView.builder(
-                            itemCount: controller.musicList.length ,
+                            itemCount:
+                                controller.textController.value.text.isEmpty
+                                    ? controller.musicList.length
+                                    : controller.filteredList.length,
                             itemBuilder: (context, index) {
                               return ListTile(
                                   onTap: () async {
                                     controller.playSong(index);
                                   },
-                                  title:
-                                      Text(controller.musicList[index].title),
-                                  subtitle: Text(
-                                      controller.musicList[index].artist ??
+                                  title: Text(controller
+                                          .textController.value.text.isEmpty
+                                      ? controller.musicList[index].title
+                                      : controller.filteredList[index].title),
+                                  subtitle: Text(controller
+                                          .textController.value.text.isEmpty
+                                      ? controller.musicList[index].artist ??
+                                          "No Artist"
+                                      : controller.filteredList[index].artist ??
                                           "No Artist"),
                                   dense: false,
                                   leading: controller.artWorkGetter(index));
                             },
                           ),
                           Obx(() {
-                            return AnimatedAlign(
-                              curve: Curves.ease,
-                              alignment: boxAligment(),
-                              duration: const Duration(milliseconds: 500),
-                              child: SongPlayingWdiget(),
+                            return Visibility(
+                              visible: controller.visible.value,
+                              child: AnimatedAlign(
+                                curve: Curves.ease,
+                                alignment: boxAligment(),
+                                duration: const Duration(milliseconds: 500),
+                                child: SongPlayingWdiget(),
+                              ),
                             );
                           })
                         ],

@@ -50,15 +50,17 @@ class SongPlayingWdiget extends StatelessWidget {
           decoration:
               const BoxDecoration(color: Color.fromARGB(111, 64, 66, 88)),
           child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                AspectRatio(aspectRatio: 1, child: artUri()),
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: artUri(),
+                ),
                 Padding(
                   padding: const EdgeInsets.only(left: 14),
                   child: SizedBox(
                     width: 205,
-                    height: 60,
                     child: Text(
                       controller.song.value == null
                           ? "Null"

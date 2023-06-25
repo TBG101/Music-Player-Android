@@ -7,9 +7,11 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
 class MusicController extends GetxController {
+  final RxBool visible = false.obs;
   final OnAudioQuery _audioQuery = OnAudioQuery();
 
   final RxList<SongModel> musicList = <SongModel>[].obs;
+  final RxList<SongModel> filteredList = <SongModel>[].obs;
 
   final RxBool hasError = false.obs;
   late AudioHandler audioHandler;
@@ -17,16 +19,15 @@ class MusicController extends GetxController {
   final Rxn<MediaItem> song = Rxn<MediaItem>();
   final Rxn<PlaybackState> playbackState = Rxn<PlaybackState>();
 
-  initHandler() {
+  var textController = TextEditingController().obs;
+
+  void initHandler() {
     audioHandler = Get.find<AudioHandler>();
   }
 
-  getSongPlaying() {
+  Rxn<MediaItem> getSongPlaying() {
     return song;
   }
-
-  // var audioHandler =
-  //     GetIt.instance<AudioHandler>(); // could be changed with getx
 
   void getSongs() async {
     try {
@@ -52,11 +53,36 @@ class MusicController extends GetxController {
     }
   }
 
+  void filterList() {
+    filteredList.value = [];
+    if (textController.value.text.isNotEmpty) {
+      for (var element in musicList) {
+        if (element.title
+            .toLowerCase()
+            .contains(textController.value.text.toLowerCase())) {
+          print(element.title);
+          filteredList.add(element);
+        }
+      }
+    }
+
+    filteredList.refresh();
+    update();
+  }
+
   saveArtImage(int index) async {
+    var songs = <SongModel>[];
+    if (textController.value.text.isEmpty) {
+      songs = musicList;
+    } else {
+      songs = filteredList;
+    }
+
     Uri? art = null;
+
     await _audioQuery
         .queryArtwork(
-            musicList[index].id,
+            songs[index].id,
             ArtworkType
                 .AUDIO, // artwork getter could be imporved for perfomance
             format: ArtworkFormat.JPEG,
@@ -66,7 +92,7 @@ class MusicController extends GetxController {
       if (value == null) return;
       var savePath = await getApplicationDocumentsDirectory();
 
-      await File("${savePath.path}${musicList[index].title}.jpg")
+      await File("${savePath.path}${songs[index].title}.jpg")
           .writeAsBytes(value)
           .then((value) => art = (value.uri));
     });
@@ -74,15 +100,23 @@ class MusicController extends GetxController {
   }
 
   void playSong(int index) async {
-    String? _path = musicList[index].uri;
+    visible.value = true;
+    var songs = <SongModel>[];
+    if (textController.value.text.isEmpty) {
+      songs = musicList;
+    } else {
+      songs = filteredList;
+    }
+
+    String? _path = songs[index].uri;
     Uri? art = await saveArtImage(index);
     var _item = MediaItem(
       id: _path!,
-      title: musicList[index].title,
-      artist: musicList[index].artist,
-      album: musicList[index].album,
+      title: songs[index].title,
+      artist: songs[index].artist,
+      album: songs[index].album,
       artUri: art,
-      duration: Duration(milliseconds: musicList[index].duration ?? 0),
+      duration: Duration(milliseconds: songs[index].duration ?? 0),
     );
 
     audioHandler.playMediaItem(_item); // play the song
@@ -102,10 +136,17 @@ class MusicController extends GetxController {
   }
 
   Widget artWorkGetter(int index) {
+    var songs = <SongModel>[];
+    if (textController.value.text.isEmpty) {
+      songs = musicList;
+    } else {
+      songs = filteredList;
+    }
+
     // artwork widget in Home Page
     return QueryArtworkWidget(
       controller: _audioQuery,
-      id: musicList[index].id,
+      id: songs[index].id,
       type: ArtworkType.AUDIO,
       nullArtworkWidget: Image.asset("lib/assets/img/NotFound.JPG"),
     );
