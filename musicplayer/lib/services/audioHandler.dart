@@ -61,11 +61,12 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> skipToNext() {
+  Future<void> skipToNext() async {
     // TODO: implement skipToNext
     print("next");
     print(_player.hasNext);
-    return super.skipToNext();
+    _player.seekToNext();
+    _player.play();
   }
 
   @override
@@ -87,7 +88,14 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
         AudioSource.uri(Uri.parse(_mediaItem.id), tag: _mediaItem));
     _player.play();
   }
-  
+
+  @override
+  Future<void> skipToQueueItem(int index) async {
+    // TODO: implement skipToQueueItem
+
+    _player.seek(Duration.zero, index: index);
+    _player.play();
+  }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {

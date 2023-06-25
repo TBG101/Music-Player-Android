@@ -45,22 +45,22 @@ class MusicController extends GetxController {
             musicList.refresh();
           }
         }
-        // var lst = <MediaItem>[];
-        // for (var index = 0; index < musicList.length; index++) {
-        //   String? _path = musicList[index].uri;
-        //   var _item = MediaItem(
-        //     id: _path!,
-        //     title: musicList[index].title,
-        //     artist: musicList[index].artist ?? " ",
-        //     album: musicList[index].album,
-        //     artUri: null,
-        //     duration: Duration(milliseconds: musicList[index].duration ?? 0),
-        //   );
-        //   lst.add(_item);
-        // }
-        // print(lst.length);
-        // print(lst.first);
-        // audioHandler.addQueueItems(lst);
+        var lst = <MediaItem>[];
+        for (var index = 0; index < musicList.length; index++) {
+          String? _path = musicList[index].uri;
+          var _item = MediaItem(
+            id: _path!,
+            title: musicList[index].title,
+            artist: musicList[index].artist ?? " ",
+            album: musicList[index].album,
+            artUri: null,
+            duration: Duration(milliseconds: musicList[index].duration ?? 0),
+          );
+          lst.add(_item);
+        }
+        print(lst.length);
+        print(lst.first);
+        audioHandler.addQueueItems(lst);
         update();
       });
     } catch (e) {
@@ -118,26 +118,27 @@ class MusicController extends GetxController {
   }
 
   void playSong(int index) async {
-    visible.value = true;
-    var songs = <SongModel>[];
-    if (textController.value.text.isEmpty) {
-      songs = musicList;
-    } else {
-      songs = filteredList;
-    }
+    audioHandler.skipToQueueItem(index);
+    // visible.value = true;
+    // var songs = <SongModel>[];
+    // if (textController.value.text.isEmpty) {
+    //   songs = musicList;
+    // } else {
+    //   songs = filteredList;
+    // }
 
-    String? _path = songs[index].uri;
-    Uri? art = await saveArtImage(index);
-    var _item = MediaItem(
-      id: _path!,
-      title: songs[index].title,
-      artist: songs[index].artist ?? " ",
-      album: songs[index].album,
-      artUri: art,
-      duration: Duration(milliseconds: songs[index].duration ?? 0),
-    );
+    // String? _path = songs[index].uri;
+    // Uri? art = await saveArtImage(index);
+    // var _item = MediaItem(
+    //   id: _path!,
+    //   title: songs[index].title,
+    //   artist: songs[index].artist ?? " ",
+    //   album: songs[index].album,
+    //   artUri: art,
+    //   duration: Duration(milliseconds: songs[index].duration ?? 0),
+    // );
 
-    audioHandler.playMediaItem(_item); // play the song
+    // audioHandler.playMediaItem(_item); // play the song
   }
 
   itemPlaying() {
