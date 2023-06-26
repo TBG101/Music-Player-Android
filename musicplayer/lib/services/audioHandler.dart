@@ -39,7 +39,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> addQueueItems(List<MediaItem> mediaItems) {
+  Future<void> addQueueItems(List<MediaItem> mediaItems) async {
     // TODO: implement addQueueItems
 
     final audioSource = mediaItems.map(
@@ -51,8 +51,20 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
     final newQueue = queue.value..addAll(mediaItems);
     queue.add(newQueue);
+  }
 
-    return super.addQueueItems(mediaItems);
+  @override
+  Future<void> updateQueue(List<MediaItem> mediaItems) async {
+    final audioSource = mediaItems.map(
+      (e) {
+        return AudioSource.uri(Uri.parse(e.id), tag: e);
+      },
+    );
+    _playlist.clear();
+    _playlist.addAll(audioSource.toList());
+    queue.value.clear();
+    final newQueue = queue.value..addAll(mediaItems);
+    queue.add(newQueue);
   }
 
   @override
@@ -61,10 +73,14 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
+  Future<void> skipToPrevious() {
+    _player.seekToPrevious();
+    _player.play();
+    return super.skipToPrevious();
+  }
+
+  @override
   Future<void> skipToNext() async {
-    // TODO: implement skipToNext
-    print("next");
-    print(_player.hasNext);
     _player.seekToNext();
     _player.play();
   }

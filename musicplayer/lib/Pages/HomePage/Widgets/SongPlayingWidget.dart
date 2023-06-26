@@ -87,7 +87,9 @@ class SongPlayingWdiget extends StatelessWidget {
                 ),
                 IconButton(
                     padding: const EdgeInsets.all(0),
-                    onPressed: () {},
+                    onPressed: () {
+                      controller.audioHandler.skipToNext();
+                    },
                     icon: const Icon(Icons.skip_next_rounded)),
               ]),
         ),

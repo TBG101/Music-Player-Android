@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/SongPlayingWidget.dart';
@@ -28,13 +26,17 @@ class _HomeState extends State<Home> {
     }
   }
 
-  bool hasPermission = false;
-  @override
-  void initState() {
+  void controllerInit() {
     controller.initHandler();
     controller.getSongs();
     controller.getState();
     controller.itemPlaying();
+  }
+
+  bool hasPermission = false; 
+  @override
+  void initState() {
+    controllerInit();
 
     requestPermission().then((value) {
       setState(() {
@@ -58,13 +60,14 @@ class _HomeState extends State<Home> {
       if (controller.musicList[index].artist == "<unknown>") return "No Artist";
       return controller.musicList[index].artist ?? "";
     } else {
-      if (controller.filteredList[index].artist == "<unknown>")
+      if (controller.filteredList[index].artist == "<unknown>") {
         return "No Artist";
+      }
       return controller.filteredList[index].artist ?? "";
     }
   }
 
-  Widget titleWidget() {
+  RichText titleWidget() {
     return RichText(
       overflow: TextOverflow.clip,
       textAlign: TextAlign.end,
@@ -89,39 +92,60 @@ class _HomeState extends State<Home> {
     return PreferredSize(
         preferredSize: const Size(double.infinity, 60),
         child: SafeArea(
-            child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 2),
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.transparent,
-              ),
-              alignment: Alignment.center,
-              child: AnimationSearchBar(
-                onChanged: (text) {
-                  controller.filterList();
-                },
-                onClosed: () {
-                  controller.textController.value.text = "";
-
-                  controller.filterList();
-                },
-                closeIconColor: Colors.white,
-                isBackButtonVisible: false,
-                duration: const Duration(milliseconds: 250),
-                previousScreen: null,
-                backIconColor: Colors.black,
-                centerTitle: 'My Music',
-                searchIconColor: Colors.white,
-                centerTitleStyle:
-                    const TextStyle(color: Colors.white, fontSize: 18),
-                searchTextEditingController: controller.textController.value,
-                horizontalPadding: 5,
-                centerWidget: titleWidget(),
-              ),
-            ),
+          decoration: const BoxDecoration(
+            color: Colors.transparent,
+          ),
+          alignment: Alignment.center,
+          child: AnimationSearchBar(
+            onChanged: (text) {
+              controller.queeUpdate();
+              controller.filterList();
+            },
+            onClosed: () {
+              controller.textController.value.clear();
+              controller.queeUpdate();
+              controller.filterList();
+            },
+            closeIconColor: Colors.white,
+            isBackButtonVisible: false,
+            duration: const Duration(milliseconds: 250),
+            previousScreen: null,
+            backIconColor: Colors.black,
+            centerTitle: 'My Music',
+            searchIconColor: Colors.white,
+            centerTitleStyle:
+                const TextStyle(color: Colors.white, fontSize: 18),
+            searchTextEditingController: controller.textController.value,
+            horizontalPadding: 5,
+            centerWidget: titleWidget(),
           ),
         )));
+  }
+
+  Widget listViewBuilderWidget(int index) {
+    if (controller.textController.value.text.isEmpty &&
+        index == controller.musicList.length) {
+      return const SizedBox(
+        height: 80,
+      );
+    }
+    if (controller.textController.value.text.isNotEmpty &&
+        index == controller.filteredList.length) {
+      return const SizedBox(
+        height: 80,
+      );
+    }
+    return ListTile(
+        onTap: () async {
+          controller.playSong(index);
+        },
+        title: Text(controller.textController.value.text.isEmpty
+            ? controller.musicList[index].title
+            : controller.filteredList[index].title),
+        subtitle: Text(artistSetter(index)),
+        dense: false,
+        leading: controller.artWorkGetter(index));
   }
 
   @override
@@ -132,7 +156,7 @@ class _HomeState extends State<Home> {
         return SafeArea(
             child: controller.hasError.isTrue
                 ? const Text("ERROR")
-                : controller.musicList.isEmpty
+                : controller.musicList.isEmpty || controller.doneInit.isFalse
                     ? const Center(
                         child: CircularProgressIndicator(),
                       )
@@ -141,20 +165,10 @@ class _HomeState extends State<Home> {
                           ListView.builder(
                             itemCount:
                                 controller.textController.value.text.isEmpty
-                                    ? controller.musicList.length
-                                    : controller.filteredList.length,
+                                    ? controller.musicList.length + 1
+                                    : controller.filteredList.length + 1,
                             itemBuilder: (context, index) {
-                              return ListTile(
-                                  onTap: () async {
-                                    controller.playSong(index);
-                                  },
-                                  title: Text(controller
-                                          .textController.value.text.isEmpty
-                                      ? controller.musicList[index].title
-                                      : controller.filteredList[index].title),
-                                  subtitle: Text(artistSetter(index)),
-                                  dense: false,
-                                  leading: controller.artWorkGetter(index));
+                              return listViewBuilderWidget(index);
                             },
                           ),
                           Obx(() {
