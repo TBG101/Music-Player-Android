@@ -33,7 +33,8 @@ class _HomeState extends State<Home> {
     controller.itemPlaying();
   }
 
-  bool hasPermission = false; 
+  bool hasPermission = false;
+
   @override
   void initState() {
     controllerInit();
@@ -90,7 +91,7 @@ class _HomeState extends State<Home> {
 
   PreferredSizeWidget appbarWdget() {
     return PreferredSize(
-        preferredSize: const Size(double.infinity, 60),
+        preferredSize: const Size(double.infinity, 65),
         child: SafeArea(
             child: Container(
           decoration: const BoxDecoration(

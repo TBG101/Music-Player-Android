@@ -1,3 +1,5 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 library animation_search_bar;
 
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
@@ -125,14 +127,15 @@ class AnimationSearchBar extends StatelessWidget {
                   duration: _duration,
                   child: AnimatedContainer(
                     curve: Curves.easeInOutCirc,
-                    width: _isSearching ? 35 : 0,
-                    height: _isSearching ? 35 : 0,
+                    width: _isSearching ? 40 : 0,
+                    height: _isSearching ? 40 : 0,
                     duration: _duration,
                     child: FittedBox(
                       child: KCustomButton(
                         widget: Padding(
-                            padding: const EdgeInsets.all(3),
+                            padding: const EdgeInsets.all(10),
                             child: Icon(Icons.close,
+                                size: 80,
                                 color: closeIconColor ??
                                     Colors.black.withOpacity(.7))),
                         onPressed: () {
@@ -201,15 +204,15 @@ class AnimationSearchBar extends StatelessWidget {
                   child: AnimatedContainer(
                     curve: Curves.easeInOutCirc,
                     duration: _duration,
-                    width: _isSearching ? 0 : 35,
-                    height: _isSearching ? 0 : 35,
+                    width: _isSearching ? 0 : 40,
+                    height: _isSearching ? 0 : 40,
                     child: FittedBox(
                       child: KCustomButton(
                           widget: Padding(
-                              padding: const EdgeInsets.all(5),
+                              padding: const EdgeInsets.all(10),
                               child: ImageIcon(
                                   const AssetImage("lib/assets/search.png"),
-                                  size: 35,
+                                  size: 60,
                                   color: searchIconColor ??
                                       Colors.black.withOpacity(.7))),
                           onPressed: () => _searchNotifier.state = true),
@@ -247,8 +250,9 @@ class KCustomButton extends StatelessWidget {
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(radius ?? 50),
             child: InkWell(
-                splashColor: Theme.of(context).primaryColor.withOpacity(.2),
-                highlightColor: Theme.of(context).primaryColor.withOpacity(.05),
+                radius: 100,
+                splashColor: Colors.white.withOpacity(0.05),
+                highlightColor: Colors.white.withOpacity(0.05),
                 onTap: onPressed,
                 onLongPress: onLongPress,
                 child: Padding(
@@ -290,8 +294,8 @@ class KBackButton extends StatelessWidget {
                 child: Padding(
                     padding: const EdgeInsets.all(3),
                     child: SizedBox(
-                        width: 30,
-                        height: 30,
+                        width: 40,
+                        height: 40,
                         child: Icon(icon ?? Icons.arrow_back_ios_new,
                             color: iconColor ?? Colors.black.withOpacity(.7),
                             size: 25))))));

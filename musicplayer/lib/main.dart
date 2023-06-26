@@ -10,9 +10,11 @@ void main() async {
 
   Get.put<AudioHandler>(await initAudioService(), permanent: true);
 
-  runApp(const GetMaterialApp(
+  runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
-    home: MyApp(),
+    title: 'Music Player',
+    theme: ThemeData.dark(useMaterial3: true),
+    home: const MyHomePage(title: 'Music Player'),
   ));
 }
 

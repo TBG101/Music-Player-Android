@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MusicController extends GetxController {
-  late final SharedPreferences prefs;
+  late SharedPreferences prefs;
 
   final RxBool visible = false.obs;
   final OnAudioQuery _audioQuery = OnAudioQuery();
@@ -32,10 +32,18 @@ class MusicController extends GetxController {
 
   var queeUpdated = true.obs;
 
+  var firsTime = false;
+
   void initHandler() async {
     audioHandler = Get.find<AudioHandler>();
     savePath = await getApplicationDocumentsDirectory();
     prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool("firstTime") == null) {
+      firsTime = true;
+      prefs.setBool("firstTime", false);
+    } else {
+      firsTime = false;
+    }
   }
 
   Rxn<MediaItem> getSongPlaying() {
@@ -82,18 +90,18 @@ class MusicController extends GetxController {
       }
 
       addListQuee();
-
-      update();
     } catch (e) {
       debugPrint(e.toString());
       hasError.value = true;
     }
-    saveAllArt();
-    // if (prefs.getBool('firstTime') == null) {
-    // } else {
-    //   prefs.setBool('firstTime', false);
-    //   doneInit.value = true;
-    // }
+    if (firsTime == true) {
+      print("true");
+      saveAllArt();
+    } else {
+      print("false");
+      doneInit.value = true;
+    }
+    update();
   }
 
   Future<Uri> artSetter(int index, List<SongModel> songs) async {
@@ -202,29 +210,12 @@ class MusicController extends GetxController {
     });
   }
 
-  Widget artWorkGetter(int index) {
-    var songs = <SongModel>[];
-    if (textController.value.text.isEmpty) {
-      songs = musicList;
-    } else {
-      songs = filteredList;
-    }
-
-    // artwork widget in Home Page
-    return QueryArtworkWidget(
-      controller: _audioQuery,
-      id: songs[index].id,
-      type: ArtworkType.AUDIO,
-      nullArtworkWidget: Image.asset("lib/assets/img/NotFound.JPG"),
-    );
-  }
-
   void saveAllArt() async {
     print(musicList.length);
     final ByteData bytes = await rootBundle.load('lib/assets/img/NotFound.JPG');
     final Uint8List list = bytes.buffer.asUint8List();
     File("${savePath.path}/NotFound.JPG").writeAsBytes(list);
-    
+
     for (int index = 0; index < musicList.length; index++) {
       var img = await _audioQuery.queryArtwork(
           musicList[index].id, ArtworkType.AUDIO,
@@ -251,5 +242,22 @@ class MusicController extends GetxController {
     doneInit.value = true;
     update();
     debugPrint("done");
+  }
+
+  Widget artWorkGetter(int index) {
+    var songs = <SongModel>[];
+    if (textController.value.text.isEmpty) {
+      songs = musicList;
+    } else {
+      songs = filteredList;
+    }
+
+    // artwork widget in Home Page
+    return QueryArtworkWidget(
+      controller: _audioQuery,
+      id: songs[index].id,
+      type: ArtworkType.AUDIO,
+      nullArtworkWidget: Image.asset("lib/assets/img/NotFound.JPG"),
+    );
   }
 }
