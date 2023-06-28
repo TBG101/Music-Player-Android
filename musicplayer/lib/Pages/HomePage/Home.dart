@@ -4,8 +4,6 @@ import 'package:musicplayer/Pages/HomePage/Widgets/SongPlayingWidget.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart';
 import 'package:musicplayer/controllers/MusicController.dart';
 
-import 'package:permission_handler/permission_handler.dart';
-
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -16,15 +14,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final MusicController controller =
       Get.put(MusicController()); // music GetX controller
-
-  Future<bool> requestPermission() async {
-    if (await Permission.storage.isDenied) {
-      await Permission.storage.request();
-      return true;
-    } else {
-      return true;
-    }
-  }
 
   void controllerInit() {
     controller.initHandler();
@@ -38,13 +27,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     controllerInit();
-
-    requestPermission().then((value) {
-      setState(() {
-        hasPermission = value;
-      });
-    });
-
     super.initState();
   }
 
@@ -155,36 +137,38 @@ class _HomeState extends State<Home> {
       appBar: appbarWdget(),
       body: GetBuilder<MusicController>(builder: (controller) {
         return SafeArea(
-            child: controller.hasError.isTrue
-                ? const Text("ERROR")
-                : controller.musicList.isEmpty || controller.doneInit.isFalse
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : Stack(
-                        children: [
-                          ListView.builder(
-                            itemCount:
-                                controller.textController.value.text.isEmpty
-                                    ? controller.musicList.length + 1
-                                    : controller.filteredList.length + 1,
-                            itemBuilder: (context, index) {
-                              return listViewBuilderWidget(index);
-                            },
-                          ),
-                          Obx(() {
-                            return Visibility(
-                              visible: controller.visible.value,
-                              child: AnimatedAlign(
-                                curve: Curves.ease,
-                                alignment: boxAligment(),
-                                duration: const Duration(milliseconds: 500),
-                                child: SongPlayingWdiget(),
+            child: controller.doneInit.isFalse
+                ? const Center(child: CircularProgressIndicator())
+                : controller.hasError.isTrue
+                    ? const Text("ERROR")
+                    : controller.musicList.isEmpty
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : Stack(
+                            children: [
+                              ListView.builder(
+                                itemCount:
+                                    controller.textController.value.text.isEmpty
+                                        ? controller.musicList.length + 1
+                                        : controller.filteredList.length + 1,
+                                itemBuilder: (context, index) {
+                                  return listViewBuilderWidget(index);
+                                },
                               ),
-                            );
-                          })
-                        ],
-                      ));
+                              Obx(() {
+                                return Visibility(
+                                  visible: controller.visible.value,
+                                  child: AnimatedAlign(
+                                    curve: Curves.ease,
+                                    alignment: boxAligment(),
+                                    duration: const Duration(milliseconds: 500),
+                                    child: SongPlayingWdiget(),
+                                  ),
+                                );
+                              })
+                            ],
+                          ));
       }),
     );
   }

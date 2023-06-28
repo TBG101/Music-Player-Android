@@ -8,11 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MusicController extends GetxController {
-  late SharedPreferences prefs;
-
   final RxBool visible = false.obs;
   final OnAudioQuery _audioQuery = OnAudioQuery();
 
@@ -32,18 +29,9 @@ class MusicController extends GetxController {
 
   var queeUpdated = true.obs;
 
-  var firsTime = false;
-
   void initHandler() async {
     audioHandler = Get.find<AudioHandler>();
     savePath = await getApplicationDocumentsDirectory();
-    prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool("firstTime") == null) {
-      firsTime = true;
-      prefs.setBool("firstTime", false);
-    } else {
-      firsTime = false;
-    }
   }
 
   Rxn<MediaItem> getSongPlaying() {
@@ -53,18 +41,22 @@ class MusicController extends GetxController {
   void addListQuee() async {
     var lst = <MediaItem>[];
     for (var index = 0; index < musicList.length; index++) {
+      String art = "${savePath.path}/${musicList[index].title}.jpg";
+
       String? path = musicList[index].uri;
-      if (await File("${savePath.path}/${musicList[index].title}.jpg")
-              .exists() ==
-          false) {
-      } else {}
+      File(art).exists().then((value) {
+        if (value != true) {
+          print("$index IMG DOES NOT EXIST");
+          art = "${savePath.path}/NotFound.JPG";
+        }
+      });
 
       var item = MediaItem(
         id: path!,
         title: musicList[index].title,
         artist: musicList[index].artist ?? " ",
         album: musicList[index].album,
-        artUri: Uri.file("${savePath.path}/${musicList[index].title}.jpg"),
+        artUri: Uri.file(art),
         duration: Duration(milliseconds: musicList[index].duration ?? 0),
       );
       lst.add(item);
@@ -74,6 +66,9 @@ class MusicController extends GetxController {
   }
 
   void getSongs() async {
+    savePath = await getApplicationDocumentsDirectory();
+    bool firstCall = await File("${savePath.path}/NotFound.JPG").exists();
+
     try {
       List<SongModel> x = await _audioQuery.querySongs(
         sortType: SongSortType.DATE_ADDED,
@@ -85,8 +80,14 @@ class MusicController extends GetxController {
       for (var element in x) {
         if (element.duration! > 60000) {
           musicList.add(element);
-          musicList.refresh();
         }
+      }
+      musicList.refresh();
+      if (firstCall == false) {
+        print("First time Running");
+        saveAllArt();
+      } else {
+        doneInit.value = true;
       }
 
       addListQuee();
@@ -94,13 +95,7 @@ class MusicController extends GetxController {
       debugPrint(e.toString());
       hasError.value = true;
     }
-    if (firsTime == true) {
-      print("true");
-      saveAllArt();
-    } else {
-      print("false");
-      doneInit.value = true;
-    }
+
     update();
   }
 
@@ -210,7 +205,7 @@ class MusicController extends GetxController {
     });
   }
 
-  void saveAllArt() async {
+  saveAllArt() async {
     print(musicList.length);
     final ByteData bytes = await rootBundle.load('lib/assets/img/NotFound.JPG');
     final Uint8List list = bytes.buffer.asUint8List();

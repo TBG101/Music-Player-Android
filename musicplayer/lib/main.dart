@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:musicplayer/Pages/CheckPermissionPage/permissionCheck.dart';
 import 'package:musicplayer/services/audioHandler.dart';
 
 import 'Pages/HomePage/Home.dart';
@@ -45,6 +46,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return const Home();
+    return const PermissionCheck();
   }
 }
