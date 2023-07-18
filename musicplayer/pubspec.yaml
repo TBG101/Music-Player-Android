@@ -44,7 +44,8 @@ dependencies:
   path_provider: ^2.0.15
   get: ^4.6.5
   flutter_riverpod: ^2.3.6
-
+  http: ^0.13.3
+  dio: ^4.0.0
 
 
 
@@ -77,6 +78,7 @@ flutter:
   assets:
     - lib/assets/img/NotFound.JPG
     - lib/assets/search.png
+    - lib/assets/img/download.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

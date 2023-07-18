@@ -29,6 +29,11 @@ class MusicController extends GetxController {
 
   var queeUpdated = true.obs;
 
+  void initFalse() {
+    doneInit.value = false;
+    update();
+  }
+
   void initHandler() async {
     audioHandler = Get.find<AudioHandler>();
     savePath = await getApplicationDocumentsDirectory();

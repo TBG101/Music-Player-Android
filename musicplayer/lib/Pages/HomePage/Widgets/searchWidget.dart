@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show ProviderScope, StateProvider, Consumer;
+import 'package:get/get.dart';
 
 final searchingProvider = StateProvider.autoDispose((ref) => false);
 
@@ -36,6 +37,8 @@ class AnimationSearchBar extends StatelessWidget {
     this.isBackButtonVisible,
     this.backIcon,
     this.duration,
+    required this.onDrawerOpen,
+    this.searchYoutube,
   }) : super(key: key);
 
   ///
@@ -60,7 +63,9 @@ class AnimationSearchBar extends StatelessWidget {
   late Duration? duration;
   final TextEditingController searchTextEditingController;
   final Function(String) onChanged;
+  final Function(String)? searchYoutube;
   final Function() onClosed;
+  final void Function() onDrawerOpen;
   final Widget centerWidget;
 
   @override
@@ -94,14 +99,16 @@ class AnimationSearchBar extends StatelessWidget {
                         duration: _duration,
                         child: AnimatedContainer(
                             curve: Curves.easeInOutCirc,
-                            width: _isSearching ? 0 : 35,
-                            height: _isSearching ? 0 : 35,
+                            width: _isSearching ? 0 : 50,
+                            height: _isSearching ? 0 : 50,
                             duration: _duration,
                             child: FittedBox(
                                 child: KBackButton(
-                                    icon: backIcon,
-                                    iconColor: backIconColor,
-                                    previousScreen: previousScreen))))
+                              icon: Icons.menu_rounded,
+                              iconColor: Colors.white,
+                              previousScreen: previousScreen,
+                              onDrawerOpen: onDrawerOpen,
+                            ))))
                     : AnimatedContainer(
                         curve: Curves.easeInOutCirc,
                         width: _isSearching ? 0 : 35,
@@ -135,7 +142,7 @@ class AnimationSearchBar extends StatelessWidget {
                         widget: Padding(
                             padding: const EdgeInsets.all(10),
                             child: Icon(Icons.close,
-                                size: 80,
+                                size: 60,
                                 color: closeIconColor ??
                                     Colors.black.withOpacity(.7))),
                         onPressed: () {
@@ -173,6 +180,13 @@ class AnimationSearchBar extends StatelessWidget {
                     child: TextField(
                       controller: searchTextEditingController,
                       cursorColor: cursorColor ?? Colors.lightBlue,
+                      onSubmitted: (textToSeach) {
+                        if (searchYoutube == null) {
+                          debugPrint("NO youtube function");
+                        } else {
+                          searchYoutube!(textToSeach);
+                        }
+                      },
                       style: textStyle ??
                           const TextStyle(
                               color: Colors.white, fontWeight: FontWeight.w300),
@@ -266,11 +280,13 @@ class KBackButton extends StatelessWidget {
   final Widget? previousScreen;
   final Color? iconColor;
   final IconData? icon;
+  final void Function() onDrawerOpen;
   const KBackButton(
       {Key? key,
       required this.previousScreen,
       required this.iconColor,
-      required this.icon})
+      required this.icon,
+      required this.onDrawerOpen})
       : super(key: key);
 
   @override
@@ -281,23 +297,17 @@ class KBackButton extends StatelessWidget {
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(50),
             child: InkWell(
+                radius: 100,
                 splashColor: Theme.of(context).primaryColor.withOpacity(.2),
                 highlightColor: Theme.of(context).primaryColor.withOpacity(.05),
-                onTap: () async {
-                  previousScreen == null
-                      ? Navigator.pop(context)
-                      : Navigator.pushReplacement(
-                          context,
-                          CupertinoPageRoute(
-                              builder: (context) => previousScreen!));
-                },
+                onTap: onDrawerOpen,
                 child: Padding(
-                    padding: const EdgeInsets.all(3),
+                    padding: const EdgeInsets.all(0),
                     child: SizedBox(
-                        width: 40,
-                        height: 40,
+                        width: 10,
+                        height: 10,
                         child: Icon(icon ?? Icons.arrow_back_ios_new,
                             color: iconColor ?? Colors.black.withOpacity(.7),
-                            size: 25))))));
+                            size: 7))))));
   }
 }
