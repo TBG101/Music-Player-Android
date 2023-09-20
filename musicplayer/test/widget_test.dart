@@ -5,8 +5,8 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 void main() async {
@@ -20,5 +20,5 @@ void main() async {
   final response = await http
       .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
 
-  print(response.body);
+  debugPrint(response.body);
 }

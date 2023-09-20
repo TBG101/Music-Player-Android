@@ -1,9 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:musicplayer/Pages/HomePage/Home.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class PermissionCheck extends StatefulWidget {
   const PermissionCheck({super.key});
@@ -14,25 +16,50 @@ class PermissionCheck extends StatefulWidget {
 
 class _PermissionCheckState extends State<PermissionCheck> {
   bool? hasPermission;
+
   checkPermission() async {
-    var x = await Permission.storage.status;
-    if (x.isDenied) x = await Permission.storage.request();
+    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
 
-    await Future.delayed(const Duration(milliseconds: 500)).then((value) {
-      if (x.isGranted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const Home()),
-          (Route<dynamic> route) => false,
-        );
-      } else {
-        setState(() {
-          hasPermission = false;
-        });
+    if (int.parse(androidInfo.version.release) < 13) {
+      var x = await Permission.storage.request();
+      if (x.isDenied) {
+        x = await Permission.storage.request();
       }
+      await Future.delayed(const Duration(milliseconds: 500)).then((value) {
+        if (x.isGranted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+            (Route<dynamic> route) => false,
+          );
+        } else {
+          setState(() {
+            hasPermission = false;
+          });
+        }
 
-      return null;
-    });
+        return null;
+      });
+    } else {
+      var x = await Permission.audio.request();
+      await Permission.mediaLibrary.request();
+      await Future.delayed(const Duration(milliseconds: 500)).then((value) {
+        if (x.isGranted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+            (Route<dynamic> route) => false,
+          );
+        } else {
+          setState(() {
+            hasPermission = false;
+          });
+        }
+
+        return null;
+      });
+    }
   }
 
   String waitingForPemission() {

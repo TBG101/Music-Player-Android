@@ -15,7 +15,7 @@ class SongPlayingWdiget extends StatelessWidget {
       return ClipRRect(
         borderRadius: BorderRadius.circular(90),
         child: Image.asset(
-          "lib/assets/img/NotFound.JPG",
+          "lib/assets/img/NotFound.jpg",
           width: 30,
           height: 30,
           fit: BoxFit.cover,

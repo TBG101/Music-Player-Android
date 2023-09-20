@@ -2,11 +2,9 @@
 
 library animation_search_bar;
 
-import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show ProviderScope, StateProvider, Consumer;
-import 'package:get/get.dart';
 
 final searchingProvider = StateProvider.autoDispose((ref) => false);
 

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:musicplayer/Pages/CheckPermissionPage/permissionCheck.dart';
 import 'package:musicplayer/services/audioHandler.dart';
 
-import 'Pages/HomePage/Home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -18,7 +18,7 @@ class _HomeState extends State<Home> {
       Get.put(MusicController()); // music GetX controller
   final youtubeController ytController =
       Get.put(youtubeController()); // music GetX controller
-  
+
   void controllerInit() {
     controller.initHandler();
     controller.getSongs();
@@ -151,8 +151,10 @@ class _HomeState extends State<Home> {
         children: [
           InkWell(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => YoutubeHomePage()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const YoutubeHomePage()));
             },
             child: const SizedBox(
               width: double.infinity,
@@ -175,7 +177,7 @@ class _HomeState extends State<Home> {
                 if (controller.doneInit.isTrue) {
                   controller.audioHandler.stop();
                   controller.initFalse();
-                  controller.saveAllArt();
+                  controller.rescanFiles();
                   scaffoldKey.currentState?.closeDrawer();
                 }
               },
@@ -228,7 +230,9 @@ class _HomeState extends State<Home> {
         body: GetBuilder<MusicController>(builder: (controller) {
           return SafeArea(
               child: controller.doneInit.isFalse
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: Obx(() => Text(
+                          "${controller.musicCountcurrent}/${controller.musicCount}")))
                   : controller.hasError.isTrue
                       ? const Text("ERROR")
                       : controller.musicList.isEmpty

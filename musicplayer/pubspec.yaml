@@ -46,6 +46,8 @@ dependencies:
   flutter_riverpod: ^2.3.6
   http: ^0.13.3
   dio: ^4.0.0
+  device_info_plus: ^9.0.3
+  file_picker: ^5.5.0
 
 
 
@@ -76,7 +78,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - lib/assets/img/NotFound.JPG
+    - lib/assets/img/NotFound.jpg
     - lib/assets/search.png
     - lib/assets/img/download.png
 

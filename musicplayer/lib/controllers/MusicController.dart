@@ -1,7 +1,4 @@
-// ignore_for_file: dead_code
-
 import 'dart:io';
-
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 
 class MusicController extends GetxController {
   final RxBool visible = false.obs;
+  final RxInt musicCountcurrent = 0.obs;
+  final RxInt musicCount = 0.obs;
   final OnAudioQuery _audioQuery = OnAudioQuery();
 
   final RxList<SongModel> musicList = <SongModel>[].obs;
@@ -47,8 +46,8 @@ class MusicController extends GetxController {
     var lst = <MediaItem>[];
     for (var index = 0; index < musicList.length; index++) {
       String art = "${savePath.path}/${musicList[index].title}.jpg";
-
       String? path = musicList[index].uri;
+
       File(art).exists().then((value) {
         if (value != true) {
           print("$index IMG DOES NOT EXIST");
@@ -72,7 +71,7 @@ class MusicController extends GetxController {
 
   void getSongs() async {
     savePath = await getApplicationDocumentsDirectory();
-    bool firstCall = await File("${savePath.path}/NotFound.JPG").exists();
+    bool firstCall = await File("${savePath.path}/NotFound.jpg").exists();
 
     try {
       List<SongModel> x = await _audioQuery.querySongs(
@@ -106,10 +105,12 @@ class MusicController extends GetxController {
 
   Future<Uri> artSetter(int index, List<SongModel> songs) async {
     Uri? art;
-    if (await File("${savePath.path}/${songs[index].title}.jpg").exists()) {
+    print("here");
+    if ((await File("${savePath.path}/${songs[index].title}.jpg").exists()) ==
+        true) {
       art = Uri.file("${savePath.path}/${songs[index].title}.jpg");
     } else {
-      art = Uri.file("${savePath.path}/NotFound.JPG");
+      art = Uri.file("${savePath.path}/NotFound.jpg");
     }
     return art;
   }
@@ -212,11 +213,14 @@ class MusicController extends GetxController {
 
   saveAllArt() async {
     print(musicList.length);
-    final ByteData bytes = await rootBundle.load('lib/assets/img/NotFound.JPG');
+    final ByteData bytes = await rootBundle.load('lib/assets/img/NotFound.jpg');
     final Uint8List list = bytes.buffer.asUint8List();
-    File("${savePath.path}/NotFound.JPG").writeAsBytes(list);
-
+    File("${savePath.path}/NotFound.jpg").writeAsBytes(list);
+    musicCount.value = musicList.length;
+    print(savePath.path);
     for (int index = 0; index < musicList.length; index++) {
+      musicCountcurrent.value = index;
+      print(index);
       var img = await _audioQuery.queryArtwork(
           musicList[index].id, ArtworkType.AUDIO,
           format: ArtworkFormat.JPEG, size: 300, quality: 300);
@@ -257,7 +261,41 @@ class MusicController extends GetxController {
       controller: _audioQuery,
       id: songs[index].id,
       type: ArtworkType.AUDIO,
-      nullArtworkWidget: Image.asset("lib/assets/img/NotFound.JPG"),
+      nullArtworkWidget: ClipRRect(
+        borderRadius: BorderRadius.circular(90),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Image.asset(
+            "lib/assets/img/NotFound.jpg",
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
     );
+  }
+
+  void rescanFiles() async {
+    savePath = await getApplicationDocumentsDirectory();
+    musicList.value = [];
+    try {
+      List<SongModel> x = await _audioQuery.querySongs(
+        sortType: SongSortType.DATE_ADDED,
+        orderType: OrderType.DESC_OR_GREATER,
+        uriType: UriType.EXTERNAL,
+        ignoreCase: true,
+      );
+
+      for (var element in x) {
+        if (element.duration! > 60000) {
+          musicList.add(element);
+        }
+      }
+      musicList.refresh();
+      addListQuee();
+    } catch (e) {
+      debugPrint(e.toString());
+      hasError.value = true;
+    }
+    await saveAllArt();
   }
 }
