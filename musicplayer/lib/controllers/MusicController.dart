@@ -45,25 +45,24 @@ class MusicController extends GetxController {
   void addListQuee() async {
     var lst = <MediaItem>[];
     for (var index = 0; index < musicList.length; index++) {
-      String art = "${savePath.path}/${musicList[index].title}.jpg";
+      String? art = "${savePath.path}/${musicList[index].title}.jpg";
       String? path = musicList[index].uri;
 
-      File(art).exists().then((value) {
+      await File(art).exists().then((value) {
         if (value != true) {
           print("$index IMG DOES NOT EXIST");
-          art = "${savePath.path}/NotFound.JPG";
+          art = null;
         }
+        var item = MediaItem(
+          id: path!,
+          title: musicList[index].title,
+          artist: musicList[index].artist ?? " ",
+          album: musicList[index].album,
+          artUri: art != null ? Uri.file(art!) : null,
+          duration: Duration(milliseconds: musicList[index].duration ?? 0),
+        );
+        lst.add(item);
       });
-
-      var item = MediaItem(
-        id: path!,
-        title: musicList[index].title,
-        artist: musicList[index].artist ?? " ",
-        album: musicList[index].album,
-        artUri: Uri.file(art),
-        duration: Duration(milliseconds: musicList[index].duration ?? 0),
-      );
-      lst.add(item);
     }
 
     audioHandler.addQueueItems(lst);
@@ -104,15 +103,17 @@ class MusicController extends GetxController {
   }
 
   Future<Uri> artSetter(int index, List<SongModel> songs) async {
-    Uri? art;
-    print("here");
-    if ((await File("${savePath.path}/${songs[index].title}.jpg").exists()) ==
-        true) {
-      art = Uri.file("${savePath.path}/${songs[index].title}.jpg");
-    } else {
-      art = Uri.file("${savePath.path}/NotFound.jpg");
-    }
-    return art;
+    return await File("${savePath.path}/${songs[index].title}.jpg")
+        .exists()
+        .then((value) {
+      Uri? art;
+      if (value) {
+        art = Uri.file("${savePath.path}/${songs[index].title}.jpg");
+      } else {
+        art = Uri.file("${savePath.path}/NotFound.jpg");
+      }
+      return art;
+    });
   }
 
   void filterList() async {
@@ -177,26 +178,6 @@ class MusicController extends GetxController {
     }
 
     audioHandler.skipToQueueItem(index);
-    // visible.value = true;
-    // var songs = <SongModel>[];
-    // if (textController.value.text.isEmpty) {
-    //   songs = musicList;
-    // } else {
-    //   songs = filteredList;
-    // }
-
-    // String? _path = songs[index].uri;
-    // Uri? art = await saveArtImage(index);
-    // var _item = MediaItem(
-    //   id: _path!,
-    //   title: songs[index].title,
-    //   artist: songs[index].artist ?? " ",
-    //   album: songs[index].album,
-    //   artUri: art,
-    //   duration: Duration(milliseconds: songs[index].duration ?? 0),
-    // );
-
-    // audioHandler.playMediaItem(_item); // play the song
   }
 
   itemPlaying() {
