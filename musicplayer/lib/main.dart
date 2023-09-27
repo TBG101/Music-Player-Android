@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/CheckPermissionPage/permissionCheck.dart';
 import 'package:musicplayer/services/audioHandler.dart';
-
+import 'package:flutter_downloader/flutter_downloader.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await FlutterDownloader.initialize(debug: true, ignoreSsl: false);
   Get.put<AudioHandler>(await initAudioService(), permanent: true);
 
   runApp(GetMaterialApp(

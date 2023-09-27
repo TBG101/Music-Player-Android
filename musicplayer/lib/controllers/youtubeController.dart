@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:musicplayer/services/keys.dart';
@@ -14,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 class youtubeController extends GetxController {
   var loading = false.obs;
   var textController = TextEditingController().obs;
+  final saveDownloadPath = Rxn<String>();
   RxList<dynamic> videos = [].obs;
   var searchData;
 
@@ -49,17 +51,23 @@ class youtubeController extends GetxController {
 
     _prepareSaveDir();
     try {
-      await _findLocalPath().then(
-        (value) => Dio().download(
-          downloadLink["link"],
-          "$value/${downloadLink["title"]}.mp3",
-          onReceiveProgress: (count, total) {
-            debugPrint(count.toString());
-          },
-        ),
-      );
+      await FlutterDownloader.enqueue(
+          url: downloadLink["link"],
+          savedDir: "${saveDownloadPath.value}",
+          showNotification: true,
+          openFileFromNotification: true);
+      // await _findLocalPath().then(
+      //   (value) => Dio().download(
+      //     downloadLink["link"],
+      //     "${saveDownloadPath.value}/${downloadLink["title"]}.mp3",
+      //     onReceiveProgress: (count, total) {
+      //       debugPrint(count.toString());
+      //     },
+      //   ),
+      // );
     } catch (e) {
       debugPrint("--- ERROR DOWNLOADING ---");
+      debugPrint(e.toString());
     }
   }
 
@@ -87,5 +95,15 @@ class youtubeController extends GetxController {
       var directory = await getApplicationDocumentsDirectory();
       return '${directory.path}${Platform.pathSeparator}Download';
     }
+  }
+
+  void setSavePath(String? newValue) {
+    saveDownloadPath.value = newValue;
+    debugPrint(newValue);
+    Permission.manageExternalStorage.status.then((value) => print(value));
+  }
+
+  String? getSavePath() {
+    return saveDownloadPath.value;
   }
 }

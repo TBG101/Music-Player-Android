@@ -158,6 +158,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.0"
+  flutter_downloader:
+    dependency: "direct main"
+    description:
+      name: flutter_downloader
+      sha256: "313fb41e598c40f1b52ff26690e0b985852c0cb31e3e4889680b4be165b97624"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.11.2"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -622,5 +630,5 @@ packages:
     source: hosted
     version: "1.0.0"
 sdks:
-  dart: ">=3.0.2 <4.0.0"
-  flutter: ">=3.7.0"
+  dart: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"

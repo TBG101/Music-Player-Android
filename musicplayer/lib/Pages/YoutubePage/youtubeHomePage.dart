@@ -1,3 +1,4 @@
+import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:musicplayer/Pages/HomePage/Home.dart";
@@ -108,6 +109,21 @@ class _YoutubeHomePageState extends State<YoutubeHomePage> {
           ),
           const Divider(),
           const Spacer(),
+          const Divider(),
+          InkWell(
+            onTap: () async {
+              String? downloadPath =
+                  await FilePicker.platform.getDirectoryPath();
+              controller.setSavePath(downloadPath);
+            },
+            child: const SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Text("Chose Where to save"),
+              ),
+            ),
+          )
         ],
       ),
     ));

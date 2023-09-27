@@ -22,6 +22,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
     final androidInfo = await deviceInfo.androidInfo;
 
     if (int.parse(androidInfo.version.release) < 13) {
+      // ANDROID 12 OR LOWER
       var x = await Permission.storage.request();
       if (x.isDenied) {
         x = await Permission.storage.request();
@@ -42,9 +43,13 @@ class _PermissionCheckState extends State<PermissionCheck> {
         return null;
       });
     } else {
+      // ANDOIRD 13 OR HIGHER
       var x = await Permission.audio.request();
       await Permission.mediaLibrary.request();
-      await Future.delayed(const Duration(milliseconds: 500)).then((value) {
+      await Permission.manageExternalStorage.request();
+      await Permission.storage.request();
+
+      await Future.delayed(const Duration(milliseconds: 2500)).then((value) {
         if (x.isGranted) {
           Navigator.pushAndRemoveUntil(
             context,
