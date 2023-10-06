@@ -57,7 +57,7 @@ class youtubeController extends GetxController {
 
       Dio().download(
         downloadLink["link"],
-        "${saveDownloadPath.value}",
+        "${saveDownloadPath.value}/${downloadLink["title"]}.mp3",
         onReceiveProgress: (count, total) {
           debugPrint(count.toString());
         },

@@ -34,6 +34,8 @@ class LocalNotificationService {
           priority: Priority.max, playSound: false,
           // different sound for
           // different notification
+          showProgress: true,
+          progress: 20,
         ),
       );
       await _notificationsPlugin.show(id, " message.notification?.title",
