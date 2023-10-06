@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 import '../../../controllers/youtubeController.dart';
 
@@ -81,7 +82,16 @@ class YouTubeVid extends StatelessWidget {
                   icon: const ImageIcon(
                     AssetImage("lib/assets/img/download.png"),
                   ),
-                ))
+                )),
+            CircularPercentIndicator(
+              radius: 30.0,
+              lineWidth: 3.0,
+              animation: true,
+              percent: 1,
+              center: const Text("zae"),
+              progressColor: Colors.green,
+              backgroundColor: Color.fromARGB(255, 4, 86, 109),
+            )
           ],
         ));
   }

@@ -41,7 +41,7 @@ dependencies:
   just_audio_background: ^0.0.1-beta.10
   audio_service: ^0.18.10
   get_it: ^7.6.0
-  path_provider: ^2.0.15
+  path_provider: ^2.1.1
   get: ^4.6.5
   flutter_riverpod: ^2.3.6
   http: ^0.13.3
@@ -49,6 +49,7 @@ dependencies:
   device_info_plus: ^9.0.3
   file_picker: ^5.5.0
   flutter_downloader: ^1.11.2
+  percent_indicator: ^4.2.3
 
 
 
