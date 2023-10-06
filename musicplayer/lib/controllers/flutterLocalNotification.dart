@@ -7,7 +7,7 @@ class LocalNotificationService {
       FlutterLocalNotificationsPlugin();
 
   static void initialize() {
-    // Initialization setting for android
+    // Initialization  setting for android
     const InitializationSettings initializationSettingsAndroid =
         InitializationSettings(
             android: AndroidInitializationSettings("@drawable/ic_launcher"));
@@ -20,21 +20,26 @@ class LocalNotificationService {
     );
   }
 
-  static Future<void> display(String id) async {
-    NotificationDetails notificationDetails = NotificationDetails(
-      android: AndroidNotificationDetails(id, "azf",
+  static Future<void> display() async {
+    // To display the notification in device
+    try {
+      final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      // ignore: prefer_const_constructors
+      NotificationDetails notificationDetails = NotificationDetails(
+        android: const AndroidNotificationDetails(
+          "Channel_Id 1", "Main Channel",
           groupKey: "gfg",
           color: Colors.green,
           importance: Importance.max,
-          showProgress: true,
-          progress: 0),
-    );
-    await _notificationsPlugin.show(
-      int.parse(id),
-      "download Started",
-      "message.notification?.body",
-      notificationDetails,
-      payload: "message.data['route']",
-    );
+          priority: Priority.max, playSound: false,
+          // different sound for
+          // different notification
+        ),
+      );
+      await _notificationsPlugin.show(id, " message.notification?.title",
+          "message.notification?.body", notificationDetails);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 }

@@ -48,8 +48,9 @@ class _PermissionCheckState extends State<PermissionCheck> {
       await Permission.mediaLibrary.request();
       await Permission.manageExternalStorage.request();
       await Permission.storage.request();
+      await Permission.notification.request();
 
-      await Future.delayed(const Duration(milliseconds: 2500)).then((value) {
+      await Future.delayed(const Duration(milliseconds: 3000)).then((value) {
         if (x.isGranted) {
           Navigator.pushAndRemoveUntil(
             context,

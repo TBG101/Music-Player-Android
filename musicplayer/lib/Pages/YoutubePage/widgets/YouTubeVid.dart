@@ -90,7 +90,7 @@ class YouTubeVid extends StatelessWidget {
               percent: 1,
               center: const Text("zae"),
               progressColor: Colors.green,
-              backgroundColor: Color.fromARGB(255, 4, 86, 109),
+              backgroundColor: const Color.fromARGB(255, 4, 86, 109),
             )
           ],
         ));
