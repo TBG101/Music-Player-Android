@@ -6,11 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/CheckPermissionPage/permissionCheck.dart';
 import 'package:musicplayer/services/audioHandler.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:musicplayer/services/flutterLocalNotification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FlutterDownloader.initialize(debug: true, ignoreSsl: false);
   Get.put<AudioHandler>(await initAudioService(), permanent: true);
 
   runApp(GetMaterialApp(
@@ -36,10 +35,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    LocalNotificationService.initialize();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

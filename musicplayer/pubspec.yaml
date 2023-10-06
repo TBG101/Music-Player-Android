@@ -48,8 +48,8 @@ dependencies:
   dio: ^4.0.0
   device_info_plus: ^9.0.3
   file_picker: ^5.5.0
-  flutter_downloader: ^1.11.2
   percent_indicator: ^4.2.3
+  flutter_local_notifications: ^16.0.0+1
 
 
 

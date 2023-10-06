@@ -5,7 +5,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:musicplayer/services/keys.dart';
@@ -49,36 +48,23 @@ class youtubeController extends GetxController {
     var downloadLink = jsonDecode(response.body);
     print(downloadLink.toString());
 
-    _prepareSaveDir();
     try {
-      await FlutterDownloader.enqueue(
-          url: downloadLink["link"],
-          savedDir: "${saveDownloadPath.value}",
-          showNotification: true,
-          openFileFromNotification: true);
-      // await _findLocalPath().then(
-      //   (value) => Dio().download(
-      //     downloadLink["link"],
-      //     "${saveDownloadPath.value}/${downloadLink["title"]}.mp3",
-      //     onReceiveProgress: (count, total) {
-      //       debugPrint(count.toString());
-      //     },
-      //   ),
-      // );
+      // await FlutterDownloader.enqueue(
+      //     url: downloadLink["link"],
+      //     savedDir: "${saveDownloadPath.value}",
+      //     showNotification: true,
+      //     openFileFromNotification: true);
+
+      Dio().download(
+        downloadLink["link"],
+        "${saveDownloadPath.value}",
+        onReceiveProgress: (count, total) {
+          debugPrint(count.toString());
+        },
+      );
     } catch (e) {
       debugPrint("--- ERROR DOWNLOADING ---");
       debugPrint(e.toString());
-    }
-  }
-
-  Future<void> _prepareSaveDir() async {
-    _localPath = (await _findLocalPath())!;
-
-    print(_localPath);
-    final savedDir = Directory(_localPath);
-    bool hasExisted = await savedDir.exists();
-    if (!hasExisted) {
-      savedDir.create();
     }
   }
 
