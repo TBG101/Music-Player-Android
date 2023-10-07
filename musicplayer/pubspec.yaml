@@ -38,7 +38,6 @@ dependencies:
   on_audio_query: ^2.9.0
   permission_handler: ^10.3.0
   just_audio: ^0.9.34
-  just_audio_background: ^0.0.1-beta.10
   audio_service: ^0.18.10
   get_it: ^7.6.0
   path_provider: ^2.1.1
@@ -50,6 +49,7 @@ dependencies:
   file_picker: ^5.5.0
   percent_indicator: ^4.2.3
   flutter_local_notifications: ^16.0.0+1
+  awesome_notifications: ^0.8.2
 
 
 
