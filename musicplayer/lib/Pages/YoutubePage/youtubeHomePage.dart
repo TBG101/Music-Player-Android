@@ -5,7 +5,6 @@ import "package:musicplayer/Pages/HomePage/Home.dart";
 import "package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart";
 import "package:musicplayer/Pages/YoutubePage/searching.dart";
 import "package:musicplayer/controllers/youtubeController.dart";
-import 'package:musicplayer/controllers/flutterLocalNotification.dart';
 
 class YoutubeHomePage extends StatefulWidget {
   const YoutubeHomePage({super.key});
@@ -114,7 +113,6 @@ class _YoutubeHomePageState extends State<YoutubeHomePage> {
           InkWell(
             onTap: () async {
               print("azefza");
-              LocalNotificationService.display();
             },
             child: const SizedBox(
                 width: double.infinity,
