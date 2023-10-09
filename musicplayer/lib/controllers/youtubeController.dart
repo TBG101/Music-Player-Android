@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,7 +19,7 @@ class youtubeController extends GetxController {
   RxList<dynamic> videos = [].obs;
   var searchData;
 
-  late String _localPath;
+  double progress = 0;
   late TargetPlatform? platform;
 
   void controllerInit() {
@@ -49,17 +50,44 @@ class youtubeController extends GetxController {
     print(downloadLink.toString());
 
     try {
-      // await FlutterDownloader.enqueue(
-      //     url: downloadLink["link"],
-      //     savedDir: "${saveDownloadPath.value}",
-      //     showNotification: true,
-      //     openFileFromNotification: true);
-
       Dio().download(
         downloadLink["link"],
         "${saveDownloadPath.value}/${downloadLink["title"]}.mp3",
-        onReceiveProgress: (count, total) {
-          debugPrint(count.toString());
+        onReceiveProgress: (count, total) async {
+          progress = ((count / total) * 100);
+          print(progress);
+
+          await Future.delayed(Duration(seconds: 1)).then((value) {
+            if (count <= total) {
+              AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                    id: 10,
+                    channelKey: 'basic_channel',
+                    actionType: ActionType.Default,
+                    title: 'Download Finished',
+                    body: 'Finished ${downloadLink["title"]}',
+                    notificationLayout: NotificationLayout.ProgressBar,
+                    category: NotificationCategory.Progress,
+                    progress: progress.toInt(),
+                    locked: false),
+              );
+            } else {
+              AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                    id: 10,
+                    channelKey: 'basic_channel',
+                    actionType: ActionType.Default,
+                    title: 'Downloading',
+                    body: '${downloadLink["title"]}',
+                    notificationLayout: NotificationLayout.ProgressBar,
+                    category: NotificationCategory.Progress,
+                    progress: progress.toInt(),
+                    locked: true,
+                    color: Colors.white,
+                    customSound: "lib/assetes/sound/uwu.mp3"),
+              );
+            }
+          });
         },
       );
     } catch (e) {
