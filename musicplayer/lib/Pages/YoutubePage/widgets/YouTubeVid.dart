@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -47,7 +49,7 @@ class YouTubeVid extends StatelessWidget {
                           padding: const EdgeInsets.only(
                               top: 8.0, right: 8, left: 8),
                           child: Text(
-                            snippetVid["title"] as String,
+                            htmlEscape.convert(snippetVid["title"] as String),
                             maxLines: 3,
                             style: const TextStyle(
                                 overflow: TextOverflow.fade, fontSize: 15),

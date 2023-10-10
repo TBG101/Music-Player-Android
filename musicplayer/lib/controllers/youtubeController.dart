@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:musicplayer/services/keys.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:taglib_ffi/taglib_ffi.dart';
 
 class YoutubeController extends GetxController {
   var loading = false.obs;
@@ -17,8 +18,7 @@ class YoutubeController extends GetxController {
   final saveDownloadPath = Rxn<String>();
   RxList<dynamic> videos = [].obs;
 
-
-  double progress = 0;
+  int progress = 0;
   late TargetPlatform? platform;
 
   void controllerInit() {
@@ -45,40 +45,56 @@ class YoutubeController extends GetxController {
     });
 
     var downloadLink = jsonDecode(response.body);
+    var filePath =
+        "${saveDownloadPath.value.toString()}/${htmlEscape.convert(downloadLink["title"])}.mp3";
+
     debugPrint(downloadLink.toString());
     progress = 0;
-    bool downloading;
-    try {
-      downloading = true;
-      Dio().download(
-        downloadLink["link"],
-        "${saveDownloadPath.value}/${downloadLink["title"]}.mp3",
-        onReceiveProgress: (count, total) async {
-          progress = ((count / total) * 100);
-          downloading = true;
-          debugPrint(progress.toString());
-        },
-      ).then((value) {
-        downloading = false;
-        Future.delayed(const Duration(seconds: 1)).then((value) {
-          AwesomeNotifications().createNotification(
-            content: NotificationContent(
-              id: 10,
-              channelKey: 'basic_channel',
-              actionType: ActionType.Default,
-              title: 'Download Finished',
-              body: '${downloadLink["title"]}',
-              notificationLayout: NotificationLayout.ProgressBar,
-              category: NotificationCategory.Progress,
-              progress: progress.toInt(),
-              locked: false,
-              color: Colors.blue,
-            ),
-          );
+    bool downloading = false;
+    bool fileExist = await File(filePath).exists();
+    if (fileExist) {
+      debugPrint('\x1B[31mFILE ALREADY EXIST\x1B[0m');
+      return;
+    } else {
+      try {
+        downloading = true;
+        Dio().download(
+          downloadLink["link"],
+          filePath,
+          onReceiveProgress: (count, total) async {
+            progress = ((count / total) * 100).toInt();
+            downloading = true;
+            debugPrint(progress.toString());
+          },
+        ).then((value) {
+          Future.delayed(const Duration(seconds: 1)).then((value) {
+            AwesomeNotifications().createNotification(
+              content: NotificationContent(
+                id: 10,
+                channelKey: 'basic_channel',
+                actionType: ActionType.Default,
+                title: 'Download Finished',
+                body: '${downloadLink["title"]}',
+                notificationLayout: NotificationLayout.ProgressBar,
+                category: NotificationCategory.Progress,
+                progress: progress.toInt(),
+                locked: false,
+                color: Colors.blue,
+              ),
+            );
+            // updateMetadata(
+            //     "${saveDownloadPath.value}/${downloadLink["title"]}.mp3");
+          });
+          downloading = false;
         });
-      });
+      } on Exception catch (e) {
+        debugPrint("--- ERROR DOWNLOADING ---");
+        debugPrint(e.toString());
+        downloading = false;
+        progress = -1;
+      }
 
-      while (downloading) {
+      while (downloading == true || (0 < progress && progress < 100)) {
         await Future.delayed(const Duration(milliseconds: 500)).then((value) {
           AwesomeNotifications().createNotification(
             content: NotificationContent(
@@ -89,17 +105,13 @@ class YoutubeController extends GetxController {
               body: '${downloadLink["title"]}',
               notificationLayout: NotificationLayout.ProgressBar,
               category: NotificationCategory.Progress,
-              progress: progress.toInt(),
+              progress: progress,
               locked: true,
               color: Colors.blue,
             ),
           );
         });
       }
-    } catch (e) {
-      debugPrint("--- ERROR DOWNLOADING ---");
-      debugPrint(e.toString());
-      downloading = false;
     }
   }
 
@@ -111,5 +123,13 @@ class YoutubeController extends GetxController {
 
   String? getSavePath() {
     return saveDownloadPath.value;
+  }
+
+  void updateMetadata(String fileSavePath) async {
+    TagLib tagLib = TagLib();
+    if (await File(fileSavePath).exists()) {
+      Tags tags = tagLib.getAudioTags(fileSavePath);
+      print(tags.duration);
+    }
   }
 }
