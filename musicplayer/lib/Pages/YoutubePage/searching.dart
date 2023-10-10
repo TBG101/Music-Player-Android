@@ -6,11 +6,11 @@ import 'package:musicplayer/controllers/youtubeController.dart';
 class Searching extends StatelessWidget {
   Searching({super.key});
 
-  final controller = Get.find<youtubeController>();
+  final controller = Get.find<YoutubeController>();
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<youtubeController>(builder: (controller) {
+    return GetBuilder<YoutubeController>(builder: (controller) {
       return controller.textController.value.text.isEmpty
           ? const SizedBox.shrink()
           : ListView.builder(

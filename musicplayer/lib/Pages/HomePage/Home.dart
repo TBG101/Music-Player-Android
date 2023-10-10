@@ -16,8 +16,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final MusicController controller =
       Get.put(MusicController()); // music GetX controller
-  final youtubeController ytController =
-      Get.put(youtubeController()); // music GetX controller
+  final YoutubeController ytController =
+      Get.put(YoutubeController()); // music GetX controller
 
   void controllerInit() {
     controller.initHandler();

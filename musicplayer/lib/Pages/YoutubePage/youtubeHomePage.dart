@@ -14,7 +14,7 @@ class YoutubeHomePage extends StatefulWidget {
 }
 
 class _YoutubeHomePageState extends State<YoutubeHomePage> {
-  final controller = Get.find<youtubeController>();
+  final controller = Get.find<YoutubeController>();
 
   var youtubeScaffoldKey = GlobalKey<ScaffoldState>();
 
