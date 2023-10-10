@@ -12,7 +12,7 @@ class YouTubeVid extends StatelessWidget {
       required this.index});
   final String idVid;
   final Map<String, dynamic> snippetVid;
-  final controller = Get.find<youtubeController>();
+  final controller = Get.find<YoutubeController>();
   final int index;
 
   @override
