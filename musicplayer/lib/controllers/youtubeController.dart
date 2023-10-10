@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:musicplayer/services/keys.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class YoutubeController extends GetxController {
@@ -17,7 +16,7 @@ class YoutubeController extends GetxController {
   var textController = TextEditingController().obs;
   final saveDownloadPath = Rxn<String>();
   RxList<dynamic> videos = [].obs;
-  var searchData;
+
 
   double progress = 0;
   late TargetPlatform? platform;
