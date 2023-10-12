@@ -1,6 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:metadata_god/metadata_god.dart';
 import 'package:musicplayer/Pages/CheckPermissionPage/permissionCheck.dart';
 import 'package:musicplayer/services/audioHandler.dart';
 
@@ -31,7 +32,7 @@ void main() async {
             channelGroupName: 'Basic group')
       ],
       debug: true);
-
+  MetadataGod.initialize();
   runApp(GetMaterialApp(
     debugShowCheckedModeBanner: false,
     title: 'Music Player',
