@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:html/parser.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import '../../../controllers/youtubeController.dart';
@@ -49,7 +50,8 @@ class YouTubeVid extends StatelessWidget {
                           padding: const EdgeInsets.only(
                               top: 8.0, right: 8, left: 8),
                           child: Text(
-                            htmlEscape.convert(snippetVid["title"] as String),
+                            parse(snippetVid["title"] as String).body!.text,
+                            // htmlEscape.convert(snippetVid["title"] as String),
                             maxLines: 3,
                             style: const TextStyle(
                                 overflow: TextOverflow.fade, fontSize: 15),
@@ -85,15 +87,6 @@ class YouTubeVid extends StatelessWidget {
                     AssetImage("lib/assets/img/download.png"),
                   ),
                 )),
-            CircularPercentIndicator(
-              radius: 30.0,
-              lineWidth: 3.0,
-              animation: true,
-              percent: 1,
-              center: const Text("zae"),
-              progressColor: Colors.green,
-              backgroundColor: const Color.fromARGB(255, 4, 86, 109),
-            )
           ],
         ));
   }
