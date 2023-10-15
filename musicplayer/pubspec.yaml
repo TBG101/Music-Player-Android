@@ -51,6 +51,7 @@ dependencies:
   
   html: ^0.15.0
   metadata_god: ^0.5.2+1
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
