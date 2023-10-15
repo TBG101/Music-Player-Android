@@ -13,6 +13,9 @@ import 'package:http/http.dart' as http;
 import 'package:musicplayer/services/keys.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:metadata_god/metadata_god.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:flutter/services.dart';
 
 class YoutubeController extends GetxController {
   var loading = false.obs;
@@ -22,13 +25,17 @@ class YoutubeController extends GetxController {
 
   int progress = 0;
   late TargetPlatform? platform;
+  late final SharedPreferences prefs;
 
-  void controllerInit() {
+  void controllerInit() async {
     if (Platform.isAndroid) {
       platform = TargetPlatform.android;
     } else {
       platform = TargetPlatform.iOS;
     }
+
+    prefs = await SharedPreferences.getInstance();
+    saveDownloadPath.value = prefs.getString('downloadPath');
   }
 
   Future<void> fetchUsers() async {
@@ -38,8 +45,9 @@ class YoutubeController extends GetxController {
   }
 
   Future<void> downloadVid(int index) async {
-    var uri = Uri.https("youtube-mp36.p.rapidapi.com", "/dl",
-        {"id": videos[index]["id"]["videoId"] as String});
+    var uri = Uri.https("youtube-mp36.p.rapidapi.com", "/dl", {
+      "id": videos[index]["id"]["videoId"] as String
+    }); // uri to get the video download link
 
     final response = await http.get(uri, headers: {
       'X-RapidAPI-Key': 'a1db472272msh381390d8c748bf0p123c89jsnc292e2863054',
@@ -78,10 +86,11 @@ class YoutubeController extends GetxController {
             createFinishedNotification(downloadLink[
                 "title"]); // create notification when download ends
             updateMetadata(filePath); // change the metadata of file
+            androidScanMediaTrigger(filePath);
           });
           downloading = false;
         });
-      } on DioError catch (e) {
+      } on Exception catch (e) {
         debugPrint("--- ERROR DOWNLOADING ---");
         debugPrint(e.toString());
         downloading = false;
@@ -96,8 +105,10 @@ class YoutubeController extends GetxController {
     }
   }
 
-  void setSavePath(String? newValue) {
+  void setSavePath(String? newValue) async {
     saveDownloadPath.value = newValue;
+    if (newValue != null) await prefs.setString('downloadPath', newValue);
+
     debugPrint(newValue);
     Permission.manageExternalStorage.status.then((value) => print(value));
   }
@@ -109,7 +120,19 @@ class YoutubeController extends GetxController {
   void updateMetadata(String fileSavePath) async {
     if (await File(fileSavePath).exists()) {
       Metadata metadata = await MetadataGod.readMetadata(file: fileSavePath);
-      print(metadata.duration);
+      print("metadata.album: ${metadata.album}");
+      print("metadata.albumArtist: ${metadata.albumArtist}");
+      print("metadata.artist: ${metadata.artist}");
+      print("metadata.discNumber: ${metadata.discNumber}");
+      print("metadata.discTotal: ${metadata.discTotal}");
+      print("metadata.durationMs: ${metadata.durationMs}");
+      print("metadata.fileSize: ${metadata.fileSize}");
+      print("metadata.genre: ${metadata.genre}");
+      print("metadata.picture: ${metadata.picture?.mimeType}");
+      print("metadata.title: ${metadata.title}");
+      print("metadata.trackNumber: ${metadata.trackNumber}");
+      print("metadata.trackTotal: ${metadata.trackTotal}");
+      print("metadata.year: ${metadata.year}");
     }
   }
 
@@ -145,5 +168,16 @@ class YoutubeController extends GetxController {
         color: Colors.blue,
       ),
     );
+  }
+
+  void androidScanMediaTrigger(String? mp3FilePath) async {
+    if (mp3FilePath == null) return;
+
+    try {
+      await const MethodChannel('plugins.flutter.io/media_scan')
+          .invokeMethod('scanFile', {'path': mp3FilePath});
+    } on PlatformException {
+      // Handle the exception if necessary
+    }
   }
 }
