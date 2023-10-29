@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
+import 'package:media_scanner/media_scanner.dart';
 
 import 'package:musicplayer/services/keys.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -172,12 +173,7 @@ class YoutubeController extends GetxController {
 
   void androidScanMediaTrigger(String? mp3FilePath) async {
     if (mp3FilePath == null) return;
-
-    try {
-      await const MethodChannel('plugins.flutter.io/media_scan')
-          .invokeMethod('scanFile', {'path': mp3FilePath});
-    } on PlatformException {
-      // Handle the exception if necessary
-    }
+    ediaScanner.loadMedia(path: mp3FilePath)
+        .then((value) => print(value.toString()));
   }
 }

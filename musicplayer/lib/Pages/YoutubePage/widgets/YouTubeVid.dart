@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:html/parser.dart';
-import 'package:percent_indicator/percent_indicator.dart';
 
 import '../../../controllers/youtubeController.dart';
 
