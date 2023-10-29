@@ -1,10 +1,9 @@
 import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 import "package:get/get.dart";
 import "package:musicplayer/Pages/HomePage/Home.dart";
 import "package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart";
-import "package:musicplayer/Pages/YoutubePage/searching.dart";
+import 'package:musicplayer/Pages/YoutubePage/video_list.dart';
 import "package:musicplayer/controllers/youtubeController.dart";
 
 class YoutubeHomePage extends StatefulWidget {
@@ -76,7 +75,7 @@ class _YoutubeHomePageState extends State<YoutubeHomePage> {
             searchYoutube: (text) async {
               // on submitted
               print(text);
-              await controller.fetchUsers();
+              await controller.getSearchResults();
               controller.update();
             },
           ),
@@ -111,9 +110,7 @@ class _YoutubeHomePageState extends State<YoutubeHomePage> {
           const Spacer(),
           const Divider(),
           InkWell(
-            onTap: () async {
-             
-            },
+            onTap: () async {},
             child: const SizedBox(
                 width: double.infinity,
                 child: Padding(
@@ -146,7 +143,7 @@ class _YoutubeHomePageState extends State<YoutubeHomePage> {
         key: youtubeScaffoldKey,
         drawer: Drawer(child: drawerList()),
         appBar: appbarWdget(),
-        body: Center(child: Searching()),
+        body: Center(child: VideoList()),
       ),
     );
   }
