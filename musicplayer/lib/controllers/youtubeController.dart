@@ -1,4 +1,4 @@
-// https://www.googleapis.com/youtube/v3/search?part=snippet&key=AIzaSyAww7JGtgWljnrXWdpRaf82Br3g8IwD_Ro&type=video&q=jelly
+// https://www.googleapis.com/youtube/v3/search?part=snippet,contentDetail&key=AIzaSyAww7JGtgWljnrXWdpRaf82Br3g8IwD_Ro&type=video&q=jelly
 
 import 'dart:convert';
 import 'dart:io';
@@ -11,12 +11,8 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:media_scanner/media_scanner.dart';
 
-import 'package:musicplayer/services/keys.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:metadata_god/metadata_god.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:flutter/services.dart';
 
 class YoutubeController extends GetxController {
   var loading = false.obs;
@@ -39,15 +35,25 @@ class YoutubeController extends GetxController {
     saveDownloadPath.value = prefs.getString('downloadPath');
   }
 
-  Future<void> fetchUsers() async {
-    final response = await http.get(Uri.parse(
-        'https://www.googleapis.com/youtube/v3/search?part=snippet&key=$API_KEY&type=video&q=${textController.value.text}'));
-    videos.value = jsonDecode(response.body)["items"];
+  Future<void> getSearchResults() async {
+    // final response = await http.get(Uri.parse(
+    //     'https://www.googleapis.com/youtube/v3/search?part=snippet,contentDetail&key=$API_KEY&type=video&q=${textController.value.text}'));
+
+    var uri = Uri.https("youtube-search-results.p.rapidapi.com",
+        "youtube-search", {"q": textController.value.text});
+    print(uri);
+    var response = await http.get(uri, headers: {
+      'X-RapidAPI-Key': 'a1db472272msh381390d8c748bf0p123c89jsnc292e2863054',
+      'X-RapidAPI-Host': 'youtube-search-results.p.rapidapi.com'
+    });
+
+    videos.value = (jsonDecode(response.body)["videos"]) as List<dynamic>;
+    update();
   }
 
   Future<void> downloadVid(int index) async {
     var uri = Uri.https("youtube-mp36.p.rapidapi.com", "/dl", {
-      "id": videos[index]["id"]["videoId"] as String
+      "id": videos[index]["id"] as String
     }); // uri to get the video download link
 
     final response = await http.get(uri, headers: {
@@ -86,7 +92,6 @@ class YoutubeController extends GetxController {
           Future.delayed(const Duration(seconds: 1)).then((value) {
             createFinishedNotification(downloadLink[
                 "title"]); // create notification when download ends
-            updateMetadata(filePath); // change the metadata of file
             androidScanMediaTrigger(filePath);
           });
           downloading = false;
@@ -116,25 +121,6 @@ class YoutubeController extends GetxController {
 
   String? getSavePath() {
     return saveDownloadPath.value;
-  }
-
-  void updateMetadata(String fileSavePath) async {
-    if (await File(fileSavePath).exists()) {
-      Metadata metadata = await MetadataGod.readMetadata(file: fileSavePath);
-      print("metadata.album: ${metadata.album}");
-      print("metadata.albumArtist: ${metadata.albumArtist}");
-      print("metadata.artist: ${metadata.artist}");
-      print("metadata.discNumber: ${metadata.discNumber}");
-      print("metadata.discTotal: ${metadata.discTotal}");
-      print("metadata.durationMs: ${metadata.durationMs}");
-      print("metadata.fileSize: ${metadata.fileSize}");
-      print("metadata.genre: ${metadata.genre}");
-      print("metadata.picture: ${metadata.picture?.mimeType}");
-      print("metadata.title: ${metadata.title}");
-      print("metadata.trackNumber: ${metadata.trackNumber}");
-      print("metadata.trackTotal: ${metadata.trackTotal}");
-      print("metadata.year: ${metadata.year}");
-    }
   }
 
   void createFinishedNotification(String title) {
@@ -173,7 +159,7 @@ class YoutubeController extends GetxController {
 
   void androidScanMediaTrigger(String? mp3FilePath) async {
     if (mp3FilePath == null) return;
-    ediaScanner.loadMedia(path: mp3FilePath)
+    MediaScanner.loadMedia(path: mp3FilePath)
         .then((value) => print(value.toString()));
   }
 }
