@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:html/parser.dart';
@@ -7,13 +5,9 @@ import 'package:html/parser.dart';
 import '../../../controllers/youtubeController.dart';
 
 class YouTubeVid extends StatelessWidget {
-  YouTubeVid(
-      {super.key,
-      required this.idVid,
-      required this.snippetVid,
-      required this.index});
-  final String idVid;
-  final Map<String, dynamic> snippetVid;
+  YouTubeVid({super.key, required this.snippetVid, required this.index});
+
+  final Map<dynamic, dynamic> snippetVid;
   final controller = Get.find<YoutubeController>();
   final int index;
 
@@ -34,17 +28,46 @@ class YouTubeVid extends StatelessWidget {
                     borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(12),
                         bottomLeft: Radius.circular(12)),
-                    child: Image.network(
-                      snippetVid["thumbnails"]["high"]["url"],
-                      // width: screenWidth * 0.3,
-                      height: 100,
+                    child: AspectRatio(
+                      aspectRatio: 4 / 3,
+                      child: Stack(children: [
+                        Image.network(
+                          snippetVid["thumbnail"],
+                          fit: BoxFit.fitWidth,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 5, bottom: 5),
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: Stack(
+                              children: [
+                                Text(
+                                  snippetVid["durationString"],
+                                  style: TextStyle(
+                                    foreground: Paint()
+                                      ..style = PaintingStyle.stroke
+                                      ..strokeWidth = 1.3
+                                      ..color =
+                                          const Color.fromARGB(255, 0, 0, 0),
+                                  ),
+                                ),
+                                Text(
+                                  snippetVid["durationString"],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ]),
                     ),
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       SizedBox(
-                        width: screenWidth * 0.55,
                         child: Padding(
                           padding: const EdgeInsets.only(
                               top: 8.0, right: 8, left: 8),
@@ -64,7 +87,7 @@ class YouTubeVid extends StatelessWidget {
                           padding: const EdgeInsets.only(
                               right: 8, left: 8, bottom: 8),
                           child: Text(
-                            snippetVid["channelTitle"] as String,
+                            snippetVid["channel"]["name"] as String,
                             maxLines: 2,
                             style: const TextStyle(overflow: TextOverflow.fade),
                             softWrap: true,
