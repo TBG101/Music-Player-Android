@@ -4,9 +4,9 @@ import 'package:musicplayer/Pages/YoutubePage/widgets/YouTubeVid.dart';
 import 'package:musicplayer/controllers/youtubeController.dart';
 
 class VideoList extends StatelessWidget {
-  VideoList({super.key});
+  final YoutubeController controller = Get.find<YoutubeController>();
 
-  final controller = Get.find<YoutubeController>();
+  VideoList({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -71,7 +71,7 @@ class MusicController extends GetxController {
   void getSongs() async {
     savePath = await getApplicationDocumentsDirectory();
     bool firstCall = await File("${savePath.path}/NotFound.jpg").exists();
-
+    print(firstCall);
     try {
       List<SongModel> x = await _audioQuery.querySongs(
         sortType: SongSortType.DATE_ADDED,
