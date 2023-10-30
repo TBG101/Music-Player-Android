@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:js_interop';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
@@ -30,8 +31,9 @@ class YoutubeController extends GetxController {
     } else {
       platform = TargetPlatform.iOS;
     }
-
-    prefs = await SharedPreferences.getInstance();
+    if (prefs.isUndefined) {
+      prefs = await SharedPreferences.getInstance();
+    }
     saveDownloadPath.value = prefs.getString('downloadPath');
   }
 

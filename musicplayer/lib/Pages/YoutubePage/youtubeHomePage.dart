@@ -6,21 +6,11 @@ import "package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart";
 import 'package:musicplayer/Pages/YoutubePage/video_list.dart';
 import "package:musicplayer/controllers/youtubeController.dart";
 
-class YoutubeHomePage extends StatefulWidget {
-  const YoutubeHomePage({super.key});
+class YoutubeHomePage extends StatelessWidget {
+  YoutubeHomePage({super.key});
 
-  @override
-  State<YoutubeHomePage> createState() => _YoutubeHomePageState();
-}
-
-class _YoutubeHomePageState extends State<YoutubeHomePage> {
   final controller = Get.find<YoutubeController>();
-  var youtubeScaffoldKey = GlobalKey<ScaffoldState>();
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  final youtubeScaffoldKey = GlobalKey<ScaffoldState>();
 
   RichText titleWidget() {
     return RichText(
@@ -82,7 +72,7 @@ class _YoutubeHomePageState extends State<YoutubeHomePage> {
         )));
   }
 
-  SafeArea drawerList() {
+  SafeArea drawerList(BuildContext context) {
     return SafeArea(
         child: Padding(
       padding: const EdgeInsets.all(10),
@@ -141,7 +131,7 @@ class _YoutubeHomePageState extends State<YoutubeHomePage> {
     return SafeArea(
       child: Scaffold(
         key: youtubeScaffoldKey,
-        drawer: Drawer(child: drawerList()),
+        drawer: Drawer(child: drawerList(context)),
         appBar: appbarWdget(),
         body: Center(child: VideoList()),
       ),

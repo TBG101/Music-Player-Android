@@ -66,8 +66,11 @@ class YouTubeVid extends StatelessWidget {
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
+                        height: 70,
+                        width: screenWidth - (133.35),
                         child: Padding(
                           padding: const EdgeInsets.only(
                               top: 8.0, right: 8, left: 8),
@@ -76,20 +79,24 @@ class YouTubeVid extends StatelessWidget {
                             // htmlEscape.convert(snippetVid["title"] as String),
                             maxLines: 3,
                             style: const TextStyle(
-                                overflow: TextOverflow.fade, fontSize: 15),
+                                fontWeight: FontWeight.w500,
+                                overflow: TextOverflow.fade,
+                                fontSize: 15),
                             softWrap: true,
                           ),
                         ),
                       ),
                       SizedBox(
-                        width: screenWidth * 0.55,
+                        width: screenWidth - (133.35) - 40,
                         child: Padding(
                           padding: const EdgeInsets.only(
                               right: 8, left: 8, bottom: 8),
                           child: Text(
                             snippetVid["channel"]["name"] as String,
-                            maxLines: 2,
-                            style: const TextStyle(overflow: TextOverflow.fade),
+                            maxLines: 1,
+                            style: const TextStyle(
+                                overflow: TextOverflow.fade,
+                                fontWeight: FontWeight.w300),
                             softWrap: true,
                           ),
                         ),

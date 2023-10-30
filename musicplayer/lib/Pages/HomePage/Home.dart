@@ -151,10 +151,8 @@ class _HomeState extends State<Home> {
         children: [
           InkWell(
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const YoutubeHomePage()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => YoutubeHomePage()));
             },
             child: const SizedBox(
               width: double.infinity,
