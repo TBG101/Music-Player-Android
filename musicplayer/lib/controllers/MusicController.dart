@@ -28,13 +28,33 @@ class MusicController extends GetxController {
 
   var queeUpdated = true.obs;
 
+  @override
+  void onInit() {
+    initAudioHandler();
+    initSavePath();
+    // TODO: implement onInit
+    super.onInit();
+  }
+
+  @override
+  void onReady() {
+    // TODO: implement onReady
+    getSongs();
+    getState();
+    itemPlaying();
+    super.onReady();
+  }
+
   void initFalse() {
     doneInit.value = false;
     update();
   }
 
-  void initHandler() async {
+  void initAudioHandler() async {
     audioHandler = Get.find<AudioHandler>();
+  }
+
+  void initSavePath() async {
     savePath = await getApplicationDocumentsDirectory();
   }
 
@@ -69,7 +89,6 @@ class MusicController extends GetxController {
   }
 
   void getSongs() async {
-    savePath = await getApplicationDocumentsDirectory();
     bool firstCall = await File("${savePath.path}/NotFound.jpg").exists();
     print(firstCall);
     try {
@@ -141,12 +160,17 @@ class MusicController extends GetxController {
     visible.value = true;
     var lst = <MediaItem>[];
     var text = textController.value.text;
-
+    print(
+        "zeafazefzae ------------------------------------------------------------");
     if (queeUpdated.isFalse) {
       queeUpdated.value = true;
       if (text.isEmpty) {
         for (var index = 0; index < musicList.length; index++) {
           var art = await artSetter(index, musicList);
+          print(
+              "zeafazefzae ------------------------------------------------------------");
+          print(art.toString() +
+              " ------------------------------------------------------------");
           var item = MediaItem(
             id: musicList[index].uri!,
             title: musicList[index].title,
@@ -162,6 +186,8 @@ class MusicController extends GetxController {
       } else {
         for (var index = 0; index < filteredList.length; index++) {
           var art = await artSetter(index, filteredList);
+          print(art.toString() +
+              " ------------------------------------------------------------");
           var item = MediaItem(
             id: filteredList[index].uri!,
             title: filteredList[index].title,
@@ -199,12 +225,13 @@ class MusicController extends GetxController {
     File("${savePath.path}/NotFound.jpg").writeAsBytes(list);
     musicCount.value = musicList.length;
     print(savePath.path);
+
     for (int index = 0; index < musicList.length; index++) {
       musicCountcurrent.value = index;
       print(index);
       var img = await _audioQuery.queryArtwork(
           musicList[index].id, ArtworkType.AUDIO,
-          format: ArtworkFormat.JPEG, size: 300, quality: 300);
+          format: ArtworkFormat.JPEG, size: 200, quality: 300);
 
       if (img == null || img.isEmpty) {
         continue;
@@ -224,6 +251,7 @@ class MusicController extends GetxController {
         print(e.toString());
       }
     }
+    musicCountcurrent.value = 0;
     doneInit.value = true;
     update();
     debugPrint("done");

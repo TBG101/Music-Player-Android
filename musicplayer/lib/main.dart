@@ -6,9 +6,18 @@ import 'package:musicplayer/services/audioHandler.dart';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 
+import 'controllers/MusicController.dart';
+import 'controllers/youtubeController.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   Get.put<AudioHandler>(await initAudioService(), permanent: true);
+
+  Get.put(MusicController(), permanent: true); // music GetX controller
+
+  Get.put(YoutubeController(), permanent: true); // music GetX controller
+
   AwesomeNotifications().initialize(
       // set the icon to null if you want to use the default app icon
       null,
@@ -31,12 +40,7 @@ void main() async {
             channelGroupName: 'Basic group')
       ],
       debug: true);
-  runApp(GetMaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: 'Music Player',
-    theme: ThemeData.dark(useMaterial3: true),
-    home: const MyHomePage(title: 'Music Player'),
-  ));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -45,7 +49,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
+      enableLog: true,
       debugShowCheckedModeBanner: false,
       title: 'Music Player',
       theme: ThemeData.dark(useMaterial3: true),
@@ -64,13 +69,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  @override
-  void initState() {
-    // TODO: implement initState
-
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return const PermissionCheck();

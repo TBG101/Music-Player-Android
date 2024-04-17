@@ -15,25 +15,11 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final MusicController controller =
-      Get.put(MusicController()); // music GetX controller
+      Get.find<MusicController>(); // music GetX controller
   final YoutubeController ytController =
-      Get.put(YoutubeController()); // music GetX controller
-
-  void controllerInit() {
-    controller.initHandler();
-    controller.getSongs();
-    controller.getState();
-    controller.itemPlaying();
-    ytController.controllerInit();
-  }
+      Get.find<YoutubeController>(); // music GetX controller
 
   bool hasPermission = false;
-
-  @override
-  void initState() {
-    controllerInit();
-    super.initState();
-  }
 
   Alignment boxAligment() {
     if (controller.song.value == null) {
