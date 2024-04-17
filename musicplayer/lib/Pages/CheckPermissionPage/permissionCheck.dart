@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:musicplayer/Pages/HomePage/Home.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -29,11 +28,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
       }
       await Future.delayed(const Duration(milliseconds: 500)).then((value) {
         if (x.isGranted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const Home()),
-            (Route<dynamic> route) => false,
-          );
+          Get.off(const Home());
         } else {
           setState(() {
             hasPermission = false;
@@ -52,11 +47,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
 
       await Future.delayed(const Duration(milliseconds: 3000)).then((value) {
         if (x.isGranted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const Home()),
-            (Route<dynamic> route) => false,
-          );
+          Get.off(const Home());
         } else {
           setState(() {
             hasPermission = false;
@@ -81,6 +72,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
   @override
   void initState() {
     checkPermission();
+
     super.initState();
   }
 

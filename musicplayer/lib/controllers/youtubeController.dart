@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:js_interop';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dio/dio.dart';
@@ -23,17 +22,20 @@ class YoutubeController extends GetxController {
 
   int progress = 0;
   late TargetPlatform? platform;
-  late final SharedPreferences prefs;
+  late SharedPreferences prefs;
 
-  void controllerInit() async {
+  @override
+  void onInit() async {
+    // TODO: implement onInit
+    super.onInit();
     if (Platform.isAndroid) {
       platform = TargetPlatform.android;
     } else {
       platform = TargetPlatform.iOS;
     }
-    if (prefs.isUndefined) {
-      prefs = await SharedPreferences.getInstance();
-    }
+
+    prefs = await SharedPreferences.getInstance();
+
     saveDownloadPath.value = prefs.getString('downloadPath');
   }
 
