@@ -133,9 +133,8 @@ class YoutubeHomePage extends StatelessWidget {
         key: youtubeScaffoldKey,
         drawer: Drawer(child: drawerList(context)),
         appBar: appbarWdget(),
-        body: Center(child: VideoList()),
+        body: const Center(child: VideoList()),
       ),
     );
   }
-
 }

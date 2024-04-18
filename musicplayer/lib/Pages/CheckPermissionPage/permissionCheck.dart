@@ -1,8 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Home.dart';
+import 'package:musicplayer/controllers/MusicController.dart';
+import 'package:musicplayer/controllers/youtubeController.dart';
+import 'package:musicplayer/services/audioHandler.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
@@ -26,8 +30,14 @@ class _PermissionCheckState extends State<PermissionCheck> {
       if (x.isDenied) {
         x = await Permission.storage.request();
       }
-      await Future.delayed(const Duration(milliseconds: 500)).then((value) {
+      await Future.delayed(const Duration(milliseconds: 500))
+          .then((value) async {
         if (x.isGranted) {
+          Get.put<AudioHandler>(await initAudioService(), permanent: true);
+
+          Get.put(MusicController(), permanent: true); // music GetX controller
+
+          Get.put(YoutubeController()); // music GetX controller
           Get.off(const Home());
         } else {
           setState(() {
@@ -39,40 +49,44 @@ class _PermissionCheckState extends State<PermissionCheck> {
       });
     } else {
       // ANDOIRD 13 OR HIGHER
-      var x = await Permission.audio.request();
-      await Permission.mediaLibrary.request();
-      await Permission.manageExternalStorage.request();
-      await Permission.storage.request();
-      await Permission.notification.request();
 
-      await Future.delayed(const Duration(milliseconds: 3000)).then((value) {
-        if (x.isGranted) {
-          Get.off(const Home());
-        } else {
+      var status = await [
+        Permission.audio,
+        Permission.mediaLibrary,
+        Permission.manageExternalStorage,
+        Permission.notification
+      ].request();
+      print(status);
+      status.forEach((key, status) async {
+        if (status == PermissionStatus.denied ||
+            status == PermissionStatus.permanentlyDenied) {
           setState(() {
             hasPermission = false;
           });
         }
-
-        return null;
       });
+      if (hasPermission != false) {
+        Get.put<AudioHandler>(await initAudioService(), permanent: true);
+        Get.put(MusicController(), permanent: true); // music GetX controller
+        Get.put(YoutubeController()); // music GetX controller
+        Get.off(const Home());
+      }
     }
   }
 
-  String waitingForPemission() {
+  Widget waitingForPemission() {
     if (hasPermission == null) {
-      return "Waiting For Permission";
+      return const CircularProgressIndicator();
     } else if (hasPermission == false) {
-      return "Permission Denied";
+      return const Text("Permission Denied");
     } else {
-      return "Accept Permission to continue";
+      return const Text("Accept Permission to continue");
     }
   }
 
   @override
   void initState() {
     checkPermission();
-
     super.initState();
   }
 
@@ -80,7 +94,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text(waitingForPemission()),
+        child: waitingForPemission(),
       ),
     );
   }
