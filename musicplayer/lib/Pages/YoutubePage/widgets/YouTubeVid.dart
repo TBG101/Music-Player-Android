@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:html/parser.dart';
+import 'package:musicplayer/controllers/youtubeController.dart';
 
-import '../../../controllers/youtubeController.dart';
+class YouTubeVid extends GetView<YoutubeController> {
+  const YouTubeVid({super.key, required this.index});
 
-class YouTubeVid extends StatelessWidget {
-  YouTubeVid({super.key, required this.snippetVid, required this.index});
-
-  final Map<dynamic, dynamic> snippetVid;
-  final controller = Get.find<YoutubeController>();
   final int index;
 
   @override
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width - 16;
     return SizedBox(
-        height: 100,
+        height: 80,
         width: screenWidth,
         child: Stack(
           children: [
@@ -29,11 +25,15 @@ class YouTubeVid extends StatelessWidget {
                         topLeft: Radius.circular(12),
                         bottomLeft: Radius.circular(12)),
                     child: AspectRatio(
-                      aspectRatio: 4 / 3,
+                      aspectRatio: 16 / 9,
                       child: Stack(children: [
+                        Container(
+                          color: Colors.black,
+                        ),
                         Image.network(
-                          snippetVid["thumbnail"],
-                          fit: BoxFit.fitWidth,
+                          controller
+                              .videos.value![index].thumbnails.mediumResUrl,
+                          fit: BoxFit.fitHeight,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(right: 5, bottom: 5),
@@ -42,8 +42,10 @@ class YouTubeVid extends StatelessWidget {
                             child: Stack(
                               children: [
                                 Text(
-                                  snippetVid["durationString"],
+                                  controller.videos.value![index].duration
+                                      .toString(),
                                   style: TextStyle(
+                                    fontSize: 12,
                                     foreground: Paint()
                                       ..style = PaintingStyle.stroke
                                       ..strokeWidth = 1.3
@@ -52,8 +54,10 @@ class YouTubeVid extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  snippetVid["durationString"],
+                                  controller.videos.value![index].duration
+                                      .toString(),
                                   style: const TextStyle(
+                                    fontSize: 12,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -69,19 +73,18 @@ class YouTubeVid extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
-                        height: 70,
-                        width: screenWidth - (133.35),
+                        height: 50,
+                        width: screenWidth - (143),
                         child: Padding(
                           padding: const EdgeInsets.only(
                               top: 8.0, right: 8, left: 8),
                           child: Text(
-                            parse(snippetVid["title"] as String).body!.text,
-                            // htmlEscape.convert(snippetVid["title"] as String),
+                            (controller.videos.value![index].title),
                             maxLines: 3,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w500,
                                 overflow: TextOverflow.fade,
-                                fontSize: 15),
+                                fontSize: 12),
                             softWrap: true,
                           ),
                         ),
@@ -92,11 +95,13 @@ class YouTubeVid extends StatelessWidget {
                           padding: const EdgeInsets.only(
                               right: 8, left: 8, bottom: 8),
                           child: Text(
-                            snippetVid["channel"]["name"] as String,
+                            controller.videos.value![index].author,
                             maxLines: 1,
                             style: const TextStyle(
-                                overflow: TextOverflow.fade,
-                                fontWeight: FontWeight.w300),
+                              overflow: TextOverflow.fade,
+                              fontWeight: FontWeight.w300,
+                              fontSize: 12,
+                            ),
                             softWrap: true,
                           ),
                         ),
@@ -120,32 +125,3 @@ class YouTubeVid extends StatelessWidget {
         ));
   }
 }
-
-/*
- vid info= {
-"publishedAt": "2023-07-17T19:16:30Z",
-"channelId": "UC0DZmkupLYwc0yDsfocLh0A",
-"title": "TITANIC vs. ICEBERG In Teardown...",
-"description": "TITANIC vs. ICEBERG In Teardown... If you enjoyed this video, watch more here: ...",
-"thumbnails": {
-  "default": {
-  "url": "https://i.ytimg.com/vi/YnfT4XSgVnc/default.jpg",
-  "width": 120,
-  "height": 90
-  },
-  "medium": {
-  "url": "https://i.ytimg.com/vi/YnfT4XSgVnc/mqdefault.jpg",
-  "width": 320,
-  "height": 180
-  },
-  "high": {
-  "url": "https://i.ytimg.com/vi/YnfT4XSgVnc/hqdefault.jpg",
-  "width": 480,
-  "height": 360
-  }
-},
-"channelTitle": "Jelly",
-"liveBroadcastContent": "none",
-"publishTime": "2023-07-17T19:16:30Z"
-} 
-*/

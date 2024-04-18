@@ -1,22 +1,24 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 void main() async {
-  var uri = Uri.https(
-      "youtube-search-results.p.rapidapi.com", "youtube-search", {"q": "move"});
+  var yt = YoutubeExplode();
+  // var x = yt.search("youtbe videos");
+  // VideoSearchList first = await x.asStream().first;
+  // print(first.first.title);
 
-  var response = await http.get(uri, headers: {
-    'X-RapidAPI-Key': 'a1db472272msh381390d8c748bf0p123c89jsnc292e2863054',
-    'X-RapidAPI-Host': 'youtube-search-results.p.rapidapi.com'
-  });
-  List x = jsonDecode(response.body)["videos"];
+  // Completer c = Completer();
+
+  // var id = first.first.id;
+
+  // var vid = await yt.videos.get(id);
+
+  // var manifest = (await yt.videos.streamsClient.getManifest(id)).streams.first;
+
+  // var stream = yt.videos.streamsClient.get(manifest);
+  // print(stream.first);
+  // await c.future;
+  var val = await yt.search("music").asStream().first;
+  print(val);
 }

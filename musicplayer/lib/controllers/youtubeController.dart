@@ -1,16 +1,12 @@
 // https://www.googleapis.com/youtube/v3/search?part=snippet,contentDetail&key=AIzaSyAww7JGtgWljnrXWdpRaf82Br3g8IwD_Ro&type=video&q=jelly
 
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 import 'package:media_scanner/media_scanner.dart';
-
+import 'package:musicplayer/controllers/Logic.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,101 +14,80 @@ class YoutubeController extends GetxController {
   var loading = false.obs;
   var textController = TextEditingController().obs;
   final saveDownloadPath = Rxn<String>();
-  RxList<dynamic> videos = [].obs;
+  final __notification = AwesomeNotifications();
+  var yt = YoutubeExplode();
 
-  int progress = 0;
-  late TargetPlatform? platform;
+  final videos = Rxn<VideoSearchList>();
+
   late SharedPreferences prefs;
 
   @override
   void onInit() async {
     // TODO: implement onInit
     super.onInit();
-    if (Platform.isAndroid) {
-      platform = TargetPlatform.android;
-    } else {
-      platform = TargetPlatform.iOS;
-    }
-
     prefs = await SharedPreferences.getInstance();
 
     saveDownloadPath.value = prefs.getString('downloadPath');
   }
 
   Future<void> getSearchResults() async {
-    // final response = await http.get(Uri.parse(
-    //     'https://www.googleapis.com/youtube/v3/search?part=snippet,contentDetail&key=$API_KEY&type=video&q=${textController.value.text}'));
+    textController.refresh();
+    videos.value =
+        await (yt.search(textController.value.text).asStream()).first;
 
-    var uri = Uri.https("youtube-search-results.p.rapidapi.com",
-        "youtube-search", {"q": textController.value.text});
-    print(uri);
-    var response = await http.get(uri, headers: {
-      'X-RapidAPI-Key': 'a1db472272msh381390d8c748bf0p123c89jsnc292e2863054',
-      'X-RapidAPI-Host': 'youtube-search-results.p.rapidapi.com'
-    });
-
-    videos.value = (jsonDecode(response.body)["videos"]) as List<dynamic>;
-    update();
+    videos.refresh();
+    print(videos.value.toString());
+    print(videos.value?.length.toString());
   }
 
   Future<void> downloadVid(int index) async {
-    var uri = Uri.https("youtube-mp36.p.rapidapi.com", "/dl", {
-      "id": videos[index]["id"] as String
-    }); // uri to get the video download link
-
-    final response = await http.get(uri, headers: {
-      'X-RapidAPI-Key': 'a1db472272msh381390d8c748bf0p123c89jsnc292e2863054',
-      'X-RapidAPI-Host': 'youtube-mp36.p.rapidapi.com',
-    });
-
-    var downloadLink = jsonDecode(response.body);
-
-    var filePath =
-        "${saveDownloadPath.value.toString()}/${parse(downloadLink["title"] as String).body!.text}.mp3";
-
-    debugPrint(downloadLink.toString());
-    progress = 0;
-    bool downloading = false;
-    bool fileExist = await File(filePath).exists();
-
-    if (fileExist) {
-      debugPrint('\x1B[31mFILE ALREADY EXIST\x1B[0m');
+    final myVideo = videos.value?[index];
+    if (videos.value == null) {
       return;
-    } else if (saveDownloadPath.value == null) {
-      debugPrint('\x1B[31mNO SAVE PATH\x1B[0m');
-      return;
-    } else {
-      try {
-        downloading = true;
-        Dio().download(
-          downloadLink["link"],
-          filePath,
-          onReceiveProgress: (count, total) async {
-            progress = ((count / total) * 100).toInt();
-            downloading = true;
-            debugPrint(progress.toString());
-          },
-        ).then((value) {
-          Future.delayed(const Duration(seconds: 1)).then((value) {
-            createFinishedNotification(downloadLink[
-                "title"]); // create notification when download ends
-            androidScanMediaTrigger(filePath);
-          });
-          downloading = false;
-        });
-      } on Exception catch (e) {
-        debugPrint("--- ERROR DOWNLOADING ---");
-        debugPrint(e.toString());
-        downloading = false;
-        progress = -1;
-      }
-
-      while (downloading == true || (0 < progress && progress < 100)) {
-        await Future.delayed(const Duration(milliseconds: 500)).then((value) {
-          createdUpdatedNotification(downloadLink["title"]);
-        });
-      }
     }
+    if (saveDownloadPath.value == null) return;
+    final id = videos.value?[index].id;
+    final manifest = await yt.videos.streamsClient.getManifest(id);
+    final audiostreamsInfo = manifest.audioOnly;
+
+    final audio = audiostreamsInfo.withHighestBitrate();
+    final audioStream = yt.videos.streamsClient.get(audio);
+
+    final fileName =
+        "${saveDownloadPath.value!}/${Logic.checkVideoTitle('${myVideo!.title}.mp3')}";
+    final file = File(fileName);
+
+    // Delete the file if exists.
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+
+    final output = file.openWrite(mode: FileMode.writeOnlyAppend);
+
+    // Track the file download status.
+    final len = audio.size.totalBytes;
+    var count = 0;
+
+    // Create the message and set the cursor position.
+    final msg = 'Downloading ${myVideo.title}.${audio.container.name}';
+    stdout.writeln(msg);
+
+    // Listen for data received.
+    await for (final data in audioStream) {
+      // Keep track of the current downloaded data.
+      count += data.length;
+
+      // Calculate the current progress.
+      final progress = ((count / len) * 100).ceil();
+
+      print(progress.toStringAsFixed(2));
+
+      // Write to file.
+      output.add(data);
+    }
+    await output.close();
+
+    androidScanMediaTrigger(fileName);
   }
 
   void setSavePath(String? newValue) async {
@@ -127,25 +102,24 @@ class YoutubeController extends GetxController {
     return saveDownloadPath.value;
   }
 
-  void createFinishedNotification(String title) {
-    AwesomeNotifications().createNotification(
+  void notificationFinished(String title) {
+    __notification.createNotification(
       content: NotificationContent(
         id: 10,
         channelKey: 'basic_channel',
         actionType: ActionType.Default,
         title: 'Download Finished',
         body: title,
-        notificationLayout: NotificationLayout.ProgressBar,
-        category: NotificationCategory.Progress,
-        progress: progress.toInt(),
+        notificationLayout: NotificationLayout.Default,
+        category: NotificationCategory.Message,
         locked: false,
         color: Colors.blue,
       ),
     );
   }
 
-  void createdUpdatedNotification(String title) {
-    AwesomeNotifications().createNotification(
+  void notificationUpdate(String title, int progress) {
+    __notification.createNotification(
       content: NotificationContent(
         id: 10,
         channelKey: 'basic_channel',

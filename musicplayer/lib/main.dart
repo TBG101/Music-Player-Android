@@ -2,21 +2,11 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/CheckPermissionPage/permissionCheck.dart';
-import 'package:musicplayer/services/audioHandler.dart';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 
-import 'controllers/MusicController.dart';
-import 'controllers/youtubeController.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  Get.put<AudioHandler>(await initAudioService(), permanent: true);
-
-  Get.put(MusicController(), permanent: true); // music GetX controller
-
-  Get.put(YoutubeController(), permanent: true); // music GetX controller
 
   AwesomeNotifications().initialize(
       // set the icon to null if you want to use the default app icon
