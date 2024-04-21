@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:musicplayer/controllers/Logic.dart';
+import 'package:musicplayer/controllers/MusicController.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,9 +54,9 @@ class YoutubeController extends GetxController {
     final audio = audiostreamsInfo.withHighestBitrate();
     final audioStream = yt.videos.streamsClient.get(audio);
 
-    final fileName =
+    final filePath =
         "${saveDownloadPath.value!}/${Logic.checkVideoTitle('${myVideo!.title}.mp3')}";
-    final file = File(fileName);
+    final file = File(filePath);
 
     // Delete the file if exists.
     if (file.existsSync()) {
@@ -87,7 +88,9 @@ class YoutubeController extends GetxController {
     }
     await output.close();
 
-    androidScanMediaTrigger(fileName);
+    androidScanMediaTrigger(filePath);
+    final c = Get.find<MusicController>();
+    c.addNewSong(filePath);
   }
 
   void setSavePath(String? newValue) async {
