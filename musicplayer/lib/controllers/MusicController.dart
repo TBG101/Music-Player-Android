@@ -3,6 +3,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:musicplayer/controllers/youtubeController.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -29,10 +30,11 @@ class MusicController extends GetxController {
   var queeUpdated = true.obs;
 
   @override
-  void onInit() {
-    initAudioHandler();
-    initSavePath();
+  void onInit() async {
+    await initAudioHandler();
+    await initSavePath();
     // TODO: implement onInit
+
     super.onInit();
   }
 
@@ -50,11 +52,19 @@ class MusicController extends GetxController {
     update();
   }
 
-  void initAudioHandler() async {
+  @override
+  void dispose() {
+    // TODO: implement dispose
+
+    Get.delete<YoutubeController>();
+    super.dispose();
+  }
+
+  Future<void> initAudioHandler() async {
     audioHandler = Get.find<AudioHandler>();
   }
 
-  void initSavePath() async {
+  Future<void> initSavePath() async {
     savePath = await getApplicationDocumentsDirectory();
   }
 
@@ -84,8 +94,15 @@ class MusicController extends GetxController {
         lst.add(item);
       });
     }
-
     audioHandler.addQueueItems(lst);
+  }
+
+  void addNewSong(String path) {
+    _audioQuery.scanMedia(path).then((value) {
+      if (value == true) {
+        queeUpdated.value = false;
+      }
+    });
   }
 
   void getSongs() async {
@@ -160,17 +177,11 @@ class MusicController extends GetxController {
     visible.value = true;
     var lst = <MediaItem>[];
     var text = textController.value.text;
-    print(
-        "zeafazefzae ------------------------------------------------------------");
     if (queeUpdated.isFalse) {
       queeUpdated.value = true;
       if (text.isEmpty) {
         for (var index = 0; index < musicList.length; index++) {
           var art = await artSetter(index, musicList);
-          print(
-              "zeafazefzae ------------------------------------------------------------");
-          print(art.toString() +
-              " ------------------------------------------------------------");
           var item = MediaItem(
             id: musicList[index].uri!,
             title: musicList[index].title,

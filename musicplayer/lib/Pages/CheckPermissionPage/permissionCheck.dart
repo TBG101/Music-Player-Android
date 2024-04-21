@@ -67,7 +67,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
       });
       if (hasPermission != false) {
         Get.put<AudioHandler>(await initAudioService(), permanent: true);
-        Get.put(MusicController(), permanent: true); // music GetX controller
+        Get.put(MusicController()); // music GetX controller
         Get.put(YoutubeController()); // music GetX controller
         Get.off(const Home());
       }
