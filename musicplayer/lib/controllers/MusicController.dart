@@ -92,6 +92,7 @@ class MusicController extends GetxController {
           duration: Duration(milliseconds: musicList[index].duration ?? 0),
         );
         lst.add(item);
+        print(item);
       });
     }
     audioHandler.addQueueItems(lst);
