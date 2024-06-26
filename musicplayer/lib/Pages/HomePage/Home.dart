@@ -211,44 +211,46 @@ class _HomeState extends State<Home> {
           child: drawerList(),
         ),
         appBar: appbarWdget(),
-        body: GetBuilder<MusicController>(builder: (controller) {
-          return SafeArea(
-              child: controller.doneInit.isFalse
-                  ? Center(
-                      child: Obx(() => Text(
-                          "${controller.musicCountcurrent}/${controller.musicCount}")))
-                  : controller.hasError.isTrue
-                      ? const Text("ERROR")
-                      : controller.musicList.isEmpty
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          : Stack(
-                              children: [
-                                ListView.builder(
-                                  itemCount: controller
-                                          .textController.value.text.isEmpty
-                                      ? controller.musicList.length + 1
-                                      : controller.filteredList.length + 1,
-                                  itemBuilder: (context, index) {
-                                    return listViewBuilderWidget(index);
-                                  },
-                                ),
-                                Obx(() {
-                                  return Visibility(
-                                    visible: controller.visible.value,
-                                    child: AnimatedAlign(
-                                      curve: Curves.ease,
-                                      alignment: boxAligment(),
-                                      duration:
-                                          const Duration(milliseconds: 500),
-                                      child: SongPlayingWdiget(),
+        body: GetBuilder<MusicController>(
+            init: controller,
+            builder: (controller) {
+              return SafeArea(
+                  child: controller.doneInit.isFalse
+                      ? Center(
+                          child: Obx(() => Text(
+                              "${controller.musicCountcurrent}/${controller.musicCount}")))
+                      : controller.hasError.isTrue
+                          ? const Text("ERROR")
+                          : controller.musicList.isEmpty
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : Stack(
+                                  children: [
+                                    ListView.builder(
+                                      itemCount: controller
+                                              .textController.value.text.isEmpty
+                                          ? controller.musicList.length + 1
+                                          : controller.filteredList.length + 1,
+                                      itemBuilder: (context, index) {
+                                        return listViewBuilderWidget(index);
+                                      },
                                     ),
-                                  );
-                                })
-                              ],
-                            ));
-        }),
+                                    Obx(() {
+                                      return Visibility(
+                                        visible: controller.visible.value,
+                                        child: AnimatedAlign(
+                                          curve: Curves.ease,
+                                          alignment: boxAligment(),
+                                          duration:
+                                              const Duration(milliseconds: 500),
+                                          child: SongPlayingWdiget(),
+                                        ),
+                                      );
+                                    })
+                                  ],
+                                ));
+            }),
       ),
     );
   }

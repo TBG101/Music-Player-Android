@@ -1,14 +1,15 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:metadata_god/metadata_god.dart';
 import 'package:musicplayer/Pages/CheckPermissionPage/permissionCheck.dart';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MetadataGod.initialize();
 
-  AwesomeNotifications().initialize(
+  await AwesomeNotifications().initialize(
       // set the icon to null if you want to use the default app icon
       null,
       [
