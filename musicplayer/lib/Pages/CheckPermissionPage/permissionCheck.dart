@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,7 +18,7 @@ class PermissionCheck extends StatefulWidget {
 class _PermissionCheckState extends State<PermissionCheck> {
   bool? hasPermission;
 
-  checkPermission() async {
+  Future<void> checkPermission() async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
 
@@ -57,15 +55,20 @@ class _PermissionCheckState extends State<PermissionCheck> {
         Permission.notification
       ].request();
       print(status);
-      status.forEach((key, status) async {
+      status.forEach((key, status) {
         if (status == PermissionStatus.denied ||
             status == PermissionStatus.permanentlyDenied) {
-          setState(() {
-            hasPermission = false;
-          });
+          hasPermission = false;
         }
       });
       if (hasPermission != false) {
+        hasPermission = true;
+      }
+      setState(() {
+        hasPermission;
+      });
+
+      if (hasPermission == true) {
         Get.put<AudioHandler>(await initAudioService(), permanent: true);
         Get.put(MusicController()); // music GetX controller
         Get.put(YoutubeController()); // music GetX controller
@@ -86,8 +89,8 @@ class _PermissionCheckState extends State<PermissionCheck> {
 
   @override
   void initState() {
-    checkPermission();
     super.initState();
+    checkPermission();
   }
 
   @override

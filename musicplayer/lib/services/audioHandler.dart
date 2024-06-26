@@ -8,21 +8,41 @@ Future<AudioHandler> initAudioService() async {
     config: const AudioServiceConfig(
       androidNotificationChannelId: 'com.mycompany.myapp.audio',
       androidNotificationChannelName: 'Audio Service Demo',
-      androidNotificationOngoing: true,
-      androidStopForegroundOnPause: true,
-      notificationColor: Colors.amber,
+      androidNotificationOngoing: false,
+      androidStopForegroundOnPause: false,
+      notificationColor: Colors.purple,
     ),
   );
 }
 
 class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
-  final _player = AudioPlayer(); // instance that allows me to play music
+  late AudioPlayer _player;
+  late AndroidLoudnessEnhancer _loudnessEnhancer;
   final _playlist = ConcatenatingAudioSource(children: []);
 
   AudioPlayerHandler() {
+    initPlayer();
+    playbackState.add(playbackState.value.copyWith(
+      controls: [MediaControl.play],
+      processingState: AudioProcessingState.loading,
+    ));
+
     _notifyAudioHandlerAboutPlaybackEvents();
     _listenForDurationChanges();
     _loadEmptyPlaylist();
+  }
+
+  void initPlayer() {
+    _loudnessEnhancer = AndroidLoudnessEnhancer();
+    _loudnessEnhancer.setEnabled(true);
+    _loudnessEnhancer.setTargetGain(0.5);
+    _player = AudioPlayer(
+      audioPipeline: AudioPipeline(
+        androidAudioEffects: [
+          _loudnessEnhancer,
+        ],
+      ),
+    );
   }
 
   Future<void> _loadEmptyPlaylist() async {
@@ -63,11 +83,6 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> play() async {
-    await _player.play();
-  }
-
-  @override
   Future<void> skipToPrevious() {
     _player.seekToPrevious();
     _player.play();
@@ -81,15 +96,25 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
+  Future<void> play() async {
+    _player.play();
+  }
+
+  @override
   Future<void> pause() async {
-    await _player.pause();
+    _player.pause();
   }
 
   @override
   Future<void> seek(Duration position) => _player.seek(position);
 
   @override
-  Future<void> stop() => _player.stop();
+  Future<void> stop() async {
+    _player.stop();
+    playbackState.add(playbackState.value.copyWith(
+      processingState: AudioProcessingState.idle,
+    ));
+  }
 
   @override
   Future<void> playMediaItem(MediaItem _mediaItem) async {
@@ -102,21 +127,22 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> skipToQueueItem(int index) async {
-    // TODO: implement skipToQueueItem
-
     _player.seek(Duration.zero, index: index);
     _player.play();
   }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {
+      print("received event");
+
       final playing = _player.playing;
       playbackState.add(playbackState.value.copyWith(
         controls: [
           MediaControl.skipToPrevious,
-          if (playing) MediaControl.pause else MediaControl.play,
+          playing ? MediaControl.play : MediaControl.pause,
           MediaControl.stop,
           MediaControl.skipToNext,
+          MediaControl.skipToPrevious
         ],
         systemActions: const {
           MediaAction.seek,

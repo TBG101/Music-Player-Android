@@ -7,9 +7,21 @@ class YouTubeVid extends GetView<YoutubeController> {
 
   final int index;
 
+  String formatDuration(Duration? duration) {
+    if (duration == null) return "Can't fetch Duration";
+
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String twoDigitHours = twoDigits(duration.inHours);
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitHours:$twoDigitMinutes:$twoDigitSeconds";
+  }
+
   @override
   Widget build(BuildContext context) {
-    var screenWidth = MediaQuery.of(context).size.width - 16;
+    final screenWidth = MediaQuery.of(context).size.width - 16;
+    final vidDuration =
+        formatDuration(controller.videos.value![index].duration);
     return SizedBox(
         height: 80,
         width: screenWidth,
@@ -42,8 +54,7 @@ class YouTubeVid extends GetView<YoutubeController> {
                             child: Stack(
                               children: [
                                 Text(
-                                  controller.videos.value![index].duration
-                                      .toString(),
+                                  vidDuration,
                                   style: TextStyle(
                                     fontSize: 12,
                                     foreground: Paint()
@@ -54,8 +65,7 @@ class YouTubeVid extends GetView<YoutubeController> {
                                   ),
                                 ),
                                 Text(
-                                  controller.videos.value![index].duration
-                                      .toString(),
+                                  vidDuration,
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: Colors.white,
@@ -115,7 +125,16 @@ class YouTubeVid extends GetView<YoutubeController> {
                 alignment: Alignment.bottomRight,
                 child: IconButton(
                   onPressed: () {
-                    controller.downloadVid(index);
+                    try {
+                      controller.downloadVid(index);
+                    } catch (e) {
+                      if (Get.isSnackbarOpen) {
+                        Get.closeAllSnackbars();
+                      }
+                      Get.snackbar("Unhandled Exceptio caught when downloading",
+                          e.toString(),
+                          isDismissible: true);
+                    }
                   },
                   icon: const ImageIcon(
                     AssetImage("lib/assets/img/download.png"),

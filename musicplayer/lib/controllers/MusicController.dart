@@ -31,20 +31,17 @@ class MusicController extends GetxController {
 
   @override
   void onInit() async {
-    await initAudioHandler();
-    await initSavePath();
-    // TODO: implement onInit
-
     super.onInit();
+    await initAudioHandler();
   }
 
   @override
-  void onReady() {
-    // TODO: implement onReady
-    getSongs();
+  void onReady() async {
+    super.onReady();
+    await initSavePath();
+    getSongs().then((value) => update());
     getState();
     itemPlaying();
-    super.onReady();
   }
 
   void initFalse() {
@@ -54,8 +51,6 @@ class MusicController extends GetxController {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-
     Get.delete<YoutubeController>();
     super.dispose();
   }
@@ -72,7 +67,7 @@ class MusicController extends GetxController {
     return song;
   }
 
-  void addListQuee() async {
+  Future<void> addListQuee() async {
     var lst = <MediaItem>[];
     for (var index = 0; index < musicList.length; index++) {
       String? art = "${savePath.path}/${musicList[index].title}.jpg";
@@ -95,7 +90,8 @@ class MusicController extends GetxController {
         print(item);
       });
     }
-    audioHandler.addQueueItems(lst);
+    // updateQueue
+    await audioHandler.updateQueue(lst);
   }
 
   void addNewSong(String path) {
@@ -104,9 +100,10 @@ class MusicController extends GetxController {
         queeUpdated.value = false;
       }
     });
+    getSongs();
   }
 
-  void getSongs() async {
+  Future<void> getSongs() async {
     bool firstCall = await File("${savePath.path}/NotFound.jpg").exists();
     print(firstCall);
     try {
@@ -122,21 +119,19 @@ class MusicController extends GetxController {
           musicList.add(element);
         }
       }
-      musicList.refresh();
+
       if (firstCall == false) {
         print("First time Running");
-        saveAllArt();
-      } else {
-        doneInit.value = true;
+        await saveAllArt();
       }
 
-      addListQuee();
+      await addListQuee();
+      doneInit.value = true;
     } catch (e) {
       debugPrint(e.toString());
       hasError.value = true;
     }
-
-    update();
+    musicList.refresh();
   }
 
   Future<Uri> artSetter(int index, List<SongModel> songs) async {
@@ -153,7 +148,7 @@ class MusicController extends GetxController {
     });
   }
 
-  void filterList() async {
+  Future<void> filterList() async {
     filteredList.clear();
 
     var text = textController.value.text;
@@ -184,13 +179,13 @@ class MusicController extends GetxController {
         for (var index = 0; index < musicList.length; index++) {
           var art = await artSetter(index, musicList);
           var item = MediaItem(
-            id: musicList[index].uri!,
-            title: musicList[index].title,
-            artist: musicList[index].artist ?? " ",
-            album: musicList[index].album,
-            artUri: art,
-            duration: Duration(milliseconds: musicList[index].duration ?? 0),
-          );
+              id: musicList[index].uri!,
+              title: musicList[index].title,
+              artist: musicList[index].artist ?? " ",
+              album: musicList[index].album,
+              artUri: art,
+              duration: Duration(milliseconds: musicList[index].duration ?? 0),
+              extras: {"loadThumbnailUri": true});
 
           lst.add(item);
         }
@@ -218,23 +213,23 @@ class MusicController extends GetxController {
     audioHandler.skipToQueueItem(index);
   }
 
-  itemPlaying() {
+  void itemPlaying() {
     audioHandler.mediaItem.listen((item) {
       song.value = item;
     });
   }
 
-  getState() {
+  void getState() {
     audioHandler.playbackState.listen((PlaybackState state) {
       playbackState.value = state;
     });
   }
 
-  saveAllArt() async {
+  Future<void> saveAllArt() async {
     print(musicList.length);
     final ByteData bytes = await rootBundle.load('lib/assets/img/NotFound.jpg');
     final Uint8List list = bytes.buffer.asUint8List();
-    File("${savePath.path}/NotFound.jpg").writeAsBytes(list);
+    await File("${savePath.path}/NotFound.jpg").writeAsBytes(list);
     musicCount.value = musicList.length;
     print(savePath.path);
 
@@ -243,7 +238,7 @@ class MusicController extends GetxController {
       print(index);
       var img = await _audioQuery.queryArtwork(
           musicList[index].id, ArtworkType.AUDIO,
-          format: ArtworkFormat.JPEG, size: 200, quality: 300);
+          format: ArtworkFormat.PNG, size: 200, quality: 300);
 
       if (img == null || img.isEmpty) {
         continue;
@@ -265,6 +260,7 @@ class MusicController extends GetxController {
     }
     musicCountcurrent.value = 0;
     doneInit.value = true;
+    refresh();
     update();
     debugPrint("done");
   }
@@ -295,9 +291,12 @@ class MusicController extends GetxController {
     );
   }
 
-  void rescanFiles() async {
+  Future<void> rescanFiles() async {
     savePath = await getApplicationDocumentsDirectory();
-    musicList.value = [];
+
+    musicList.clear();
+    filteredList.clear();
+
     try {
       List<SongModel> x = await _audioQuery.querySongs(
         sortType: SongSortType.DATE_ADDED,
@@ -312,7 +311,7 @@ class MusicController extends GetxController {
         }
       }
       musicList.refresh();
-      addListQuee();
+      await addListQuee();
     } catch (e) {
       debugPrint(e.toString());
       hasError.value = true;
