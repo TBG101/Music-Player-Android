@@ -2,7 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
-Future<AudioHandler> initAudioService() async {
+Future<AudioPlayerHandler> initAudioService() async {
   return await AudioService.init(
     builder: () => AudioPlayerHandler(),
     config: const AudioServiceConfig(
@@ -43,6 +43,10 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
         ],
       ),
     );
+  }
+
+  int? getCurrentIndex() {
+    return _player.currentIndex;
   }
 
   Future<void> _loadEmptyPlaylist() async {

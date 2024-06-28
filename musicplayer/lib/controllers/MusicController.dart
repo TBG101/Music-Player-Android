@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/controllers/youtubeController.dart';
+import 'package:musicplayer/services/audioHandler.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -17,7 +18,7 @@ class MusicController extends GetxController {
   final RxList<SongModel> filteredList = <SongModel>[].obs;
 
   final RxBool hasError = false.obs;
-  late AudioHandler audioHandler;
+  late AudioPlayerHandler audioHandler;
 
   final Rxn<MediaItem> song = Rxn<MediaItem>();
   final Rxn<PlaybackState> playbackState = Rxn<PlaybackState>();
@@ -56,7 +57,7 @@ class MusicController extends GetxController {
   }
 
   Future<void> initAudioHandler() async {
-    audioHandler = Get.find<AudioHandler>();
+    audioHandler = Get.find<AudioPlayerHandler>();
   }
 
   Future<void> initSavePath() async {

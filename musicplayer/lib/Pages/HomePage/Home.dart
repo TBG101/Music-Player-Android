@@ -20,6 +20,7 @@ class _HomeState extends State<Home> {
       Get.find<YoutubeController>(); // music GetX controller
 
   bool hasPermission = false;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
 
   Alignment boxAligment() {
     if (controller.song.value == null) {
@@ -61,8 +62,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-  var scaffoldKey = GlobalKey<ScaffoldState>();
 
   PreferredSizeWidget appbarWdget() {
     return PreferredSize(
