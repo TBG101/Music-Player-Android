@@ -74,7 +74,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 2),
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 4),
             child: AnimatedContainer(
               curve: Curves.ease,
               duration: const Duration(milliseconds: 100),
@@ -131,7 +131,9 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
                         icon: const Icon(Icons.skip_next_rounded)),
                   ])
                   .animate(target: (containerHeight) / screenHeight)
-                  .fadeOut()
+                  .fadeOut(
+                    curve: Curves.ease,
+                  )
                   .swap(
                       builder: (_, __) => SongFullScreen(
                             songImage: SongImageWidget(
@@ -142,7 +144,9 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
                             ),
                           )
                               .animate(target: (containerHeight) / screenHeight)
-                              .fadeIn()),
+                              .fadeIn(
+                                curve: Curves.ease,
+                              )),
             ),
           ),
         ),
