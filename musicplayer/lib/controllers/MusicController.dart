@@ -223,7 +223,13 @@ class MusicController extends GetxController {
   void getState() {
     audioHandler.playbackState.listen((PlaybackState state) {
       playbackState.value = state;
+      playbackState.refresh();
+      print(state.position);
     });
+  }
+
+  void seekTime(Duration duration) {
+    audioHandler.seek(duration);
   }
 
   Future<void> saveAllArt() async {
