@@ -134,7 +134,12 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
                   .fadeOut()
                   .swap(
                       builder: (_, __) => SongFullScreen(
-                            songImage: SongImageWidget(path: getPath(),raduis: 15),
+                            songImage: SongImageWidget(
+                              path: getPath(),
+                              raduis: 15,
+                              height: 100,
+                              width: 100,
+                            ),
                           )
                               .animate(target: (containerHeight) / screenHeight)
                               .fadeIn()),
