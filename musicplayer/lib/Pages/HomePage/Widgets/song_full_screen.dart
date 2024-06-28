@@ -19,36 +19,60 @@ class _SongFullScreenState extends State<SongFullScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height - 50;
+    final width = MediaQuery.of(context).size.width - 50;
     return SizedBox(
       width: MediaQuery.of(context).size.width - 50,
-      height: MediaQuery.of(context).size.height - 50,
+      height: height,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // back button
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                    onPressed: () {}, icon: const Icon(Icons.arrow_back_ios))
-              ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.arrow_back_ios_rounded))
+                ],
+              ),
             ),
           ),
 
           // iamge here
-          AspectRatio(
-            aspectRatio: 1,
-            child: widget.songImage,
+          SizedBox(
+            height: height * 0.48,
+            width: width,
+            child: Align(
+              alignment: Alignment.center,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: widget.songImage,
+              ),
+            ),
           ),
 
-          Obx(
-            () => Text(controller.song.value == null
-                ? "null"
-                : controller.song.value!.title),
+          SizedBox(
+            width: width,
+            child: Obx(
+              () => Text(
+                controller.song.value == null
+                    ? "null"
+                    : controller.song.value!.title,
+                textAlign: TextAlign.center,
+                softWrap: true,
+                style: const TextStyle(
+                    color: Colors.purple,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
           Obx(() => Text(controller.song.value == null
               ? "null"
