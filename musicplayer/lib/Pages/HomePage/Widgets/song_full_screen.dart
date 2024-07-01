@@ -77,43 +77,39 @@ class _SongFullScreenState extends State<SongFullScreen> {
           Obx(() => Text(controller.song.value == null
               ? "null"
               : controller.song.value!.artist ?? "")),
-          // // slider for time control
+        
+         // slider for time control
+          StreamBuilder<Duration>(
+              stream: controller.audioHandler.positionDataStream,
+              builder: ((context, snapshot) {
+                if (snapshot.data != null && controller.song.value != null) {
+                  if (controller.song.value!.duration != null) {
+                    return Slider(
+                      value: moving
+                          ? sliderValue
+                          : snapshot.data!.inMilliseconds /
+                              controller.song.value!.duration!.inMilliseconds,
+                      onChangeStart: (value) {
+                        value = sliderValue;
+                        moving = true;
+                      },
+                      onChanged: (value) {
+                        sliderValue = value;
+                        setState(() {});
+                      },
+                      onChangeEnd: (value) {
+                        moving = false;
 
-          Obx(() {
-            if (controller.playbackState.value != null &&
-                controller.song.value != null) {
-              if (controller.song.value!.duration != null) {
-                return Slider(
-                  value: moving
-                      ? sliderValue
-                      : controller
-                              .playbackState.value!.position.inMilliseconds /
-                          controller.song.value!.duration!.inMilliseconds,
-                  onChangeStart: (value) {
-                    value = sliderValue;
-                    moving = true;
-                  },
-                  onChanged: (value) {
-                    sliderValue = value;
-                    setState(() {});
-                  },
-                  onChangeEnd: (value) {
-                    moving = false;
-                    if (controller.playbackState.value != null &&
-                        controller.song.value != null) {
-                      if (controller.song.value!.duration != null) {
                         final ms = value *
                             controller.song.value!.duration!.inMilliseconds;
                         final newDuration = Duration(milliseconds: ms.toInt());
                         controller.seekTime(newDuration);
-                      }
-                    }
-                  },
-                );
-              }
-            }
-            return const SizedBox.shrink();
-          }),
+                      },
+                    );
+                  }
+                }
+                return const SizedBox.shrink();
+              })),
 
           // controls
         ],
