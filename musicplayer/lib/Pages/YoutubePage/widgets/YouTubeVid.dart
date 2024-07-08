@@ -3,9 +3,21 @@ import 'package:get/get.dart';
 import 'package:musicplayer/controllers/youtubeController.dart';
 
 class YouTubeVid extends GetView<YoutubeController> {
-  const YouTubeVid({super.key, required this.index});
-
+  const YouTubeVid({
+    required this.videoDuration,
+    required this.videoThumbnail,
+    required this.videoTitle,
+    required this.videoAuthor,
+    required this.downloadVideoFunction,
+    super.key,
+    required this.index,
+  });
+  final Duration videoDuration;
+  final String videoThumbnail;
+  final String videoTitle;
+  final String videoAuthor;
   final int index;
+  final VoidCallback downloadVideoFunction;
 
   String formatDuration(Duration? duration) {
     if (duration == null) return "Can't fetch Duration";
@@ -20,8 +32,7 @@ class YouTubeVid extends GetView<YoutubeController> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width - 16;
-    final vidDuration =
-        formatDuration(controller.videos.value![index].duration);
+    final vidDuration = formatDuration(videoDuration);
     return SizedBox(
         height: 80,
         width: screenWidth,
@@ -43,9 +54,19 @@ class YouTubeVid extends GetView<YoutubeController> {
                           color: Colors.black,
                         ),
                         Image.network(
-                          controller
-                              .videos.value![index].thumbnails.mediumResUrl,
+                          videoThumbnail,
                           fit: BoxFit.fitHeight,
+                        ),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Container(
+                            height: 30,
+                            width: 60,
+                            decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.9),
+                                borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(8))),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(right: 5, bottom: 5),
@@ -53,20 +74,11 @@ class YouTubeVid extends GetView<YoutubeController> {
                             alignment: Alignment.bottomRight,
                             child: Stack(
                               children: [
-                                Text(
-                                  vidDuration,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 1.3
-                                      ..color =
-                                          const Color.fromARGB(255, 0, 0, 0),
-                                  ),
-                                ),
+                              
                                 Text(
                                   vidDuration,
                                   style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
                                     fontSize: 12,
                                     color: Colors.white,
                                   ),
@@ -89,7 +101,7 @@ class YouTubeVid extends GetView<YoutubeController> {
                           padding: const EdgeInsets.only(
                               top: 8.0, right: 8, left: 8),
                           child: Text(
-                            (controller.videos.value![index].title),
+                            (videoTitle),
                             maxLines: 3,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w500,
@@ -105,7 +117,7 @@ class YouTubeVid extends GetView<YoutubeController> {
                           padding: const EdgeInsets.only(
                               right: 8, left: 8, bottom: 8),
                           child: Text(
-                            controller.videos.value![index].author,
+                            videoAuthor,
                             maxLines: 1,
                             style: const TextStyle(
                               overflow: TextOverflow.fade,
@@ -126,7 +138,7 @@ class YouTubeVid extends GetView<YoutubeController> {
                 child: IconButton(
                   onPressed: () {
                     try {
-                      controller.downloadVid(index);
+                      downloadVideoFunction();
                     } catch (e) {
                       if (Get.isSnackbarOpen) {
                         Get.closeAllSnackbars();

@@ -77,8 +77,8 @@ class _SongFullScreenState extends State<SongFullScreen> {
           Obx(() => Text(controller.song.value == null
               ? "null"
               : controller.song.value!.artist ?? "")),
-        
-         // slider for time control
+
+          // slider for time control
           StreamBuilder<Duration>(
               stream: controller.audioHandler.positionDataStream,
               builder: ((context, snapshot) {

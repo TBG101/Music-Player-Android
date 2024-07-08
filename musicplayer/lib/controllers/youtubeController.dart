@@ -3,8 +3,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:ffmpeg_kit_flutter_min/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_min/session_state.dart';
+
+import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full/session_state.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:http/http.dart' as http;
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -48,9 +49,22 @@ class YoutubeController extends GetxController {
     print(videos.value?.length.toString());
   }
 
-  Future<void> downloadVid(int index) async {
+  Future<RelatedVideosList?> findMusicRecomendation() async {
+    final controller = Get.find<MusicController>();
+    final title = controller.musicList[0].title;
+    final listOfVideos = await yt.search(title).asStream().first;
+    return yt.videos.getRelatedVideos(listOfVideos[0]);
+  }
+
+  Future<void> downloadVid(int index, List<Video> listOfVideos) async {
     try {
-      final myVideo = videos.value?[index];
+      late final Video? myVideo;
+
+      if (listOfVideos.isEmpty) {
+        myVideo = videos.value?[index];
+      } else {
+        myVideo = listOfVideos[index];
+      }
       if (videos.value == null ||
           myVideo == null ||
           saveDownloadPath.value == null) return;
@@ -118,21 +132,34 @@ class YoutubeController extends GetxController {
           "${saveDownloadPath.value!}/${Logic.checkVideoTitle('${myVideo.title}.mp3')}");
       // final mimeType = lookupMimeType(filePath);
 
-      notificationFinished(title: "Donwload finished ${myVideo.title}");
+      notificationFinished(title: "Merging to MP4 ${myVideo.title}");
 
-      Completer complete = Completer();
+      Completer<bool> complete = Completer<bool>();
       FFmpegKit.executeAsync(
-          "-y -i '${file.path}' -vn -f mp3 '${newFile.path}'", (session) async {
-        if (await session.getState() == SessionState.completed) {
-          complete.complete(true);
-        } else {
-          complete.complete(false);
-        }
-      });
+        "-y -i '${file.path}' -vn -f mp3 '${newFile.path}'",
+        (session) async {
+          final x = await session.getState();
+          if (x == SessionState.running) return;
+          if (x == SessionState.completed) {
+            print("complected");
+            complete.complete(true);
+          } else if (x == SessionState.failed) {
+            complete.completeError(false);
+            print(("error mergin"));
+          }
+        },
+        (log) {
+          print(log.getMessage().toString());
+        },
+      );
 
       final bool res = await complete.future;
       if (res == false) {
         throw Exception("couldn't convert to mp3 file with ffmpeg");
+      }
+      if (!file.existsSync()) {
+        file.delete();
+        return;
       }
       final metadata = await MetadataRetriever.fromFile(newFile);
       await md.MetadataGod.writeMetadata(
@@ -146,12 +173,13 @@ class YoutubeController extends GetxController {
                   data: imgBytes, mimeType: lookupMimeType(imgPath) ?? "")));
 
       androidScanMediaTrigger(newFile.path);
+      notificationFinished(title: "Download Finished ${myVideo.title}");
 
       // might work might not i have no idea
       c.addNewSong(newFile.path);
       c.rescanFiles();
     } catch (e) {
-      notificationFinished();
+      notificationFinished(title: "Failed to download");
       print(e);
     }
   }
