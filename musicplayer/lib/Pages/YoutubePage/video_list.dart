@@ -33,7 +33,7 @@ class VideoList extends GetView<YoutubeController> {
                               snapshot.data![index].thumbnails.mediumResUrl,
                           videoTitle: snapshot.data![index].title,
                           downloadVideoFunction: () {
-                            controller.downloadVid(
+                            controller.addVideoToQuee(
                                 index, snapshot.data ?? <Video>[]);
                           },
                           index: index,
@@ -60,7 +60,7 @@ class VideoList extends GetView<YoutubeController> {
                                 .videos.value![index].thumbnails.mediumResUrl,
                             videoTitle: controller.videos.value![index].title,
                             downloadVideoFunction: () {
-                              controller.downloadVid(index, <Video>[]);
+                              controller.addVideoToQuee(index, <Video>[]);
                             },
                           ),
                         );

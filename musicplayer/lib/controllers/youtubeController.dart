@@ -4,8 +4,8 @@ import 'dart:async';
 import 'dart:io';
 
 
-import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full/session_state.dart';
+import 'package:ffmpeg_kit_flutter_audio/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_audio/session_state.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:http/http.dart' as http;
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -30,6 +30,10 @@ class YoutubeController extends GetxController {
   final videos = Rxn<VideoSearchList>();
 
   late SharedPreferences prefs;
+
+  final videoQuee = <Video>[];
+
+  var downloadingVideo = false;
 
   @override
   void onInit() async {
@@ -56,19 +60,30 @@ class YoutubeController extends GetxController {
     return yt.videos.getRelatedVideos(listOfVideos[0]);
   }
 
-  Future<void> downloadVid(int index, List<Video> listOfVideos) async {
-    try {
-      late final Video? myVideo;
+  Future<void> addVideoToQuee(int index, List<Video> listOfVideos) async {
+    late final Video? myVideo;
 
-      if (listOfVideos.isEmpty) {
-        myVideo = videos.value?[index];
-      } else {
-        myVideo = listOfVideos[index];
-      }
-      if (videos.value == null ||
-          myVideo == null ||
-          saveDownloadPath.value == null) return;
-      final id = videos.value?[index].id;
+    if (listOfVideos.isEmpty) {
+      myVideo = videos.value?[index];
+    } else {
+      myVideo = listOfVideos[index];
+    }
+    if (videos.value == null ||
+        myVideo == null ||
+        saveDownloadPath.value == null) return;
+
+    videoQuee.add(myVideo);
+    downloadingVideo = true;
+    while (downloadingVideo == true && videoQuee.isNotEmpty) {
+      await downloadVid();
+    }
+    downloadingVideo = false;
+  }
+
+  Future<void> downloadVid() async {
+    try {
+      final myVideo = videoQuee.last;
+      final id = myVideo.id;
       notificationUpdate("fetching data ${myVideo.title}", 0);
       final manifest = await yt.videos.streamsClient.getManifest(id);
       final audiostreamsInfo = manifest.audioOnly;
@@ -182,6 +197,8 @@ class YoutubeController extends GetxController {
       notificationFinished(title: "Failed to download");
       print(e);
     }
+
+    videoQuee.removeLast();
   }
 
   void setSavePath(String? newValue) async {
