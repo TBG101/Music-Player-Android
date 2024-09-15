@@ -1,8 +1,5 @@
-// https://www.googleapis.com/youtube/v3/search?part=snippet,contentDetail&key=AIzaSyAww7JGtgWljnrXWdpRaf82Br3g8IwD_Ro&type=video&q=jelly
-
 import 'dart:async';
 import 'dart:io';
-
 
 import 'package:ffmpeg_kit_flutter_audio/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_audio/session_state.dart';
@@ -47,7 +44,6 @@ class YoutubeController extends GetxController {
     textController.refresh();
     videos.value =
         await (yt.search(textController.value.text).asStream()).first;
-
     videos.refresh();
     print(videos.value.toString());
     print(videos.value?.length.toString());
