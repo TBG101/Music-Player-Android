@@ -118,6 +118,33 @@ class _HomeState extends State<Home> {
         onTap: () async {
           controller.playSong(index);
         },
+        onLongPress: () {
+          Get.dialog(Dialog(
+            child: SizedBox(
+              height: 140,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+                      controller.textController.value.text.isEmpty
+                          ? controller.musicList[index].title
+                          : controller.filteredList[index].title,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      title: const Text("Delete song"),
+                      onTap: () {
+                        controller.deleteSong(index);
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ));
+        },
         title: Text(controller.textController.value.text.isEmpty
             ? controller.musicList[index].title
             : controller.filteredList[index].title),

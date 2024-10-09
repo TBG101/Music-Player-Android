@@ -89,14 +89,15 @@ class YoutubeController extends GetxController {
 
       final filePath =
           "${saveDownloadPath.value!}/${Logic.checkVideoTitle('${myVideo.title}.webm')}";
-      final file = File(filePath);
+      final webmFile = File(filePath);
 
       // Delete the file if exists.
-      if (file.existsSync()) {
-        file.deleteSync();
+      if (webmFile.existsSync()) {
+      
+        webmFile.deleteSync();
       }
       //open the file
-      var output = file.openWrite(mode: FileMode.writeOnlyAppend);
+      var output = webmFile.openWrite(mode: FileMode.writeOnlyAppend);
 
       // Track the file download status.
       final fileLength = audio.size.totalBytes;
@@ -124,7 +125,7 @@ class YoutubeController extends GetxController {
         print("here");
         await output.close();
         notificationFinished(title: "Donwload finished ${myVideo.title}");
-        file.delete();
+        webmFile.delete();
         return;
       }
 
@@ -139,15 +140,14 @@ class YoutubeController extends GetxController {
         File(imgPath).writeAsBytes(imgBytes);
       }
 
-      final newFile = File(
+      final mp3File = File(
           "${saveDownloadPath.value!}/${Logic.checkVideoTitle('${myVideo.title}.mp3')}");
-      // final mimeType = lookupMimeType(filePath);
 
       notificationFinished(title: "Merging to MP4 ${myVideo.title}");
 
       Completer<bool> complete = Completer<bool>();
       FFmpegKit.executeAsync(
-        "-y -i '${file.path}' -vn -f mp3 '${newFile.path}'",
+        "-y -i '${webmFile.path}' -vn -f mp3 '${mp3File.path}'",
         (session) async {
           final x = await session.getState();
           if (x == SessionState.running) return;
@@ -168,32 +168,32 @@ class YoutubeController extends GetxController {
       if (res == false) {
         throw Exception("couldn't convert to mp3 file with ffmpeg");
       }
-      if (!file.existsSync()) {
-        file.delete();
-        return;
+
+      if (webmFile.existsSync()) {
+        webmFile.delete();
       }
-      final metadata = await MetadataRetriever.fromFile(newFile);
+
+      final metadata = await MetadataRetriever.fromFile(mp3File);
       await md.MetadataGod.writeMetadata(
-          file: newFile.path,
+          file: mp3File.path,
           metadata: md.Metadata(
               title: myVideo.title,
               artist: myVideo.author,
               durationMs: (metadata.trackDuration ?? 0).toDouble(),
-              fileSize: newFile.lengthSync(),
+              fileSize: mp3File.lengthSync(),
               picture: md.Picture(
                   data: imgBytes, mimeType: lookupMimeType(imgPath) ?? "")));
 
-      androidScanMediaTrigger(newFile.path);
+      androidScanMediaTrigger(mp3File.path);
       notificationFinished(title: "Download Finished ${myVideo.title}");
 
-      // might work might not i have no idea
-      c.addNewSong(newFile.path);
+      // recheck all the files
+      c.addNewSong(mp3File.path);
       c.rescanFiles();
     } catch (e) {
       notificationFinished(title: "Failed to download");
       print(e);
     }
-
     videoQuee.removeLast();
   }
 
