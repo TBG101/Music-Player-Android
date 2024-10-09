@@ -10,7 +10,4 @@ class Logic {
         .replaceAll('>', '')
         .replaceAll('|', '');
   }
-
-  
-
 }

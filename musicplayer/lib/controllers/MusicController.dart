@@ -325,4 +325,29 @@ class MusicController extends GetxController {
     }
     await saveAllArt();
   }
+
+  Future<void> deleteSong(int index) async {
+    if (filteredList.isNotEmpty) {
+      Get.snackbar("Can't Delete",
+          "Can't delete when you're in the search tab, i'm too lazy");
+      return;
+    }
+
+    if (audioHandler.getCurrentIndex() == index) {
+      Get.snackbar("Can't Delete", "Current song is beign played");
+    }
+    musicList.removeAt(index);
+    final uri = musicList[index].uri;
+    
+    if (uri == null) return;
+    try {
+      await File(uri).delete();
+    } catch (error) {
+      print(error.toString());
+      Get.snackbar("Error", error.toString());
+    }
+    refresh();
+    musicList.refresh();
+    filteredList.refresh();
+  }
 }
