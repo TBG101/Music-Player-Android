@@ -13,6 +13,7 @@ import 'package:metadata_god/metadata_god.dart' as md;
 import 'package:mime/mime.dart';
 import 'package:musicplayer/controllers/Logic.dart';
 import 'package:musicplayer/controllers/MusicController.dart';
+import 'package:musicplayer/services/task_quee.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,8 +23,8 @@ class YoutubeController extends GetxController {
   var textController = TextEditingController().obs;
   final saveDownloadPath = Rxn<String>();
   final __notification = AwesomeNotifications();
-  var yt = YoutubeExplode();
-
+  final yt = YoutubeExplode();
+  final downloadQuee = TaskQuee();
   final videos = Rxn<VideoSearchList>();
 
   late SharedPreferences prefs;
@@ -68,17 +69,26 @@ class YoutubeController extends GetxController {
         myVideo == null ||
         saveDownloadPath.value == null) return;
 
+    downloadQuee.addTask(() => {downloadVid(myVideo!)});
+    downloadQuee.startQuee();
+
+    /* old code
     videoQuee.add(myVideo);
+
     downloadingVideo = true;
+
+    if (downloadingVideo) return;
+
     while (downloadingVideo == true && videoQuee.isNotEmpty) {
-      await downloadVid();
+      final myVideo = videoQuee.last;
+      await downloadVid(myVideo);
     }
     downloadingVideo = false;
+    */
   }
 
-  Future<void> downloadVid() async {
+  Future<void> downloadVid(Video myVideo) async {
     try {
-      final myVideo = videoQuee.last;
       final id = myVideo.id;
       notificationUpdate("fetching data ${myVideo.title}", 0);
       final manifest = await yt.videos.streamsClient.getManifest(id);
@@ -93,7 +103,6 @@ class YoutubeController extends GetxController {
 
       // Delete the file if exists.
       if (webmFile.existsSync()) {
-      
         webmFile.deleteSync();
       }
       //open the file

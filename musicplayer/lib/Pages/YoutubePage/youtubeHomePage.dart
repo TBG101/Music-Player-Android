@@ -19,7 +19,6 @@ class YoutubeHomePage extends StatelessWidget {
       textDirection: TextDirection.rtl,
       softWrap: true,
       maxLines: 1,
-      textScaleFactor: 1,
       text: const TextSpan(
         text: 'You',
         style: TextStyle(color: Colors.white, fontSize: 23),
@@ -30,6 +29,7 @@ class YoutubeHomePage extends StatelessWidget {
                   fontWeight: FontWeight.bold, color: Colors.redAccent)),
         ],
       ),
+      textScaler: const TextScaler.linear(1),
     );
   }
 
