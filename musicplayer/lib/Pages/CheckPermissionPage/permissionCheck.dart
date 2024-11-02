@@ -19,61 +19,40 @@ class _PermissionCheckState extends State<PermissionCheck> {
   bool? hasPermission;
 
   Future<void> checkPermission() async {
-    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
+    bool permissionGranted = false;
 
     if (int.parse(androidInfo.version.release) < 13) {
       // ANDROID 12 OR LOWER
-      var x = await Permission.storage.request();
-      if (x.isDenied) {
-        x = await Permission.storage.request();
+      var storagePermission = await Permission.storage.request();
+      if (storagePermission.isGranted) {
+        permissionGranted = true;
+      } else {
+        permissionGranted = false;
       }
-      await Future.delayed(const Duration(milliseconds: 500))
-          .then((value) async {
-        if (x.isGranted) {
-          Get.put<AudioHandler>(await initAudioService(), permanent: true);
-
-          Get.put(MusicController(), permanent: true); // music GetX controller
-
-          Get.put(YoutubeController()); // music GetX controller
-          Get.off(const Home());
-        } else {
-          setState(() {
-            hasPermission = false;
-          });
-        }
-
-        return null;
-      });
     } else {
-      // ANDOIRD 13 OR HIGHER
-
-      var status = await [
+      // ANDROID 13 OR HIGHER
+      final statuses = await [
         Permission.audio,
         Permission.mediaLibrary,
         Permission.manageExternalStorage,
         Permission.notification
       ].request();
-      print(status);
-      status.forEach((key, status) {
-        if (status == PermissionStatus.denied ||
-            status == PermissionStatus.permanentlyDenied) {
-          hasPermission = false;
-        }
-      });
-      if (hasPermission != false) {
-        hasPermission = true;
-      }
-      setState(() {
-        hasPermission;
-      });
 
-      if (hasPermission == true) {
-        Get.put<AudioPlayerHandler>(await initAudioService(), permanent: true);
-        Get.put(MusicController()); // music GetX controller
-        Get.put(YoutubeController()); // music GetX controller
-        Get.off(const Home());
-      }
+      permissionGranted = statuses.values.every((status) => status.isGranted);
+    }
+
+    setState(() {
+      hasPermission = permissionGranted;
+    });
+
+    if (permissionGranted) {
+      // Initialize services and navigate to Home
+      Get.put<AudioHandler>(await initAudioService(), permanent: true);
+      Get.put(MusicController(), permanent: true); // music GetX controller
+      Get.put(YoutubeController()); // youtube GetX controller
+      Get.off(const Home());
     }
   }
 
@@ -90,7 +69,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
   @override
   void initState() {
     super.initState();
-    checkPermission();
+    Future.delayed(Duration.zero, checkPermission);
   }
 
   @override

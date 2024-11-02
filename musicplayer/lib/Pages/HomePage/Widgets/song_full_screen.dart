@@ -80,37 +80,42 @@ class _SongFullScreenState extends State<SongFullScreen> {
 
           // slider for time control
           StreamBuilder<Duration>(
-              stream: controller.audioHandler.positionDataStream,
-              builder: ((context, snapshot) {
-                if (snapshot.data != null && controller.song.value != null) {
-                  if (controller.song.value!.duration != null) {
-                    return Slider(
-                      value: moving
-                          ? sliderValue
-                          : snapshot.data!.inMilliseconds /
-                              controller.song.value!.duration!.inMilliseconds,
-                      onChangeStart: (value) {
-                        value = sliderValue;
+            stream: controller.audioHandler.positionDataStream,
+            builder: ((context, snapshot) {
+              if (snapshot.hasData && controller.song.value != null) {
+                final songDuration = controller.song.value!.duration;
+                if (songDuration != null && songDuration.inMilliseconds > 0) {
+                  double progress = snapshot.data!.inMilliseconds /
+                      songDuration.inMilliseconds;
+
+                  return Slider(
+                    value: moving ? sliderValue : progress,
+                    onChangeStart: (value) {
+                      setState(() {
                         moving = true;
-                      },
-                      onChanged: (value) {
                         sliderValue = value;
-                        setState(() {});
-                      },
-                      onChangeEnd: (value) {
+                      });
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        sliderValue = value;
+                      });
+                    },
+                    onChangeEnd: (value) {
+                      setState(() {
                         moving = false;
-
-                        final ms = value *
-                            controller.song.value!.duration!.inMilliseconds;
-                        final newDuration = Duration(milliseconds: ms.toInt());
-                        controller.seekTime(newDuration);
-                      },
-                    );
-                  }
+                      });
+                      final newDuration = Duration(
+                          milliseconds:
+                              (value * songDuration.inMilliseconds).toInt());
+                      controller.seekTime(newDuration);
+                    },
+                  );
                 }
-                return const SizedBox.shrink();
-              })),
-
+              }
+              return const SizedBox.shrink();
+            }),
+          )
           // controls
         ],
       ),

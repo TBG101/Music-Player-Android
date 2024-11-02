@@ -1,7 +1,4 @@
 import 'dart:collection';
-
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-
 class TaskQuee {
   // singleton
   TaskQuee._privateConstructor();
