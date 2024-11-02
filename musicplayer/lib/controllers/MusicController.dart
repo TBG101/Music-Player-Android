@@ -40,9 +40,13 @@ class MusicController extends GetxController {
   void onReady() async {
     super.onReady();
     await initSavePath();
-    getSongs().then((value) => update());
+    getSongs().then((value) {
+      musicList.refresh();
+      update();
+    });
     getState();
     itemPlaying();
+    update();
   }
 
   void initFalse() {
@@ -338,7 +342,7 @@ class MusicController extends GetxController {
     }
     musicList.removeAt(index);
     final uri = musicList[index].uri;
-    
+
     if (uri == null) return;
     try {
       await File(uri).delete();
