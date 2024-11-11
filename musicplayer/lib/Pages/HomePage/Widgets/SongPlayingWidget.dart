@@ -24,6 +24,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget>
   double borderRaduis = 20;
 
   late Animation<double> animation;
+  late Animation<Color?> colorAnimation;
   late AnimationController animationController;
 
   @override
@@ -32,8 +33,14 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget>
     animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 500));
 
-    animation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+    animation = Tween<double>(begin: 1, end: 0).animate(CurvedAnimation(
         parent: animationController, curve: Curves.fastOutSlowIn));
+
+    colorAnimation = ColorTween(
+            begin: const Color.fromARGB(111, 64, 66, 88),
+            end: Color.fromARGB(255, 14, 14, 14))
+        .animate(CurvedAnimation(
+            parent: animationController, curve: Curves.fastOutSlowIn));
   }
 
   Widget artUri() {
@@ -61,6 +68,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget>
     return PopScope(
       canPop: false,
       onPopInvoked: (value) {
+        animationController.forward(from: 0);
         setState(() {
           containerHeight = 75;
           borderRaduis = 20;
@@ -69,9 +77,13 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget>
       },
       child: GestureDetector(
         onVerticalDragEnd: (details) {
-          if (containerHeight <= 300) {
+          if (containerHeight < 300) {
             containerHeight = 75;
-            animationController.reverse();
+            if (animationController.value != 1) {
+              animationController.forward(from: 0);
+            }
+          } else {
+            animationController.reverse(from: 1);
           }
           setState(() {});
         },
@@ -81,7 +93,6 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget>
             if (containerHeight < 75) {
               containerHeight = 75;
               borderRaduis = 20;
-              animationController.forward();
             }
             if (containerHeight > 300) {
               containerHeight = screenHeight;
@@ -104,8 +115,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget>
                   top: 10, bottom: 10, right: 10, left: 12),
               height: containerHeight,
               width: MediaQuery.of(context).size.width,
-              decoration:
-                  const BoxDecoration(color: Color.fromARGB(111, 64, 66, 88)),
+              decoration: BoxDecoration(color: colorAnimation.value),
               child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -163,7 +173,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget>
                       builder: (_, __) => SongFullScreen(
                             songImage: SongImageWidget(
                               path: getPath(),
-                              raduis: 15,
+                              raduis: 10,
                               height: 100,
                               width: 100,
                             ),

@@ -44,11 +44,10 @@ class _SongFullScreenState extends State<SongFullScreen> {
               ),
             ),
           ),
-
+          const Spacer(),
           // iamge here
           SizedBox(
-            height: height * 0.48,
-            width: width,
+            width: width * 0.8,
             child: Align(
               alignment: Alignment.center,
               child: AspectRatio(
@@ -68,7 +67,7 @@ class _SongFullScreenState extends State<SongFullScreen> {
                 textAlign: TextAlign.center,
                 softWrap: true,
                 style: const TextStyle(
-                    color: Colors.purple,
+                    color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold),
               ),
@@ -83,8 +82,8 @@ class _SongFullScreenState extends State<SongFullScreen> {
             stream: controller.audioHandler.positionDataStream,
             builder: ((context, snapshot) {
               if (snapshot.hasData && controller.song.value != null) {
-                final songDuration = controller.song.value!.duration;
-                if (songDuration != null && songDuration.inMilliseconds > 0) {
+                final songDuration = controller.currentSongDuration.value;
+                if (songDuration.inMilliseconds > 0) {
                   double progress = snapshot.data!.inMilliseconds /
                       songDuration.inMilliseconds;
 
@@ -113,10 +112,39 @@ class _SongFullScreenState extends State<SongFullScreen> {
                   );
                 }
               }
-              return const SizedBox.shrink();
+              return Text(controller.song.value!.duration.toString());
             }),
           )
           // controls
+          ,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    controller.audioHandler.skipToPrevious();
+                  },
+                  icon: const Icon(Icons.skip_previous_rounded)),
+              Obx(
+                () => IconButton(
+                    onPressed: () {
+                      controller.playbackState.value!.playing
+                          ? controller.audioHandler.pause()
+                          : controller.audioHandler.play();
+                    },
+                    icon: Icon(controller.playbackState.value!.playing
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded)),
+              ),
+              IconButton(
+                  onPressed: () {
+                    controller.audioHandler.skipToNext();
+                  },
+                  icon: const Icon(Icons.skip_next_rounded)),
+            ],
+          ),
+          const Spacer()
         ],
       ),
     );
