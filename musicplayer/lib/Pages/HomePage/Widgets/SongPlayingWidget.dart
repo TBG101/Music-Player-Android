@@ -1,6 +1,7 @@
 import "dart:io";
 import "dart:ui";
 
+import "package:flutter/animation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:get/get.dart";
@@ -15,10 +16,25 @@ class SongPlayingWdiget extends StatefulWidget {
   State<SongPlayingWdiget> createState() => _SongPlayingWdigetState();
 }
 
-class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
+class _SongPlayingWdigetState extends State<SongPlayingWdiget>
+    with SingleTickerProviderStateMixin {
   final MusicController controller = Get.find<MusicController>();
   double containerHeight = 75;
   bool canDrag = true;
+  double borderRaduis = 20;
+
+  late Animation<double> animation;
+  late AnimationController animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+
+    animation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+        parent: animationController, curve: Curves.fastOutSlowIn));
+  }
 
   Widget artUri() {
     if (controller.song.value?.artUri == null ||
@@ -47,6 +63,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
       onPopInvoked: (value) {
         setState(() {
           containerHeight = 75;
+          borderRaduis = 20;
           canDrag = true;
         });
       },
@@ -54,6 +71,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
         onVerticalDragEnd: (details) {
           if (containerHeight <= 300) {
             containerHeight = 75;
+            animationController.reverse();
           }
           setState(() {});
         },
@@ -62,9 +80,12 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
             containerHeight = -details.localPosition.dy + 75;
             if (containerHeight < 75) {
               containerHeight = 75;
+              borderRaduis = 20;
+              animationController.forward();
             }
             if (containerHeight > 300) {
               containerHeight = screenHeight;
+              borderRaduis = 0;
               canDrag = false;
             }
             setState(() {});
@@ -72,9 +93,10 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
           }
         },
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(borderRaduis),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 4),
+            filter: ImageFilter.blur(
+                sigmaX: 5 * animation.value, sigmaY: 4 * animation.value),
             child: AnimatedContainer(
               curve: Curves.ease,
               duration: const Duration(milliseconds: 100),
@@ -130,11 +152,14 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
                         },
                         icon: const Icon(Icons.skip_next_rounded)),
                   ])
-                  .animate(target: (containerHeight) / screenHeight)
+                  .animate(
+                    target: (containerHeight) / screenHeight,
+                  )
                   .fadeOut(
                     curve: Curves.ease,
                   )
                   .swap(
+                      duration: const Duration(milliseconds: 500),
                       builder: (_, __) => SongFullScreen(
                             songImage: SongImageWidget(
                               path: getPath(),

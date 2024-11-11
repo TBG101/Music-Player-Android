@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/SongPlayingWidget.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart';
@@ -21,6 +23,7 @@ class _HomeState extends State<Home> {
 
   bool hasPermission = false;
   var scaffoldKey = GlobalKey<ScaffoldState>();
+  DateTime timeBackPressed = DateTime.now();
 
   Alignment boxAligment() {
     if (controller.song.value == null) {
@@ -49,7 +52,6 @@ class _HomeState extends State<Home> {
       textDirection: TextDirection.rtl,
       softWrap: true,
       maxLines: 1,
-      textScaleFactor: 1,
       text: const TextSpan(
         text: 'My ',
         style: TextStyle(color: Colors.white, fontSize: 23),
@@ -60,6 +62,7 @@ class _HomeState extends State<Home> {
                   fontWeight: FontWeight.bold, color: Colors.purpleAccent)),
         ],
       ),
+      textScaler: const TextScaler.linear(1),
     );
   }
 
@@ -204,7 +207,6 @@ class _HomeState extends State<Home> {
     ));
   }
 
-  DateTime timeBackPressed = DateTime.now();
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -236,7 +238,6 @@ class _HomeState extends State<Home> {
         drawer: Drawer(
           child: drawerList(),
         ),
-        appBar: appbarWdget(),
         body: GetBuilder<MusicController>(
             init: controller,
             builder: (controller) {
@@ -253,14 +254,32 @@ class _HomeState extends State<Home> {
                                 )
                               : Stack(
                                   children: [
-                                    ListView.builder(
-                                      itemCount: controller
-                                              .textController.value.text.isEmpty
-                                          ? controller.musicList.length + 1
-                                          : controller.filteredList.length + 1,
-                                      itemBuilder: (context, index) {
-                                        return listViewBuilderWidget(index);
-                                      },
+                                    Column(
+                                      children: [
+                                        Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 5),
+                                            child: appbarWdget()),
+                                        SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height -
+                                              95,
+                                          child: ListView.builder(
+                                            itemCount: controller.textController
+                                                    .value.text.isEmpty
+                                                ? controller.musicList.length +
+                                                    1
+                                                : controller
+                                                        .filteredList.length +
+                                                    1,
+                                            itemBuilder: (context, index) {
+                                              return listViewBuilderWidget(
+                                                  index);
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     Obx(() {
                                       return Visibility(
