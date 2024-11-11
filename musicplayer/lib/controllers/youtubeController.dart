@@ -1,28 +1,24 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:ffmpeg_kit_flutter_audio/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_audio/session_state.dart';
-import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:http/http.dart' as http;
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:media_scanner/media_scanner.dart';
-import 'package:metadata_god/metadata_god.dart' as md;
-import 'package:mime/mime.dart';
-import 'package:musicplayer/controllers/Logic.dart';
 import 'package:musicplayer/controllers/MusicController.dart';
 import 'package:musicplayer/services/task_quee.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+import 'package:musicplayer/utils/notification_manager.dart';
+import 'package:musicplayer/utils/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class YoutubeController extends GetxController {
+  var notificationManager = NotificationManager();
+
   var loading = false.obs;
   var textController = TextEditingController().obs;
   final saveDownloadPath = Rxn<String>();
-  final __notification = AwesomeNotifications();
   final yt = YoutubeExplode();
   final downloadQuee = TaskQuee();
   final videos = Rxn<VideoSearchList>();
@@ -32,6 +28,8 @@ class YoutubeController extends GetxController {
   final videoQuee = <Video>[];
 
   var downloadingVideo = false;
+
+  var __notificationId = 0;
 
   @override
   void onInit() async {
@@ -50,9 +48,12 @@ class YoutubeController extends GetxController {
     print(videos.value?.length.toString());
   }
 
-  Future<RelatedVideosList?> findMusicRecomendation() async {
+  Future<RelatedVideosList?> findMusicRecomendation(
+      {int videoIndex = 0}) async {
+    assert(videoIndex >= 0);
+
     final controller = Get.find<MusicController>();
-    final title = controller.musicList[0].title;
+    final title = controller.musicList[videoIndex].title;
     final listOfVideos = await yt.search(title).asStream().first;
     return yt.videos.getRelatedVideos(listOfVideos[0]);
   }
@@ -88,9 +89,12 @@ class YoutubeController extends GetxController {
   }
 
   Future<void> downloadVid(Video myVideo) async {
+    final currentNotificationId = __notificationId++;
     try {
       final id = myVideo.id;
-      notificationUpdate("fetching data ${myVideo.title}", 0);
+      notificationManager.notificationUpdate(
+          "fetching data ${myVideo.title}", 0, currentNotificationId);
+
       final manifest = await yt.videos.streamsClient.getManifest(id);
       final audiostreamsInfo = manifest.audioOnly;
 
@@ -98,13 +102,14 @@ class YoutubeController extends GetxController {
       final audioStream = yt.videos.streamsClient.get(audio);
 
       final filePath =
-          "${saveDownloadPath.value!}/${Logic.checkVideoTitle('${myVideo.title}.webm')}";
+          "${saveDownloadPath.value!}/${Utils.checkVideoTitle('${myVideo.title}.webm')}";
       final webmFile = File(filePath);
 
       // Delete the file if exists.
       if (webmFile.existsSync()) {
         webmFile.deleteSync();
       }
+
       //open the file
       var output = webmFile.openWrite(mode: FileMode.writeOnlyAppend);
 
@@ -123,7 +128,9 @@ class YoutubeController extends GetxController {
         final progress = ((dataDownloaded / fileLength) * 100).ceil();
         if (DateTime.now()
             .isAfter(timePassed.add(const Duration(seconds: 1)))) {
-          notificationUpdate("downloading ${myVideo.title}", progress);
+          notificationManager.notificationUpdate(
+              msg, progress, currentNotificationId);
+          // notificationUpdate("downloading ${myVideo.title}", progress);
           timePassed = DateTime.now();
         }
 
@@ -133,7 +140,9 @@ class YoutubeController extends GetxController {
       if (dataDownloaded < fileLength) {
         print("here");
         await output.close();
-        notificationFinished(title: "Donwload finished ${myVideo.title}");
+        notificationManager.showNotificationInfo(
+            "Failed to download", currentNotificationId,
+            body: "Download failed");
         webmFile.delete();
         return;
       }
@@ -143,16 +152,18 @@ class YoutubeController extends GetxController {
       final imgBytes =
           (await http.get(Uri.parse(myVideo.thumbnails.maxResUrl))).bodyBytes;
       final imgPath =
-          "${c.savePath.path}/${Logic.checkVideoTitle(myVideo.title)}.jpg";
+          "${c.savePath.path}/${Utils.checkVideoTitle(myVideo.title)}.jpg";
+
       if (await File(imgPath).exists() == false) {
         debugPrint("SAVING IMG");
         File(imgPath).writeAsBytes(imgBytes);
       }
 
       final mp3File = File(
-          "${saveDownloadPath.value!}/${Logic.checkVideoTitle('${myVideo.title}.mp3')}");
+          "${saveDownloadPath.value!}/${Utils.checkVideoTitle('${myVideo.title}.mp3')}");
 
-      notificationFinished(title: "Merging to MP4 ${myVideo.title}");
+      notificationManager.showNotificationInfo(
+          "Merging to MP4 ${myVideo.title}", currentNotificationId);
 
       Completer<bool> complete = Completer<bool>();
       FFmpegKit.executeAsync(
@@ -174,6 +185,7 @@ class YoutubeController extends GetxController {
       );
 
       final bool res = await complete.future;
+
       if (res == false) {
         throw Exception("couldn't convert to mp3 file with ffmpeg");
       }
@@ -182,26 +194,20 @@ class YoutubeController extends GetxController {
         webmFile.delete();
       }
 
-      final metadata = await MetadataRetriever.fromFile(mp3File);
-      await md.MetadataGod.writeMetadata(
-          file: mp3File.path,
-          metadata: md.Metadata(
-              title: myVideo.title,
-              artist: myVideo.author,
-              durationMs: (metadata.trackDuration ?? 0).toDouble(),
-              fileSize: mp3File.lengthSync(),
-              picture: md.Picture(
-                  data: imgBytes, mimeType: lookupMimeType(imgPath) ?? "")));
+      Utils.writeMetaData(mp3File, myVideo, imgBytes, imgPath);
 
-      androidScanMediaTrigger(mp3File.path);
-      notificationFinished(title: "Download Finished ${myVideo.title}");
+      Utils.androidScanMediaTrigger(mp3File.path);
+
+      notificationManager.showNotificationInfo(
+          "Download Finished", currentNotificationId);
 
       // recheck all the files
       c.addNewSong(mp3File.path);
       c.rescanFiles();
     } catch (e) {
-      notificationFinished(title: "Failed to download");
-      print(e);
+      notificationManager.showNotificationInfo(
+          "Failed to download", currentNotificationId,
+          body: e.toString());
     }
     videoQuee.removeLast();
   }
@@ -212,48 +218,5 @@ class YoutubeController extends GetxController {
 
     debugPrint(newValue);
     Permission.manageExternalStorage.status.then((value) => print(value));
-  }
-
-  String? getSavePath() {
-    return saveDownloadPath.value;
-  }
-
-  void notificationFinished({String? title}) {
-    __notification.createNotification(
-      content: NotificationContent(
-        id: 10,
-        channelKey: 'basic_channel',
-        actionType: ActionType.Default,
-        title: 'Download Finished',
-        body: title,
-        notificationLayout: NotificationLayout.Default,
-        category: NotificationCategory.Message,
-        locked: false,
-        color: Colors.blue,
-      ),
-    );
-  }
-
-  void notificationUpdate(String title, int progress) {
-    __notification.createNotification(
-      content: NotificationContent(
-        id: 10,
-        channelKey: 'basic_channel',
-        actionType: ActionType.Default,
-        title: 'Downloading',
-        body: title,
-        notificationLayout: NotificationLayout.ProgressBar,
-        category: NotificationCategory.Progress,
-        progress: progress,
-        locked: true,
-        color: Colors.blue,
-      ),
-    );
-  }
-
-  void androidScanMediaTrigger(String? mp3FilePath) async {
-    if (mp3FilePath == null) return;
-    MediaScanner.loadMedia(path: mp3FilePath)
-        .then((value) => print(value.toString()));
   }
 }

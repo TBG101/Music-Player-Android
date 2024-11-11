@@ -49,7 +49,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
 
     if (permissionGranted) {
       // Initialize services and navigate to Home
-      Get.put<AudioHandler>(await initAudioService(), permanent: true);
+      Get.put<AudioPlayerHandler>(await initAudioService(), permanent: true);
       Get.put(MusicController(), permanent: true); // music GetX controller
       Get.put(YoutubeController()); // youtube GetX controller
       Get.off(const Home());

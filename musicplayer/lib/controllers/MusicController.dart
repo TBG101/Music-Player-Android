@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/controllers/youtubeController.dart';
 import 'package:musicplayer/services/audioHandler.dart';
+import 'package:musicplayer/utils/utils.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -40,13 +41,9 @@ class MusicController extends GetxController {
   void onReady() async {
     super.onReady();
     await initSavePath();
-    getSongs().then((value) {
-      musicList.refresh();
-      update();
-    });
+    getSongs().then((value) => update());
     getState();
     itemPlaying();
-    update();
   }
 
   void initFalse() {
@@ -328,9 +325,13 @@ class MusicController extends GetxController {
       hasError.value = true;
     }
     await saveAllArt();
+    update();
+    refresh();
   }
 
   Future<void> deleteSong(int index) async {
+    Get.snackbar("Song Uri is", musicList[index].uri!);
+
     if (filteredList.isNotEmpty) {
       Get.snackbar("Can't Delete",
           "Can't delete when you're in the search tab, i'm too lazy");
@@ -340,12 +341,13 @@ class MusicController extends GetxController {
     if (audioHandler.getCurrentIndex() == index) {
       Get.snackbar("Can't Delete", "Current song is beign played");
     }
+    
     musicList.removeAt(index);
     final uri = musicList[index].uri;
 
     if (uri == null) return;
     try {
-      await File(uri).delete();
+      Utils.deleteMusicUri(Uri.parse(uri));
     } catch (error) {
       print(error.toString());
       Get.snackbar("Error", error.toString());
