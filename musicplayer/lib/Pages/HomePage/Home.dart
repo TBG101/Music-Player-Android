@@ -1,9 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:musicplayer/Pages/HomePage/Widgets/SongPlayingWidget.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart';
+import 'package:musicplayer/Pages/HomePage/Widgets/expandable_screen.dart';
 import 'package:musicplayer/Pages/YoutubePage/youtubeHomePage.dart';
 import 'package:musicplayer/controllers/MusicController.dart';
 import 'package:musicplayer/controllers/youtubeController.dart';
@@ -289,7 +287,7 @@ class _HomeState extends State<Home> {
                                           alignment: boxAligment(),
                                           duration:
                                               const Duration(milliseconds: 500),
-                                          child: SongPlayingWdiget(),
+                                          child: const ExpandableSongScreen(),
                                         ),
                                       );
                                     })
