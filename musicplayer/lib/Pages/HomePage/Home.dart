@@ -207,94 +207,65 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        final difference = DateTime.now().difference(timeBackPressed);
-        final IsExistWaning = difference >= const Duration(seconds: 2);
-        timeBackPressed = DateTime.now();
-        if (IsExistWaning) {
-          const msg = "Press back button again";
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            width: 200,
-            duration: Duration(seconds: 2),
-            shape: StadiumBorder(),
-            behavior: SnackBarBehavior.floating,
-            content: Text(
-              msg,
-              textAlign: TextAlign.center,
-            ),
-          ));
-          return false;
-        } else {
-          ScaffoldMessenger.of(context).clearSnackBars();
-          return true;
-        }
-      },
-      child: Scaffold(
-        key: scaffoldKey,
-        drawer: Drawer(
-          child: drawerList(),
-        ),
-        body: GetBuilder<MusicController>(
-            init: controller,
-            builder: (controller) {
-              return SafeArea(
-                  child: controller.doneInit.isFalse
-                      ? Center(
-                          child: Obx(() => Text(
-                              "${controller.musicCountcurrent}/${controller.musicCount}")))
-                      : controller.hasError.isTrue
-                          ? const Text("ERROR")
-                          : controller.musicList.isEmpty
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
-                              : Stack(
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 5),
-                                            child: appbarWdget()),
-                                        SizedBox(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height -
-                                              95,
-                                          child: ListView.builder(
-                                            itemCount: controller.textController
-                                                    .value.text.isEmpty
-                                                ? controller.musicList.length +
-                                                    1
-                                                : controller
-                                                        .filteredList.length +
-                                                    1,
-                                            itemBuilder: (context, index) {
-                                              return listViewBuilderWidget(
-                                                  index);
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Obx(() {
-                                      return Visibility(
-                                        visible: controller.visible.value,
-                                        child: AnimatedAlign(
-                                          curve: Curves.ease,
-                                          alignment: boxAligment(),
-                                          duration:
-                                              const Duration(milliseconds: 500),
-                                          child: const ExpandableSongScreen(),
-                                        ),
-                                      );
-                                    })
-                                  ],
-                                ));
-            }),
+    return Scaffold(
+      key: scaffoldKey,
+      drawer: Drawer(
+        child: drawerList(),
       ),
+      body: GetBuilder<MusicController>(
+          init: controller,
+          builder: (controller) {
+            return SafeArea(
+                child: controller.doneInit.isFalse
+                    ? Center(
+                        child: Obx(() => Text(
+                            "${controller.musicCountcurrent}/${controller.musicCount}")))
+                    : controller.hasError.isTrue
+                        ? const Text("ERROR")
+                        : controller.musicList.isEmpty
+                            ? const Center(
+                                child: CircularProgressIndicator(),
+                              )
+                            : Stack(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 5),
+                                          child: appbarWdget()),
+                                      SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height -
+                                                95,
+                                        child: ListView.builder(
+                                          itemCount: controller.textController
+                                                  .value.text.isEmpty
+                                              ? controller.musicList.length + 1
+                                              : controller.filteredList.length +
+                                                  1,
+                                          itemBuilder: (context, index) {
+                                            return listViewBuilderWidget(index);
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Obx(() {
+                                    return Visibility(
+                                      visible: controller.visible.value,
+                                      child: AnimatedAlign(
+                                        curve: Curves.ease,
+                                        alignment: boxAligment(),
+                                        duration:
+                                            const Duration(milliseconds: 500),
+                                        child: const ExpandableSongScreen(),
+                                      ),
+                                    );
+                                  })
+                                ],
+                              ));
+          }),
     );
   }
 }

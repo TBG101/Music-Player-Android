@@ -45,10 +45,8 @@ class _SongFullScreenState extends State<SongFullScreen> {
               ),
             ),
           ),
-
           SizedBox(
-            height: height * 0.48,
-            width: width,
+            width: width * 0.8,
             child: Align(
               alignment: Alignment.center,
               child: AspectRatio(
