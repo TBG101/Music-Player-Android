@@ -1,6 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:musicplayer/models/data_audio_position.dart';
+import 'package:rxdart/rxdart.dart';
 
 Future<AudioPlayerHandler> initAudioService() async {
   return await AudioService.init(
@@ -135,7 +137,16 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     _player.play();
   }
 
-  Stream<Duration> get positionDataStream => _player.positionStream;
+  Stream<dataAudioPosition> get audioPositionStream =>
+      Rx.combineLatest2<Duration, Duration?, dataAudioPosition>(
+          _player.positionStream, _player.durationStream, (position, duration) {
+        print("position: $position");
+        print("duration: $duration");
+        return dataAudioPosition(
+          duration: duration ?? Duration.zero,
+          position: position,
+        );
+      });
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {

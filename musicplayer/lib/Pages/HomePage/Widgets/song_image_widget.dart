@@ -22,12 +22,16 @@ class SongImageWidget extends StatelessWidget {
               width: width,
               height: height,
               fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+              gaplessPlayback: true,
             )
           : Image.file(
               File(path),
               width: height,
               height: width,
               fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+              gaplessPlayback: true,
             ),
     );
   }
