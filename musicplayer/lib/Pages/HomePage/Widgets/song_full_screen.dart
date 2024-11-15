@@ -19,8 +19,9 @@ class _SongFullScreenState extends State<SongFullScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height - 50;
     final width = MediaQuery.of(context).size.width - 50;
+    final height =
+        MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
     return SizedBox(
       width: MediaQuery.of(context).size.width - 50,
       height: height,
@@ -45,7 +46,6 @@ class _SongFullScreenState extends State<SongFullScreen> {
             ),
           ),
 
-          // iamge here
           SizedBox(
             height: height * 0.48,
             width: width,
@@ -68,27 +68,47 @@ class _SongFullScreenState extends State<SongFullScreen> {
                 textAlign: TextAlign.center,
                 softWrap: true,
                 style: const TextStyle(
-                    color: Colors.purple,
+                    color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold),
               ),
             ),
           ),
+
           Obx(() => Text(controller.song.value == null
               ? "null"
               : controller.song.value!.artist ?? "")),
 
           // slider for time control
           StreamBuilder<Duration>(
+            initialData: Duration.zero,
             stream: controller.audioHandler.positionDataStream,
             builder: ((context, snapshot) {
-              if (snapshot.hasData && controller.song.value != null) {
-                final songDuration = controller.song.value!.duration;
-                if (songDuration != null && songDuration.inMilliseconds > 0) {
-                  double progress = snapshot.data!.inMilliseconds /
-                      songDuration.inMilliseconds;
+              if (snapshot.hasError) {
+                return Text("Error: ${snapshot.error}");
+              }
+              if (!snapshot.hasData) {
+                return const Text("data not available");
+              }
+              if (controller.song.value == null) {
+                return const Text(
+                    "controller.song.value is null \nNo song selected");
+              }
 
+              final songDuration = controller.song.value!.duration;
+
+              if (songDuration == null) {
+                return const Text("songDuration is null");
+              }
+
+              return FutureBuilder(
+                future: controller.audioHandler
+                    .getMediaItem(controller.song.value!.id),
+                builder: (context, snapshotFuture) {
+                  double progress = snapshot.data!.inMilliseconds /
+                      snapshotFuture.data!.duration!.inMilliseconds;
                   return Slider(
+                    activeColor: Colors.white,
                     value: moving ? sliderValue : progress,
                     onChangeStart: (value) {
                       setState(() {
@@ -105,18 +125,71 @@ class _SongFullScreenState extends State<SongFullScreen> {
                       setState(() {
                         moving = false;
                       });
-                      final newDuration = Duration(
-                          milliseconds:
-                              (value * songDuration.inMilliseconds).toInt());
+                      final newDuration = snapshotFuture.data!.duration!;
                       controller.seekTime(newDuration);
                     },
                   );
-                }
-              }
-              return const SizedBox.shrink();
+                },
+              );
+
+              // if (songDuration.inMilliseconds > 0) {
+              //   double progress =
+              //       snapshot.data!.inMilliseconds / songDuration.inMilliseconds;
+              //   return Slider(
+              //     activeColor: Colors.white,
+              //     value: moving ? sliderValue : progress,
+              //     onChangeStart: (value) {
+              //       setState(() {
+              //         moving = true;
+              //         sliderValue = value;
+              //       });
+              //     },
+              //     onChanged: (value) {
+              //       setState(() {
+              //         sliderValue = value;
+              //       });
+              //     },
+              //     onChangeEnd: (value) {
+              //       setState(() {
+              //         moving = false;
+              //       });
+              //       final newDuration = Duration(
+              //           milliseconds:
+              //               (value * songDuration.inMilliseconds).toInt());
+              //       controller.seekTime(newDuration);
+              //     },
+              //   );
+              // }
             }),
+          ), // controls
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    controller.audioHandler.skipToPrevious();
+                  },
+                  icon: const Icon(Icons.skip_previous_rounded)),
+              Obx(
+                () => IconButton(
+                    onPressed: () {
+                      controller.playbackState.value!.playing
+                          ? controller.audioHandler.pause()
+                          : controller.audioHandler.play();
+                    },
+                    icon: Icon(controller.playbackState.value!.playing
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded)),
+              ),
+              IconButton(
+                  onPressed: () {
+                    controller.audioHandler.skipToNext();
+                  },
+                  icon: const Icon(Icons.skip_next_rounded))
+            ],
           )
-          // controls
         ],
       ),
     );

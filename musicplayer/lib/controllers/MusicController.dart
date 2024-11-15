@@ -10,6 +10,8 @@ import 'package:on_audio_query/on_audio_query.dart';
 import 'package:path_provider/path_provider.dart';
 
 class MusicController extends GetxController {
+  late AudioPlayerHandler audioHandler;
+
   final RxBool visible = false.obs;
   final RxInt musicCountcurrent = 0.obs;
   final RxInt musicCount = 0.obs;
@@ -19,7 +21,6 @@ class MusicController extends GetxController {
   final RxList<SongModel> filteredList = <SongModel>[].obs;
 
   final RxBool hasError = false.obs;
-  late AudioPlayerHandler audioHandler;
 
   final Rxn<MediaItem> song = Rxn<MediaItem>();
   final Rxn<PlaybackState> playbackState = Rxn<PlaybackState>();
@@ -341,7 +342,7 @@ class MusicController extends GetxController {
     if (audioHandler.getCurrentIndex() == index) {
       Get.snackbar("Can't Delete", "Current song is beign played");
     }
-    
+
     musicList.removeAt(index);
     final uri = musicList[index].uri;
 
