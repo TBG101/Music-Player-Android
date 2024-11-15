@@ -1,11 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:musicplayer/Pages/HomePage/Widgets/song_image_widget.dart';
 import 'package:musicplayer/controllers/MusicController.dart';
+import 'package:musicplayer/models/data_audio_position.dart';
 
 class SongFullScreen extends StatefulWidget {
-  final Widget songImage;
-
-  const SongFullScreen({super.key, required this.songImage});
+  const SongFullScreen({super.key});
 
   @override
   State<SongFullScreen> createState() => _SongFullScreenState();
@@ -16,6 +17,15 @@ class _SongFullScreenState extends State<SongFullScreen> {
 
   bool moving = false;
   double sliderValue = 0;
+
+  String getPath() {
+    if (controller.song.value?.artUri == null ||
+        controller.song.value!.artUri?.path == null) {
+      return "lib/assets/img/NotFound.jpg";
+    } else {
+      return File.fromUri(controller.song.value!.artUri!).path;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +61,10 @@ class _SongFullScreenState extends State<SongFullScreen> {
               alignment: Alignment.center,
               child: AspectRatio(
                 aspectRatio: 1,
-                child: widget.songImage,
+                child: Obx(
+                  () => SongImageWidget(
+                      path: getPath(), raduis: 15, height: 100, width: 100),
+                ),
               ),
             ),
           ),
@@ -78,9 +91,11 @@ class _SongFullScreenState extends State<SongFullScreen> {
               : controller.song.value!.artist ?? "")),
 
           // slider for time control
-          StreamBuilder<Duration>(
-            initialData: Duration.zero,
-            stream: controller.audioHandler.positionDataStream,
+          StreamBuilder<dataAudioPosition>(
+            initialData: dataAudioPosition(
+                duration: const Duration(milliseconds: 0),
+                position: const Duration(milliseconds: 0)),
+            stream: controller.audioHandler.audioPositionStream,
             builder: ((context, snapshot) {
               if (snapshot.hasError) {
                 return Text("Error: ${snapshot.error}");
@@ -93,71 +108,44 @@ class _SongFullScreenState extends State<SongFullScreen> {
                     "controller.song.value is null \nNo song selected");
               }
 
-              final songDuration = controller.song.value!.duration;
-
-              if (songDuration == null) {
-                return const Text("songDuration is null");
+              final songDuration = snapshot.data!.duration;
+              bool disabled = false;
+              double progress = 0;
+              if (songDuration.inMilliseconds == 0) {
+                disabled = true;
+              } else {
+                progress = snapshot.data!.position.inMilliseconds /
+                    songDuration.inMilliseconds;
               }
 
-              return FutureBuilder(
-                future: controller.audioHandler
-                    .getMediaItem(controller.song.value!.id),
-                builder: (context, snapshotFuture) {
-                  double progress = snapshot.data!.inMilliseconds /
-                      snapshotFuture.data!.duration!.inMilliseconds;
-                  return Slider(
-                    activeColor: Colors.white,
-                    value: moving ? sliderValue : progress,
-                    onChangeStart: (value) {
-                      setState(() {
-                        moving = true;
-                        sliderValue = value;
-                      });
-                    },
-                    onChanged: (value) {
-                      setState(() {
-                        sliderValue = value;
-                      });
-                    },
-                    onChangeEnd: (value) {
-                      setState(() {
-                        moving = false;
-                      });
-                      final newDuration = snapshotFuture.data!.duration!;
-                      controller.seekTime(newDuration);
-                    },
-                  );
+              songDuration.inMilliseconds;
+              return Slider(
+                activeColor: Colors.white,
+                value: moving ? sliderValue : progress,
+                onChangeStart: (value) {
+                  if (disabled) return;
+                  setState(() {
+                    moving = true;
+                    sliderValue = value;
+                  });
+                },
+                onChanged: (value) {
+                  if (disabled) return;
+                  setState(() {
+                    sliderValue = value;
+                  });
+                },
+                onChangeEnd: (value) {
+                  if (disabled) return;
+                  setState(() {
+                    moving = false;
+                  });
+                  final newDuration = Duration(
+                      milliseconds:
+                          (value * songDuration.inMilliseconds).toInt());
+                  controller.seekTime(newDuration);
                 },
               );
-
-              // if (songDuration.inMilliseconds > 0) {
-              //   double progress =
-              //       snapshot.data!.inMilliseconds / songDuration.inMilliseconds;
-              //   return Slider(
-              //     activeColor: Colors.white,
-              //     value: moving ? sliderValue : progress,
-              //     onChangeStart: (value) {
-              //       setState(() {
-              //         moving = true;
-              //         sliderValue = value;
-              //       });
-              //     },
-              //     onChanged: (value) {
-              //       setState(() {
-              //         sliderValue = value;
-              //       });
-              //     },
-              //     onChangeEnd: (value) {
-              //       setState(() {
-              //         moving = false;
-              //       });
-              //       final newDuration = Duration(
-              //           milliseconds:
-              //               (value * songDuration.inMilliseconds).toInt());
-              //       controller.seekTime(newDuration);
-              //     },
-              //   );
-              // }
             }),
           ), // controls
 

@@ -55,6 +55,7 @@ dependencies:
   ffmpeg_kit_flutter_audio: ^6.0.3
   mime: ^1.0.5
   flutter_animate: ^4.5.0
+  rxdart: ^0.27.7
   
 
 
