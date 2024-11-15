@@ -23,6 +23,8 @@ class MusicController extends GetxController {
   final RxBool hasError = false.obs;
 
   final Rxn<MediaItem> song = Rxn<MediaItem>();
+  final Rx<Duration> currentSongDuration = Duration.zero.obs;
+
   final Rxn<PlaybackState> playbackState = Rxn<PlaybackState>();
 
   var textController = TextEditingController().obs;
@@ -218,7 +220,11 @@ class MusicController extends GetxController {
 
   void itemPlaying() {
     audioHandler.mediaItem.listen((item) {
+      if (item == null) return;
+      print("----- UPDATED SONG -----");
       song.value = item;
+      song.refresh();
+      currentSongDuration.value = item.duration ?? Duration.zero;
     });
   }
 
