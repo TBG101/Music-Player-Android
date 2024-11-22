@@ -5,7 +5,7 @@ import 'package:ffmpeg_kit_flutter_audio/session_state.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:musicplayer/controllers/MusicController.dart';
+import 'package:musicplayer/controllers/music_controller.dart';
 import 'package:musicplayer/services/task_quee.dart';
 import 'package:musicplayer/utils/notification_manager.dart';
 import 'package:musicplayer/utils/utils.dart';

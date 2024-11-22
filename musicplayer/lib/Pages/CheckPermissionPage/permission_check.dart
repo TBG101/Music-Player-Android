@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Home.dart';
-import 'package:musicplayer/controllers/MusicController.dart';
-import 'package:musicplayer/controllers/youtubeController.dart';
+import 'package:musicplayer/controllers/music_controller.dart';
+import 'package:musicplayer/controllers/youtube_controller.dart';
 import 'package:musicplayer/services/audioHandler.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';

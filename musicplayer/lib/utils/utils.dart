@@ -43,4 +43,10 @@ class Utils {
   static void deleteMusicUri(Uri uri) {
     File.fromUri(uri).deleteSync();
   }
+
+  static String formatDurationToMinutesAndSeconds(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds.remainder(60);
+    return "$minutes:${seconds.toString().padLeft(2, '0')}";
+  }
 }

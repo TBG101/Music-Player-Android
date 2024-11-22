@@ -4,7 +4,7 @@ import "package:get/get.dart";
 import "package:musicplayer/Pages/HomePage/Home.dart";
 import "package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart";
 import 'package:musicplayer/Pages/YoutubePage/video_list.dart';
-import "package:musicplayer/controllers/youtubeController.dart";
+import "package:musicplayer/controllers/youtube_controller.dart";
 
 class YoutubeHomePage extends StatelessWidget {
   YoutubeHomePage({super.key});
@@ -64,8 +64,11 @@ class YoutubeHomePage extends StatelessWidget {
             },
             searchYoutube: (text) async {
               // on submitted
-              print(text);
-              await controller.getSearchResults();
+              try {
+                await controller.getSearchResults();
+              } catch (e) {
+                Get.snackbar("Couldn't fetch data from youtube", e.toString());
+              }
               controller.update();
             },
           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:musicplayer/controllers/youtubeController.dart';
+import 'package:musicplayer/controllers/youtube_controller.dart';
 
 class YouTubeVid extends GetView<YoutubeController> {
   const YouTubeVid({

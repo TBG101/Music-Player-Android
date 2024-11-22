@@ -22,6 +22,8 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   late AndroidLoudnessEnhancer _loudnessEnhancer;
   final _playlist = ConcatenatingAudioSource(children: []);
 
+  bool isShuffle = false;
+
   AudioPlayerHandler() {
     initPlayer();
     playbackState.add(playbackState.value.copyWith(
@@ -37,8 +39,9 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   void initPlayer() {
     _loudnessEnhancer = AndroidLoudnessEnhancer();
     _loudnessEnhancer.setEnabled(true);
-    _loudnessEnhancer.setTargetGain(0.5);
+    // _loudnessEnhancer.setTargetGain(0.5);
     _player = AudioPlayer(
+      handleInterruptions: true,
       audioPipeline: AudioPipeline(
         androidAudioEffects: [
           _loudnessEnhancer,
@@ -89,10 +92,9 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
-  Future<void> skipToPrevious() {
+  Future<void> skipToPrevious() async {
     _player.seekToPrevious();
     _player.play();
-    return super.skipToPrevious();
   }
 
   @override
@@ -137,11 +139,14 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     _player.play();
   }
 
+  void switchShuffle() {
+    isShuffle = !isShuffle;
+    _player.setShuffleModeEnabled(isShuffle);
+  }
+
   Stream<dataAudioPosition> get audioPositionStream =>
       Rx.combineLatest2<Duration, Duration?, dataAudioPosition>(
           _player.positionStream, _player.durationStream, (position, duration) {
-        print("position: $position");
-        print("duration: $duration");
         return dataAudioPosition(
           duration: duration ?? Duration.zero,
           position: position,
@@ -150,8 +155,6 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {
-      print("received event");
-
       final playing = _player.playing;
       playbackState.add(playbackState.value.copyWith(
         controls: [

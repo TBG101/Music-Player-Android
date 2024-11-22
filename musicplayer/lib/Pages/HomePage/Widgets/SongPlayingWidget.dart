@@ -1,12 +1,10 @@
 import "dart:io";
 import "dart:ui";
-
 import "package:flutter/material.dart";
-import "package:flutter_animate/flutter_animate.dart";
 import "package:get/get.dart";
 import "package:musicplayer/Pages/HomePage/Widgets/song_full_screen.dart";
 import 'package:musicplayer/Pages/HomePage/Widgets/song_image_widget.dart';
-import "package:musicplayer/controllers/MusicController.dart";
+import "package:musicplayer/controllers/music_controller.dart";
 
 class SongPlayingWdiget extends StatefulWidget {
   final bool isFullScreen;
@@ -48,11 +46,10 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
         parent: animationController, curve: Curves.fastOutSlowIn));
 
     // initliaz color animation
-    animationColor = ColorTween(
-            begin: const Color.fromARGB(255, 51, 51, 51),
-            end: widgetPlayingColor)
-        .animate(CurvedAnimation(
-            parent: animationController, curve: Curves.fastOutSlowIn));
+    animationColor =
+        ColorTween(begin: const Color(0xFF000434), end: widgetPlayingColor)
+            .animate(CurvedAnimation(
+                parent: animationController, curve: Curves.fastOutSlowIn));
   }
 
   Widget artUri() {
@@ -67,12 +64,6 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
             path: File.fromUri(controller.song.value!.artUri!).absolute.path);
       });
     }
-  }
-
-
-
-  Widget fullScreenWidget() {
-    return SongFullScreen();
   }
 
   Widget dockedSongWidget() {
@@ -139,7 +130,8 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
         animation: animationController,
         builder: (context, child) {
           return ClipRRect(
-              borderRadius: BorderRadius.circular(borderRaduis),
+              borderRadius: BorderRadius.circular(
+                  borderRaduis * animationController.value),
               child: BackdropFilter(
                 filter: ImageFilter.blur(
                     sigmaX: 5 * animationController.value,
@@ -151,6 +143,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(color: animationColor.value),
                     child: Stack(
+                      fit: StackFit.expand,
                       alignment: Alignment.topCenter,
                       children: [
                         AnimatedBuilder(
@@ -165,7 +158,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
                             builder: (context, child) {
                               return Opacity(
                                   opacity: 1 - animation.value,
-                                  child: fullScreenWidget());
+                                  child: const SongFullScreen());
                             })
                       ],
                     )),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:metadata_god/metadata_god.dart';
-import 'package:musicplayer/Pages/CheckPermissionPage/permissionCheck.dart';
+import 'package:musicplayer/Pages/CheckPermissionPage/permission_check.dart';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 

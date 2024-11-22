@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/YoutubePage/widgets/YouTubeVid.dart';
-import 'package:musicplayer/controllers/youtubeController.dart';
+import 'package:musicplayer/controllers/youtube_controller.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class VideoList extends GetView<YoutubeController> {
@@ -15,10 +15,10 @@ class VideoList extends GetView<YoutubeController> {
               future: controller.findMusicRecomendation(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Text("error occured while fetching recommended");
+                  return const Text("error occured while fetching recommended");
                 }
                 if (snapshot.data == null) {
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 }
                 return ListView.builder(
                     itemCount: snapshot.data!.length,
