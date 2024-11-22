@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/expandable_screen.dart';
 import 'package:musicplayer/Pages/YoutubePage/youtubeHomePage.dart';
-import 'package:musicplayer/controllers/MusicController.dart';
-import 'package:musicplayer/controllers/youtubeController.dart';
+import 'package:musicplayer/controllers/music_controller.dart';
+import 'package:musicplayer/controllers/youtube_controller.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

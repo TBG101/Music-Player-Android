@@ -3,7 +3,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:musicplayer/controllers/youtubeController.dart';
+import 'package:musicplayer/controllers/youtube_controller.dart';
 import 'package:musicplayer/services/audioHandler.dart';
 import 'package:musicplayer/utils/utils.dart';
 import 'package:on_audio_query/on_audio_query.dart';
@@ -23,7 +23,6 @@ class MusicController extends GetxController {
   final RxBool hasError = false.obs;
 
   final Rxn<MediaItem> song = Rxn<MediaItem>();
-  final Rx<Duration> currentSongDuration = Duration.zero.obs;
 
   final Rxn<PlaybackState> playbackState = Rxn<PlaybackState>();
 
@@ -66,10 +65,6 @@ class MusicController extends GetxController {
 
   Future<void> initSavePath() async {
     savePath = await getApplicationDocumentsDirectory();
-  }
-
-  Rxn<MediaItem> getSongPlaying() {
-    return song;
   }
 
   Future<void> addListQuee() async {
@@ -198,8 +193,6 @@ class MusicController extends GetxController {
       } else {
         for (var index = 0; index < filteredList.length; index++) {
           var art = await artSetter(index, filteredList);
-          print(art.toString() +
-              " ------------------------------------------------------------");
           var item = MediaItem(
             id: filteredList[index].uri!,
             title: filteredList[index].title,
@@ -221,10 +214,9 @@ class MusicController extends GetxController {
   void itemPlaying() {
     audioHandler.mediaItem.listen((item) {
       if (item == null) return;
-      print("----- UPDATED SONG -----");
       song.value = item;
       song.refresh();
-      currentSongDuration.value = item.duration ?? Duration.zero;
+      
     });
   }
 

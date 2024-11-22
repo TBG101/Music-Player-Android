@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/song_image_widget.dart';
-import 'package:musicplayer/controllers/MusicController.dart';
+import 'package:musicplayer/controllers/music_controller.dart';
 import 'package:musicplayer/models/data_audio_position.dart';
+import 'package:musicplayer/utils/utils.dart';
 
 class SongFullScreen extends StatefulWidget {
   const SongFullScreen({super.key});
@@ -27,6 +30,7 @@ class _SongFullScreenState extends State<SongFullScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width - 50;
@@ -41,34 +45,48 @@ class _SongFullScreenState extends State<SongFullScreen> {
         children: [
           // back button
           Padding(
-            padding: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.only(bottom: 90),
             child: SizedBox(
               width: MediaQuery.of(context).size.width,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
+                alignment: Alignment.centerLeft,
                 children: [
                   IconButton(
+                      iconSize: 26,
                       onPressed: () {},
-                      icon: const Icon(Icons.arrow_back_ios_rounded))
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                      )),
+                  const Center(
+                      child: Text(
+                    "Now Playing",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ))
                 ],
               ),
             ),
           ),
-          SizedBox(
-            width: width * 0.8,
-            child: Align(
-              alignment: Alignment.center,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: Obx(
-                  () => SongImageWidget(
-                      path: getPath(), raduis: 15, height: 100, width: 100),
+
+          // song image
+          Padding(
+            padding: const EdgeInsets.only(bottom: 40),
+            child: SizedBox(
+              width: width * 0.95,
+              child: Align(
+                alignment: Alignment.center,
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Obx(
+                    () => SongImageWidget(
+                        path: getPath(), raduis: 5, height: 100, width: 100),
+                  ),
                 ),
               ),
             ),
           ),
 
+          // song title
           SizedBox(
             width: width,
             child: Obx(
@@ -86,9 +104,13 @@ class _SongFullScreenState extends State<SongFullScreen> {
             ),
           ),
 
-          Obx(() => Text(controller.song.value == null
-              ? "null"
-              : controller.song.value!.artist ?? "")),
+          // artist
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Obx(() => Text(controller.song.value == null
+                ? "null"
+                : controller.song.value!.artist ?? "")),
+          ),
 
           // slider for time control
           StreamBuilder<dataAudioPosition>(
@@ -97,12 +119,14 @@ class _SongFullScreenState extends State<SongFullScreen> {
                 position: const Duration(milliseconds: 0)),
             stream: controller.audioHandler.audioPositionStream,
             builder: ((context, snapshot) {
-              if (snapshot.hasError) {
-                return Text("Error: ${snapshot.error}");
+              if (snapshot.hasError) return Text("Error: ${snapshot.error}");
+
+              if (!snapshot.hasData) return const Text("data not available");
+
+              if (snapshot.data == null) {
+                return const Text("snapshot.data is null");
               }
-              if (!snapshot.hasData) {
-                return const Text("data not available");
-              }
+
               if (controller.song.value == null) {
                 return const Text(
                     "controller.song.value is null \nNo song selected");
@@ -119,63 +143,102 @@ class _SongFullScreenState extends State<SongFullScreen> {
               }
 
               songDuration.inMilliseconds;
-              return Slider(
-                activeColor: Colors.white,
-                value: moving ? sliderValue : progress,
-                onChangeStart: (value) {
-                  if (disabled) return;
-                  setState(() {
-                    moving = true;
-                    sliderValue = value;
-                  });
-                },
-                onChanged: (value) {
-                  if (disabled) return;
-                  setState(() {
-                    sliderValue = value;
-                  });
-                },
-                onChangeEnd: (value) {
-                  if (disabled) return;
-                  setState(() {
-                    moving = false;
-                  });
-                  final newDuration = Duration(
-                      milliseconds:
-                          (value * songDuration.inMilliseconds).toInt());
-                  controller.seekTime(newDuration);
-                },
+
+              String songDurationStr =
+                  Utils.formatDurationToMinutesAndSeconds(songDuration);
+
+              String songCurrentPositionStr =
+                  Utils.formatDurationToMinutesAndSeconds(
+                      snapshot.data!.position);
+              return FittedBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(songCurrentPositionStr,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white)),
+                    SizedBox(
+                      width: width * 0.9,
+                      child: Slider(
+                        activeColor: Colors.white,
+                        value: moving ? sliderValue : progress,
+                        onChangeStart: (value) {
+                          if (disabled) return;
+                          setState(() {
+                            moving = true;
+                            sliderValue = value;
+                          });
+                        },
+                        onChanged: (value) {
+                          if (disabled) return;
+                          setState(() {
+                            sliderValue = value;
+                          });
+                        },
+                        onChangeEnd: (value) {
+                          if (disabled) return;
+                          setState(() {
+                            moving = false;
+                          });
+                          final newDuration = Duration(
+                              milliseconds:
+                                  (value * songDuration.inMilliseconds)
+                                      .toInt());
+                          controller.seekTime(newDuration);
+                        },
+                      ),
+                    ),
+                    Text(songDurationStr,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white)),
+                  ],
+                ),
               );
             }),
-          ), // controls
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              IconButton(
-                  onPressed: () {
-                    controller.audioHandler.skipToPrevious();
-                  },
-                  icon: const Icon(Icons.skip_previous_rounded)),
-              Obx(
-                () => IconButton(
+          ),
+          
+          // controls
+          Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
                     onPressed: () {
-                      controller.playbackState.value!.playing
-                          ? controller.audioHandler.pause()
-                          : controller.audioHandler.play();
+                      controller.audioHandler.switchShuffle();
                     },
-                    icon: Icon(controller.playbackState.value!.playing
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded)),
-              ),
-              IconButton(
-                  onPressed: () {
-                    controller.audioHandler.skipToNext();
-                  },
-                  icon: const Icon(Icons.skip_next_rounded))
-            ],
-          )
+                    icon: const Icon(Icons.shuffle_rounded)),
+                IconButton(
+                    iconSize: 40,
+                    onPressed: () {
+                      controller.audioHandler.skipToPrevious();
+                    },
+                    icon: const Icon(Icons.skip_previous_rounded)),
+                Obx(
+                  () => IconButton(
+                      iconSize: 40,
+                      onPressed: () {
+                        controller.playbackState.value!.playing
+                            ? controller.audioHandler.pause()
+                            : controller.audioHandler.play();
+                      },
+                      icon: Icon(controller.playbackState.value!.playing
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded)),
+                ),
+                IconButton(
+                    iconSize: 40,
+                    onPressed: () {
+                      controller.audioHandler.skipToNext();
+                    },
+                    icon: const Icon(Icons.skip_next_rounded)),
+                IconButton(
+                    onPressed: () {}, icon: const Icon(Icons.repeat_rounded)),
+              ],
+            ),
+          ),
         ],
       ),
     );
