@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -94,13 +95,27 @@ class MusicController extends GetxController {
     await audioHandler.updateQueue(lst);
   }
 
-  void addNewSong(String path) {
-    _audioQuery.scanMedia(path).then((value) {
-      if (value == true) {
-        queeUpdated.value = false;
+  Future<void> addNewSong() async {
+    List<SongModel> tempList = <SongModel>[];
+    List<SongModel> x = await _audioQuery.querySongs(
+      sortType: SongSortType.DATE_ADDED,
+      orderType: OrderType.DESC_OR_GREATER,
+      uriType: UriType.EXTERNAL,
+      ignoreCase: true,
+    );
+
+    for (var element in x) {
+      if (element.duration! > 60000) {
+        tempList.add(element);
       }
-    });
-    getSongs();
+    }
+    filteredList.clear();
+    musicList.clear();
+
+    musicList.addAll(tempList);
+    musicList.refresh();
+    queeUpdated.value = false;
+    update();
   }
 
   Future<void> getSongs() async {
@@ -173,6 +188,7 @@ class MusicController extends GetxController {
     visible.value = true;
     var lst = <MediaItem>[];
     var text = textController.value.text;
+
     if (queeUpdated.isFalse) {
       queeUpdated.value = true;
       if (text.isEmpty) {
@@ -186,7 +202,6 @@ class MusicController extends GetxController {
               artUri: art,
               duration: Duration(milliseconds: musicList[index].duration ?? 0),
               extras: {"loadThumbnailUri": true});
-
           lst.add(item);
         }
         await audioHandler.updateQueue(lst);
@@ -216,7 +231,6 @@ class MusicController extends GetxController {
       if (item == null) return;
       song.value = item;
       song.refresh();
-      
     });
   }
 
