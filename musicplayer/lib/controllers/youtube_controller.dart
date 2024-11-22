@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/controllers/music_controller.dart';
-import 'package:musicplayer/services/task_quee.dart';
+import 'package:musicplayer/models/task_quee.dart';
 import 'package:musicplayer/utils/notification_manager.dart';
 import 'package:musicplayer/utils/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -41,11 +41,10 @@ class YoutubeController extends GetxController {
 
   Future<void> getSearchResults() async {
     textController.refresh();
-    videos.value =
+    final result =
         await (yt.search(textController.value.text).asStream()).first;
+    videos.value = result;
     videos.refresh();
-    print(videos.value.toString());
-    print(videos.value?.length.toString());
   }
 
   Future<RelatedVideosList?> findMusicRecomendation(
@@ -72,20 +71,6 @@ class YoutubeController extends GetxController {
 
     downloadQuee.addTask(() => {downloadVid(myVideo!)});
     downloadQuee.startQuee();
-
-    /* old code
-    videoQuee.add(myVideo);
-
-    downloadingVideo = true;
-
-    if (downloadingVideo) return;
-
-    while (downloadingVideo == true && videoQuee.isNotEmpty) {
-      final myVideo = videoQuee.last;
-      await downloadVid(myVideo);
-    }
-    downloadingVideo = false;
-    */
   }
 
   Future<void> downloadVid(Video myVideo) async {
@@ -102,7 +87,8 @@ class YoutubeController extends GetxController {
       final audioStream = yt.videos.streamsClient.get(audio);
 
       final filePath =
-          "${saveDownloadPath.value!}/${Utils.checkVideoTitle('${myVideo.title}.webm')}";
+          "${saveDownloadPath.value!}/${Utils.sanitizeFileName('${myVideo.title}.webm')}";
+
       final webmFile = File(filePath);
 
       // Delete the file if exists.
@@ -149,10 +135,12 @@ class YoutubeController extends GetxController {
 
       output.close();
       final c = Get.find<MusicController>();
+
       final imgBytes =
           (await http.get(Uri.parse(myVideo.thumbnails.maxResUrl))).bodyBytes;
+
       final imgPath =
-          "${c.savePath.path}/${Utils.checkVideoTitle(myVideo.title)}.jpg";
+          "${c.savePath.path}/${Utils.sanitizeFileName(myVideo.title)}.jpg";
 
       if (await File(imgPath).exists() == false) {
         debugPrint("SAVING IMG");
@@ -160,12 +148,13 @@ class YoutubeController extends GetxController {
       }
 
       final mp3File = File(
-          "${saveDownloadPath.value!}/${Utils.checkVideoTitle('${myVideo.title}.mp3')}");
+          "${saveDownloadPath.value!}/${Utils.sanitizeFileName('${myVideo.title}.mp3')}");
 
       notificationManager.showNotificationInfo(
           "Merging to MP4 ${myVideo.title}", currentNotificationId);
 
       Completer<bool> complete = Completer<bool>();
+
       FFmpegKit.executeAsync(
         "-y -i '${webmFile.path}' -vn -f mp3 '${mp3File.path}'",
         (session) async {
@@ -202,8 +191,7 @@ class YoutubeController extends GetxController {
           "Download Finished", currentNotificationId);
 
       // recheck all the files
-      c.addNewSong(mp3File.path);
-      c.rescanFiles();
+      c.addNewSong();
     } catch (e) {
       notificationManager.showNotificationInfo(
           "Failed to download", currentNotificationId,

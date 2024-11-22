@@ -28,16 +28,15 @@ class Utils {
                 data: imgBytes, mimeType: lookupMimeType(imgPath) ?? "")));
   }
 
-  static String checkVideoTitle(String title) {
-    return title
-        .replaceAll(r'\', '')
-        .replaceAll('/', '')
-        .replaceAll('*', '')
-        .replaceAll('?', '')
-        .replaceAll('"', '')
-        .replaceAll('<', '')
-        .replaceAll('>', '')
-        .replaceAll('|', '');
+  static String sanitizeFileName(String input) {
+    final invalidChars = RegExp(r'[<>:"/\\|?*]');
+    String sanitized = input.replaceAll(invalidChars, '_');
+
+    if (sanitized.length > 255) {
+      sanitized = sanitized.substring(0, 255);
+    }
+
+    return sanitized;
   }
 
   static void deleteMusicUri(Uri uri) {
