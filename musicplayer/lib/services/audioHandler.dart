@@ -26,6 +26,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
 
   AudioPlayerHandler() {
     initPlayer();
+
     playbackState.add(playbackState.value.copyWith(
       controls: [MediaControl.play],
       processingState: AudioProcessingState.loading,
@@ -60,6 +61,15 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     } catch (e) {
       print("Error: $e");
     }
+  }
+
+  @override
+  Future<void> addQueueItem(MediaItem mediaItem) async {
+    final audioSource =
+        AudioSource.uri(Uri.parse(mediaItem.id), tag: mediaItem);
+    _playlist.add(audioSource);
+    final newQueue = queue.value..add(mediaItem);
+    queue.add(newQueue);
   }
 
   @override

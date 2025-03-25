@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/controllers/music_controller.dart';
-import 'package:musicplayer/services/task_quee.dart';
+import 'package:musicplayer/models/task_quee.dart';
 import 'package:musicplayer/utils/notification_manager.dart';
 import 'package:musicplayer/utils/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -41,11 +41,10 @@ class YoutubeController extends GetxController {
 
   Future<void> getSearchResults() async {
     textController.refresh();
-    videos.value =
+    final result =
         await (yt.search(textController.value.text).asStream()).first;
+    videos.value = result;
     videos.refresh();
-    print(videos.value.toString());
-    print(videos.value?.length.toString());
   }
 
   Future<RelatedVideosList?> findMusicRecomendation(
