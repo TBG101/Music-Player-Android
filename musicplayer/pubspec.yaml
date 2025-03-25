@@ -56,6 +56,8 @@ dependencies:
   mime: ^1.0.5
   flutter_animate: ^4.5.0
   rxdart: ^0.27.7
+  flutter_native_splash: ^2.4.0
+
   
 
 
@@ -85,7 +87,6 @@ flutter:
     - lib/assets/img/NotFound.jpg
     - lib/assets/search.png
     - lib/assets/img/download.png
-    - lib/assets/sound/uwu.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

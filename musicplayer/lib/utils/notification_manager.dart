@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 
 class NotificationManager {
   // singleton
+  NotificationManager._internal();
   static final NotificationManager _instance = NotificationManager._internal();
   factory NotificationManager() => _instance;
-  NotificationManager._internal();
 
   final __notification = AwesomeNotifications();
+  var lastNotificationTime = DateTime.now();
 
   void showNotificationInfo(String title, int notificationId,
       {String? body, bool? error}) {
@@ -26,6 +27,12 @@ class NotificationManager {
   }
 
   void notificationUpdate(String title, int progress, int notificationId) {
+    // Basically update a notification after a certain time
+    // to avoid spamming the notification bar
+    if (lastNotificationTime.difference(DateTime.now()).inMilliseconds < 500) {
+      return;
+    }
+
     __notification.createNotification(
       content: NotificationContent(
           id: notificationId,
