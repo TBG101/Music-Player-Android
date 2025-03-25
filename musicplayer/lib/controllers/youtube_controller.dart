@@ -14,6 +14,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class YoutubeController extends GetxController {
+  final c = Get.find<MusicController>();
   var notificationManager = NotificationManager();
 
   var loading = false.obs;
@@ -33,7 +34,6 @@ class YoutubeController extends GetxController {
 
   @override
   void onInit() async {
-    // TODO: implement onInit
     super.onInit();
     prefs = await SharedPreferences.getInstance();
     saveDownloadPath.value = prefs.getString('downloadPath');
@@ -70,146 +70,130 @@ class YoutubeController extends GetxController {
         myVideo == null ||
         saveDownloadPath.value == null) return;
 
-    downloadQuee.addTask(() => {downloadVid(myVideo!)});
+    downloadQuee.addTask(() => {downloadVideo(myVideo!)});
     downloadQuee.startQuee();
-
-    /* old code
-    videoQuee.add(myVideo);
-
-    downloadingVideo = true;
-
-    if (downloadingVideo) return;
-
-    while (downloadingVideo == true && videoQuee.isNotEmpty) {
-      final myVideo = videoQuee.last;
-      await downloadVid(myVideo);
-    }
-    downloadingVideo = false;
-    */
   }
 
-  Future<void> downloadVid(Video myVideo) async {
+  Future<void> downloadVideo(Video myVideo) async {
     final currentNotificationId = __notificationId++;
     try {
-      final id = myVideo.id;
       notificationManager.notificationUpdate(
           "fetching data ${myVideo.title}", 0, currentNotificationId);
 
-      final manifest = await yt.videos.streamsClient.getManifest(id);
-      final audiostreamsInfo = manifest.audioOnly;
+      final manifest = await yt.videos.streamsClient.getManifest(myVideo.id);
+      final audioStreamInfo = manifest.audioOnly.withHighestBitrate();
+      final audioStream = yt.videos.streamsClient.get(audioStreamInfo);
 
-      final audio = audiostreamsInfo.withHighestBitrate();
-      final audioStream = yt.videos.streamsClient.get(audio);
+      final webmFile = await _prepareFile(myVideo.title, 'webm');
+      final fileLength = audioStreamInfo.size.totalBytes;
 
-      final filePath =
-          "${saveDownloadPath.value!}/${Utils.checkVideoTitle('${myVideo.title}.webm')}";
-      final webmFile = File(filePath);
+      await _downloadAudioStream(audioStream, webmFile, fileLength,
+          myVideo.title, currentNotificationId);
 
-      // Delete the file if exists.
-      if (webmFile.existsSync()) {
-        webmFile.deleteSync();
-      }
+      final mp3File =
+          await _convertToMp3(webmFile, myVideo.title, currentNotificationId);
 
-      //open the file
-      var output = webmFile.openWrite(mode: FileMode.writeOnlyAppend);
+      final imgPath = await _saveThumbnail(myVideo);
 
-      // Track the file download status.
-      final fileLength = audio.size.totalBytes;
-      var dataDownloaded = 0;
-
-      // Create the message and set the cursor position.
-      final msg = 'Downloading ${myVideo.title}.${audio.container.name}';
-      stdout.writeln(msg);
-      var timePassed = DateTime.now();
-      // Listen for data received.
-      await for (final data in audioStream) {
-        // Keep track of the current downloaded data.
-        dataDownloaded += data.length;
-        final progress = ((dataDownloaded / fileLength) * 100).ceil();
-        if (DateTime.now()
-            .isAfter(timePassed.add(const Duration(seconds: 1)))) {
-          notificationManager.notificationUpdate(
-              msg, progress, currentNotificationId);
-          // notificationUpdate("downloading ${myVideo.title}", progress);
-          timePassed = DateTime.now();
-        }
-
-        // Write to file.
-        output.add(data);
-      }
-      if (dataDownloaded < fileLength) {
-        print("here");
-        await output.close();
-        notificationManager.showNotificationInfo(
-            "Failed to download", currentNotificationId,
-            body: "Download failed");
-        webmFile.delete();
-        return;
-      }
-
-      output.close();
-      final c = Get.find<MusicController>();
-      final imgBytes =
-          (await http.get(Uri.parse(myVideo.thumbnails.maxResUrl))).bodyBytes;
-      final imgPath =
-          "${c.savePath.path}/${Utils.checkVideoTitle(myVideo.title)}.jpg";
-
-      if (await File(imgPath).exists() == false) {
-        debugPrint("SAVING IMG");
-        File(imgPath).writeAsBytes(imgBytes);
-      }
-
-      final mp3File = File(
-          "${saveDownloadPath.value!}/${Utils.checkVideoTitle('${myVideo.title}.mp3')}");
-
-      notificationManager.showNotificationInfo(
-          "Merging to MP4 ${myVideo.title}", currentNotificationId);
-
-      Completer<bool> complete = Completer<bool>();
-      FFmpegKit.executeAsync(
-        "-y -i '${webmFile.path}' -vn -f mp3 '${mp3File.path}'",
-        (session) async {
-          final x = await session.getState();
-          if (x == SessionState.running) return;
-          if (x == SessionState.completed) {
-            print("complected");
-            complete.complete(true);
-          } else if (x == SessionState.failed) {
-            complete.completeError(false);
-            print(("error mergin"));
-          }
-        },
-        (log) {
-          print(log.getMessage().toString());
-        },
-      );
-
-      final bool res = await complete.future;
-
-      if (res == false) {
-        throw Exception("couldn't convert to mp3 file with ffmpeg");
-      }
-
-      if (webmFile.existsSync()) {
-        webmFile.delete();
-      }
-
-      Utils.writeMetaData(mp3File, myVideo, imgBytes, imgPath);
+      Utils.writeMetaData(
+          mp3File, myVideo, await File(imgPath).readAsBytes(), imgPath);
 
       Utils.androidScanMediaTrigger(mp3File.path);
 
       notificationManager.showNotificationInfo(
           "Download Finished", currentNotificationId);
-
-      // recheck all the files
-      c.addNewSong(mp3File.path);
-      c.rescanFiles();
     } catch (e) {
       notificationManager.showNotificationInfo(
           "Failed to download", currentNotificationId,
           body: e.toString());
     }
     videoQuee.removeLast();
+    
+  }
+
+  Future<File> _prepareFile(String title, String extension) async {
+    final filePath =
+        "${saveDownloadPath.value!}/${Utils.checkVideoTitle('$title.$extension')}";
+    final file = File(filePath);
+
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+
+    return file;
+  }
+
+  Future<void> _downloadAudioStream(Stream<List<int>> audioStream,
+      File webmFile, int fileLength, String title, int notificationId) async {
+    final output = webmFile.openWrite(mode: FileMode.writeOnlyAppend);
+    var dataDownloaded = 0;
+    final msg = 'Downloading $title.webm';
+    var timePassed = DateTime.now();
+
+    await for (final data in audioStream) {
+      dataDownloaded += data.length;
+      final progress = ((dataDownloaded / fileLength) * 100).ceil();
+
+      if (DateTime.now().isAfter(timePassed.add(const Duration(seconds: 1)))) {
+        notificationManager.notificationUpdate(msg, progress, notificationId);
+        timePassed = DateTime.now();
+      }
+
+      output.add(data);
+    }
+
+    await output.close();
+
+    if (dataDownloaded < fileLength) {
+      notificationManager.showNotificationInfo(
+          "Failed to download", notificationId,
+          body: "Download failed");
+      webmFile.deleteSync();
+      throw Exception("Incomplete download");
+    }
+  }
+
+  Future<File> _convertToMp3(
+      File webmFile, String title, int notificationId) async {
+    final mp3File = await _prepareFile(title, 'mp3');
+    notificationManager.showNotificationInfo(
+        "Merging to MP3 $title", notificationId);
+
+    final completer = Completer<bool>();
+    FFmpegKit.executeAsync(
+      "-y -i '${webmFile.path}' -vn -f mp3 '${mp3File.path}'",
+      (session) async {
+        final state = await session.getState();
+        if (state == SessionState.completed) {
+          completer.complete(true);
+        } else if (state == SessionState.failed) {
+          completer.complete(false);
+        }
+      },
+      (log) => print(log.getMessage()),
+    );
+
+    final success = await completer.future;
+    if (!success) {
+      throw Exception("Couldn't convert to mp3 file with ffmpeg");
+    }
+
+    webmFile.deleteSync();
+    return mp3File;
+  }
+
+  Future<String> _saveThumbnail(Video myVideo) async {
+    final c = Get.find<MusicController>();
+    final imgBytes =
+        (await http.get(Uri.parse(myVideo.thumbnails.maxResUrl))).bodyBytes;
+    final imgPath =
+        "${c.savePath.path}/${Utils.checkVideoTitle(myVideo.title)}.jpg";
+
+    if (!await File(imgPath).exists()) {
+      File(imgPath).writeAsBytesSync(imgBytes);
+    }
+
+    return imgPath;
   }
 
   void setSavePath(String? newValue) async {
@@ -218,5 +202,11 @@ class YoutubeController extends GetxController {
 
     debugPrint(newValue);
     Permission.manageExternalStorage.status.then((value) => print(value));
+  }
+
+  @override
+  void onClose() {
+    yt.close();
+    super.onClose();
   }
 }

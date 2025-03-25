@@ -14,67 +14,51 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final MusicController controller =
-      Get.find<MusicController>(); // music GetX controller
-  final YoutubeController ytController =
-      Get.find<YoutubeController>(); // music GetX controller
+  final MusicController controller = Get.find<MusicController>();
+  final YoutubeController ytController = Get.find<YoutubeController>();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  bool hasPermission = false;
-  var scaffoldKey = GlobalKey<ScaffoldState>();
-  DateTime timeBackPressed = DateTime.now();
+  Alignment _getBoxAlignment() => controller.song.value == null
+      ? const Alignment(1.25, 1.25)
+      : Alignment.bottomCenter;
 
-  Alignment boxAligment() {
-    if (controller.song.value == null) {
-      return const Alignment(1.25, 1.25);
-    } else {
-      return Alignment.bottomCenter;
-    }
+  String _getArtistName(int index) {
+    final list = controller.textController.value.text.isEmpty
+        ? controller.musicList
+        : controller.filteredList;
+    final artist = list[index].artist;
+    return (artist == "<unknown>" || artist == null) ? "No Artist" : artist;
   }
 
-  String artistSetter(int index) {
-    if (controller.textController.value.text.isEmpty) {
-      if (controller.musicList[index].artist == "<unknown>") return "No Artist";
-      return controller.musicList[index].artist ?? "";
-    } else {
-      if (controller.filteredList[index].artist == "<unknown>") {
-        return "No Artist";
-      }
-      return controller.filteredList[index].artist ?? "";
-    }
-  }
-
-  RichText titleWidget() {
+  RichText _buildTitleWidget() {
     return RichText(
       overflow: TextOverflow.clip,
       textAlign: TextAlign.end,
       textDirection: TextDirection.rtl,
-      softWrap: true,
       maxLines: 1,
       text: const TextSpan(
         text: 'My ',
         style: TextStyle(color: Colors.white, fontSize: 23),
-        children: <TextSpan>[
+        children: [
           TextSpan(
-              text: 'Music',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, color: Colors.purpleAccent)),
+            text: 'Music',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.purpleAccent),
+          ),
         ],
       ),
-      textScaler: const TextScaler.linear(1),
     );
   }
 
-  PreferredSizeWidget appbarWdget() {
+  PreferredSizeWidget _buildAppBar() {
     return PreferredSize(
-        preferredSize: const Size(double.infinity, 65),
-        child: SafeArea(
-            child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.transparent,
-          ),
+      preferredSize: const Size(double.infinity, 65),
+      child: SafeArea(
+        child: Container(
+          color: Colors.transparent,
           alignment: Alignment.center,
           child: AnimationSearchBar(
-            onChanged: (text) {
+            onChanged: (_) {
               controller.queeUpdate();
               controller.filterList();
             },
@@ -94,96 +78,80 @@ class _HomeState extends State<Home> {
                 const TextStyle(color: Colors.white, fontSize: 18),
             searchTextEditingController: controller.textController.value,
             horizontalPadding: 5,
-            centerWidget: titleWidget(),
-            onDrawerOpen: () {
-              scaffoldKey.currentState?.openDrawer();
-            },
+            centerWidget: _buildTitleWidget(),
+            onDrawerOpen: () => scaffoldKey.currentState?.openDrawer(),
           ),
-        )));
+        ),
+      ),
+    );
   }
 
-  Widget listViewBuilderWidget(int index) {
-    if (controller.textController.value.text.isEmpty &&
-        index == controller.musicList.length) {
-      return const SizedBox(
-        height: 80,
-      );
+  Widget _buildListTile(int index) {
+    final list = controller.textController.value.text.isEmpty
+        ? controller.musicList
+        : controller.filteredList;
+
+    if (index == list.length) {
+      return const SizedBox(height: 80);
     }
-    if (controller.textController.value.text.isNotEmpty &&
-        index == controller.filteredList.length) {
-      return const SizedBox(
-        height: 80,
-      );
-    }
+
     return ListTile(
-        onTap: () async {
-          controller.playSong(index);
-        },
-        onLongPress: () {
-          Get.dialog(Dialog(
-            child: SizedBox(
-              height: 140,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Text(
-                      controller.textController.value.text.isEmpty
-                          ? controller.musicList[index].title
-                          : controller.filteredList[index].title,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      title: const Text("Delete song"),
-                      onTap: () {
-                        controller.deleteSong(index);
-                      },
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ));
-        },
-        title: Text(controller.textController.value.text.isEmpty
-            ? controller.musicList[index].title
-            : controller.filteredList[index].title),
-        subtitle: Text(artistSetter(index)),
-        dense: false,
-        leading: controller.artWorkGetter(index));
-  }
-
-  SafeArea drawerList() {
-    return SafeArea(
-        child: Padding(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => YoutubeHomePage()));
-            },
-            child: const SizedBox(
-              width: double.infinity,
-              child: Padding(
-                padding: EdgeInsets.all(12.0),
-                child: Text(
-                  "YouTube",
-                  style: TextStyle(fontSize: 18),
-                ),
+      onTap: () => controller.playSong(index),
+      onLongPress: () {
+        Get.dialog(Dialog(
+          child: SizedBox(
+            height: 140,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Text(
+                    list[index].title,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    title: const Text("Delete song"),
+                    onTap: () => controller.deleteSong(index),
+                  ),
+                ],
               ),
             ),
           ),
-          const Divider(),
-          const Spacer(),
-          const Divider(),
-          SizedBox(
-            width: double.infinity,
-            child: InkWell(
+        ));
+      },
+      title: Text(list[index].title),
+      subtitle: Text(_getArtistName(index)),
+      leading: controller.artWorkGetter(index),
+    );
+  }
+
+  Widget _buildDrawer() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            InkWell(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => YoutubeHomePage()),
+              ),
+              child: const SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text(
+                    "YouTube",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+            ),
+            const Divider(),
+            const Spacer(),
+            const Divider(),
+            InkWell(
               onTap: () {
                 if (controller.doneInit.isTrue) {
                   controller.audioHandler.stop();
@@ -193,79 +161,75 @@ class _HomeState extends State<Home> {
                 }
               },
               child: const Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Text(
-                    "Rescan Files ?",
-                    style: TextStyle(fontSize: 18),
-                  )),
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  "Rescan Files?",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      drawer: Drawer(
-        child: drawerList(),
-      ),
+      drawer: Drawer(child: _buildDrawer()),
       body: GetBuilder<MusicController>(
-          init: controller,
-          builder: (controller) {
-            return SafeArea(
-                child: controller.doneInit.isFalse
-                    ? Center(
-                        child: Obx(() => Text(
-                            "${controller.musicCountcurrent}/${controller.musicCount}")))
-                    : controller.hasError.isTrue
-                        ? const Text("ERROR")
-                        : controller.musicList.isEmpty
-                            ? const Center(
-                                child: CircularProgressIndicator(),
-                              )
-                            : Stack(
-                                children: [
-                                  Column(
-                                    children: [
-                                      Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 5),
-                                          child: appbarWdget()),
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height -
-                                                95,
-                                        child: ListView.builder(
-                                          itemCount: controller.textController
-                                                  .value.text.isEmpty
-                                              ? controller.musicList.length + 1
-                                              : controller.filteredList.length +
-                                                  1,
-                                          itemBuilder: (context, index) {
-                                            return listViewBuilderWidget(index);
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Obx(() {
-                                    return Visibility(
-                                      visible: controller.visible.value,
-                                      child: AnimatedAlign(
-                                        curve: Curves.ease,
-                                        alignment: boxAligment(),
-                                        duration:
-                                            const Duration(milliseconds: 500),
-                                        child: const ExpandableSongScreen(),
-                                      ),
-                                    );
-                                  })
-                                ],
-                              ));
-          }),
+        init: controller,
+        builder: (controller) {
+          if (controller.doneInit.isFalse) {
+            return Center(
+              child: Obx(() => Text(
+                  "${controller.musicCountcurrent}/${controller.musicCount}")),
+            );
+          }
+
+          if (controller.hasError.isTrue) {
+            return const Center(child: Text("ERROR"));
+          }
+
+          if (controller.musicList.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: _buildAppBar(),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: controller.textController.value.text.isEmpty
+                          ? controller.musicList.length + 1
+                          : controller.filteredList.length + 1,
+                      itemBuilder: (context, index) => _buildListTile(index),
+                    ),
+                  ),
+                ],
+              ),
+              Obx(() {
+                return Visibility(
+                  visible: controller.visible.value,
+                  child: AnimatedAlign(
+                    curve: Curves.ease,
+                    alignment: _getBoxAlignment(),
+                    duration: const Duration(milliseconds: 500),
+                    child: const ExpandableSongScreen(),
+                  ),
+                );
+              }),
+            ],
+          );
+        },
+      ),
     );
   }
 }

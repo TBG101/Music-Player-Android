@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:musicplayer/Pages/CheckPermissionPage/permission_check.dart';
@@ -6,9 +7,9 @@ import 'package:musicplayer/Pages/CheckPermissionPage/permission_check.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final wigetBindidng = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: wigetBindidng);
   MetadataGod.initialize();
-
   await AwesomeNotifications().initialize(
       // set the icon to null if you want to use the default app icon
       null,

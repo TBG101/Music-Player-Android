@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Home.dart';
 import 'package:musicplayer/controllers/music_controller.dart';
@@ -51,7 +52,13 @@ class _PermissionCheckState extends State<PermissionCheck> {
       Get.put<AudioPlayerHandler>(await initAudioService(), permanent: true);
       Get.put(MusicController(), permanent: true); // music GetX controller
       Get.put(YoutubeController()); // youtube GetX controller
-      Get.off(const Home());
+
+      Get.off(
+        const Home(),
+      );
+    } else {
+      // remove the splash
+      FlutterNativeSplash.remove();
     }
   }
 
@@ -68,7 +75,7 @@ class _PermissionCheckState extends State<PermissionCheck> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, checkPermission);
+    Future.delayed(const Duration(milliseconds: 100), checkPermission);
   }
 
   @override

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/controllers/youtube_controller.dart';
 import 'package:musicplayer/services/audioHandler.dart';
@@ -42,6 +43,7 @@ class MusicController extends GetxController {
   @override
   void onReady() async {
     super.onReady();
+    FlutterNativeSplash.remove();
     await initSavePath();
     getSongs().then((value) => update());
     getState();
@@ -216,7 +218,6 @@ class MusicController extends GetxController {
       if (item == null) return;
       song.value = item;
       song.refresh();
-      
     });
   }
 
@@ -273,17 +274,18 @@ class MusicController extends GetxController {
   }
 
   Widget artWorkGetter(int index) {
-    var songs = <SongModel>[];
+    late int songId;
     if (textController.value.text.isEmpty) {
-      songs = musicList;
+      songId = musicList[index].id;
     } else {
-      songs = filteredList;
+      songId = filteredList[index].id;
     }
 
     // artwork widget in Home Page
     return QueryArtworkWidget(
       controller: _audioQuery,
-      id: songs[index].id,
+      id: songId,
+      format: ArtworkFormat.JPEG,
       type: ArtworkType.AUDIO,
       nullArtworkWidget: ClipRRect(
         borderRadius: BorderRadius.circular(90),
@@ -295,6 +297,25 @@ class MusicController extends GetxController {
           ),
         ),
       ),
+    );
+  }
+
+  Future<Uint8List?> getArtAsUint8List(int index) {
+    late int songId;
+    if (textController.value.text.isEmpty) {
+      songId = musicList[index].id;
+    } else {
+      songId = filteredList[index].id;
+    }
+
+    // artwork widget in Home Page
+    return _audioQuery.queryArtwork(
+      songId,
+      ArtworkType.AUDIO,
+      format: ArtworkFormat.JPEG,
+      size: 200,
+      quality: 300,
+      
     );
   }
 

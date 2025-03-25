@@ -11,7 +11,7 @@ class ExpandableSongScreen extends StatefulWidget {
 class _ExpandableSongScreenState extends State<ExpandableSongScreen>
     with SingleTickerProviderStateMixin {
   final _sheet = GlobalKey();
-  final _controller = DraggableScrollableController();
+  final _draggableScrollableController = DraggableScrollableController();
   late final AnimationController animationController;
 
   DraggableScrollableSheet get sheet =>
@@ -20,7 +20,7 @@ class _ExpandableSongScreenState extends State<ExpandableSongScreen>
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_onChanged);
+    _draggableScrollableController.addListener(_onChanged);
     animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 500));
 
@@ -28,7 +28,7 @@ class _ExpandableSongScreenState extends State<ExpandableSongScreen>
   }
 
   void _onChanged() {
-    final currentSize = _controller.size;
+    final currentSize = _draggableScrollableController.size;
     animationController.value = 1 - currentSize;
     print(animationController.value);
     if (currentSize <= 0.05) {
@@ -48,16 +48,17 @@ class _ExpandableSongScreenState extends State<ExpandableSongScreen>
   void _hide() => _animateSheet(sheet.minChildSize);
 
   void _animateSheet(double size) {
-    _controller.animateTo(
-      size,
-      duration: const Duration(milliseconds: 50),
-      curve: Curves.fastOutSlowIn,
-    );
+    // _draggableScrollableController.animateTo(
+    //   size,
+    //   duration: const Duration(milliseconds: 50),
+    //   curve: Curves.fastOutSlowIn,
+    // );
+    _draggableScrollableController.jumpTo(size);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _draggableScrollableController.dispose();
     super.dispose();
   }
 
@@ -70,7 +71,7 @@ class _ExpandableSongScreenState extends State<ExpandableSongScreen>
       expand: true,
       snap: true,
       snapSizes: const [0.09, 1],
-      controller: _controller,
+      controller: _draggableScrollableController,
       builder: (BuildContext context, ScrollController scrollController) {
         return SingleChildScrollView(
             controller: scrollController,
