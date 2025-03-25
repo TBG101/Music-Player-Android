@@ -34,6 +34,8 @@ class MusicController extends GetxController {
 
   var queeUpdated = true.obs;
 
+  var lastFilterTime = DateTime.now();
+
   @override
   void onInit() async {
     super.onInit();
@@ -106,6 +108,9 @@ class MusicController extends GetxController {
   }
 
   Future<void> getSongs() async {
+    // this should change
+    // we're checking if this is the first time the app is running by checking if the NotFound.jpg exists
+    // if it doesn't exist, we're going to save all the album arts
     bool firstCall = await File("${savePath.path}/NotFound.jpg").exists();
     print(firstCall);
     try {
@@ -151,8 +156,10 @@ class MusicController extends GetxController {
   }
 
   Future<void> filterList() async {
-    filteredList.clear();
+    if (lastFilterTime.difference(DateTime.now()).inMilliseconds < 500) return;
+    lastFilterTime = DateTime.now();
 
+    filteredList.clear();
     var text = textController.value.text;
 
     if (text.isNotEmpty) {
@@ -209,7 +216,6 @@ class MusicController extends GetxController {
         await audioHandler.updateQueue(lst);
       }
     }
-
     audioHandler.skipToQueueItem(index);
   }
 
@@ -273,6 +279,7 @@ class MusicController extends GetxController {
     debugPrint("done");
   }
 
+  @Deprecated('Use [getArtAsUint8List]')
   Widget artWorkGetter(int index) {
     late int songId;
     if (textController.value.text.isEmpty) {
@@ -285,7 +292,6 @@ class MusicController extends GetxController {
     return QueryArtworkWidget(
       controller: _audioQuery,
       id: songId,
-      format: ArtworkFormat.JPEG,
       type: ArtworkType.AUDIO,
       nullArtworkWidget: ClipRRect(
         borderRadius: BorderRadius.circular(90),
@@ -315,7 +321,6 @@ class MusicController extends GetxController {
       format: ArtworkFormat.JPEG,
       size: 200,
       quality: 300,
-      
     );
   }
 

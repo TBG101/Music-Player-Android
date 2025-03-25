@@ -15,7 +15,6 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final MusicController controller = Get.find<MusicController>();
-  final YoutubeController ytController = Get.find<YoutubeController>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   Alignment _getBoxAlignment() => controller.song.value == null
@@ -58,14 +57,10 @@ class _HomeState extends State<Home> {
           color: Colors.transparent,
           alignment: Alignment.center,
           child: AnimationSearchBar(
-            onChanged: (_) {
-              controller.queeUpdate();
-              controller.filterList();
-            },
+            onChanged: (_) => _updateSearch(),
             onClosed: () {
               controller.textController.value.clear();
-              controller.queeUpdate();
-              controller.filterList();
+              _updateSearch();
             },
             closeIconColor: Colors.white,
             isBackButtonVisible: true,
@@ -86,44 +81,81 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void _updateSearch() {
+    controller.queeUpdate();
+    controller.filterList();
+  }
+
   Widget _buildListTile(int index) {
     final list = controller.textController.value.text.isEmpty
         ? controller.musicList
         : controller.filteredList;
 
-    if (index == list.length) {
-      return const SizedBox(height: 80);
-    }
+    if (index == list.length) return const SizedBox(height: 80);
 
     return ListTile(
       onTap: () => controller.playSong(index),
-      onLongPress: () {
-        Get.dialog(Dialog(
-          child: SizedBox(
-            height: 140,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text(
-                    list[index].title,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const Divider(),
-                  ListTile(
-                    title: const Text("Delete song"),
-                    onTap: () => controller.deleteSong(index),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ));
-      },
+      onLongPress: () => _showDeleteDialog(index, list[index].title),
       title: Text(list[index].title),
       subtitle: Text(_getArtistName(index)),
-      leading: controller.artWorkGetter(index),
+      leading: _buildLeadingImage(index),
     );
+  }
+
+  Widget _buildLeadingImage(int index) {
+    return FutureBuilder(
+      future: controller.getArtAsUint8List(index),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return const Icon(Icons.error);
+
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            snapshot.data == null) {
+          return const _DefaultImage();
+        }
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(90),
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: Image.memory(
+              snapshot.data!,
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+              cacheHeight: 50,
+              cacheWidth: 50,
+              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                return AnimatedOpacity(
+                  duration: const Duration(milliseconds: 500),
+                  opacity: frame == null ? 0 : 1,
+                  child: child,
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteDialog(int index, String title) {
+    Get.dialog(Dialog(
+      child: SizedBox(
+        height: 140,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Text(title, style: const TextStyle(fontSize: 16)),
+              const Divider(),
+              ListTile(
+                title: const Text("Delete song"),
+                onTap: () => controller.deleteSong(index),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
   }
 
   Widget _buildDrawer() {
@@ -141,10 +173,7 @@ class _HomeState extends State<Home> {
                 width: double.infinity,
                 child: Padding(
                   padding: EdgeInsets.all(12.0),
-                  child: Text(
-                    "YouTube",
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  child: Text("YouTube", style: TextStyle(fontSize: 18)),
                 ),
               ),
             ),
@@ -152,26 +181,25 @@ class _HomeState extends State<Home> {
             const Spacer(),
             const Divider(),
             InkWell(
-              onTap: () {
-                if (controller.doneInit.isTrue) {
-                  controller.audioHandler.stop();
-                  controller.initFalse();
-                  controller.rescanFiles();
-                  scaffoldKey.currentState?.closeDrawer();
-                }
-              },
+              onTap: _rescanFiles,
               child: const Padding(
                 padding: EdgeInsets.all(10),
-                child: Text(
-                  "Rescan Files?",
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: Text("Rescan Files?", style: TextStyle(fontSize: 18)),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _rescanFiles() {
+    if (controller.doneInit.isTrue) {
+      controller.audioHandler.stop();
+      controller.initFalse();
+      controller.rescanFiles();
+      scaffoldKey.currentState?.closeDrawer();
+    }
   }
 
   @override
@@ -230,6 +258,36 @@ class _HomeState extends State<Home> {
           );
         },
       ),
+    );
+  }
+}
+
+class _DefaultImage extends StatelessWidget {
+  const _DefaultImage();
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(90),
+      child: const AspectRatio(
+        aspectRatio: 1,
+        child: NotFoundImage(),
+      ),
+    );
+  }
+}
+
+class NotFoundImage extends StatelessWidget {
+  const NotFoundImage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      "lib/assets/img/NotFound.jpg",
+      fit: BoxFit.cover,
+      alignment: Alignment.center,
+      cacheHeight: 50,
+      cacheWidth: 50,
     );
   }
 }
