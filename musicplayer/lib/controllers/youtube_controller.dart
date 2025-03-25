@@ -112,7 +112,7 @@ class YoutubeController extends GetxController {
 
   Future<File> _prepareFile(String title, String extension) async {
     final filePath =
-        "${saveDownloadPath.value!}/${Utils.checkVideoTitle('$title.$extension')}";
+        "${saveDownloadPath.value!}/${Utils.sanitizeFileName('$title.$extension')}";
     final file = File(filePath);
 
     if (file.existsSync()) {
@@ -186,7 +186,7 @@ class YoutubeController extends GetxController {
     final imgBytes =
         (await http.get(Uri.parse(myVideo.thumbnails.maxResUrl))).bodyBytes;
     final imgPath =
-        "${c.savePath.path}/${Utils.checkVideoTitle(myVideo.title)}.jpg";
+        "${c.savePath.path}/${Utils.sanitizeFileName(myVideo.title)}.jpg";
 
     if (!await File(imgPath).exists()) {
       File(imgPath).writeAsBytesSync(imgBytes);
