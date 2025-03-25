@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/song_image_widget.dart';
 import 'package:musicplayer/controllers/music_controller.dart';
@@ -29,7 +27,6 @@ class _SongFullScreenState extends State<SongFullScreen> {
       return File.fromUri(controller.song.value!.artUri!).path;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +194,7 @@ class _SongFullScreenState extends State<SongFullScreen> {
               );
             }),
           ),
-          
+
           // controls
           Padding(
             padding: const EdgeInsets.only(top: 20),

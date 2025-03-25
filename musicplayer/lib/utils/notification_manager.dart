@@ -32,7 +32,7 @@ class NotificationManager {
     if (lastNotificationTime.difference(DateTime.now()).inMilliseconds < 500) {
       return;
     }
-
+    lastNotificationTime = DateTime.now();
     __notification.createNotification(
       content: NotificationContent(
           id: notificationId,
