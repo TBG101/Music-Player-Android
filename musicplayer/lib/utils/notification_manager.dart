@@ -29,7 +29,8 @@ class NotificationManager {
   void notificationUpdate(String title, int progress, int notificationId) {
     // Basically update a notification after a certain time
     // to avoid spamming the notification bar
-    if (lastNotificationTime.difference(DateTime.now()).inMilliseconds < 500) {
+    if (lastNotificationTime.isBefore(
+        lastNotificationTime.add(const Duration(milliseconds: 500)))) {
       return;
     }
     lastNotificationTime = DateTime.now();

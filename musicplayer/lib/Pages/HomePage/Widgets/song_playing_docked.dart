@@ -37,10 +37,11 @@ class SongPlayingDocked extends GetView<MusicController> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 14),
-        decoration: const BoxDecoration(
-            boxShadow: [BoxShadow(color: Colors.black, blurRadius: 10)],
-            color: Color(0xff212121),
-            borderRadius: BorderRadius.all(Radius.circular(12))),
+        decoration: BoxDecoration(
+            boxShadow: const [BoxShadow(color: Colors.black, blurRadius: 10)],
+            color: const Color(0xff212121),
+            border: Border.all(color: Colors.white12, width: 1),
+            borderRadius: const BorderRadius.all(Radius.circular(12))),
         child: ListTile(
           onTap: () {
             Get.to(const SongFullScreen());
@@ -67,10 +68,12 @@ class SongPlayingDocked extends GetView<MusicController> {
               softWrap: true,
             );
           }),
-          subtitle: Text(
-            _getArtistName(),
-            overflow: TextOverflow.ellipsis,
-          ),
+          subtitle: Obx(() {
+            return Text(
+              _getArtistName(),
+              overflow: TextOverflow.ellipsis,
+            );
+          }),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
