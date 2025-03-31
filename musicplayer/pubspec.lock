@@ -161,14 +161,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
-  dio:
-    dependency: "direct main"
-    description:
-      name: dio
-      sha256: "7d328c4d898a61efc3cd93655a0955858e29a0aa647f0f9e02d59b3bb275e2e8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.6"
   fake_async:
     dependency: transitive
     description:
@@ -329,7 +321,7 @@ packages:
     source: hosted
     version: "0.15.5"
   http:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: http
       sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010
@@ -440,14 +432,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-  lists:
-    dependency: transitive
-    description:
-      name: lists
-      sha256: "4ca5c19ae4350de036a7e996cdd1ee39c93ac0a2b840f4915459b7d0a7d4ab27"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   logging:
     dependency: transitive
     description:
@@ -600,14 +584,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  percent_indicator:
-    dependency: "direct main"
-    description:
-      name: percent_indicator
-      sha256: c37099ad833a883c9d71782321cb65c3a848c21b6939b6185f0ff6640d05814c
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.3"
   permission_handler:
     dependency: "direct main"
     description:
@@ -784,6 +760,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  simple_sparse_list:
+    dependency: transitive
+    description:
+      name: simple_sparse_list
+      sha256: aa648fd240fa39b49dcd11c19c266990006006de6699a412de485695910fbc1f
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.4"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -889,10 +873,10 @@ packages:
     dependency: transitive
     description:
       name: unicode
-      sha256: "0f69e46593d65245774d4f17125c6084d2c20b4e473a983f6e21b7d7762218f1"
+      sha256: "48f8b6c50ed70ba61647f4987d56ec505923041956bbdb651db2838ce7b47b58"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.1"
+    version: "1.1.7"
   universal_io:
     dependency: transitive
     description:
@@ -985,10 +969,10 @@ packages:
     dependency: "direct main"
     description:
       name: youtube_explode_dart
-      sha256: "51ca5b2c03bf56060143d4f87df90ec3227592d7ae8a8003532533ae019d4291"
+      sha256: f226459955b3de3e4cdd88bb4098dd7fed0261ac3f41485e2b8bbfb2f7c9ddc5
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.6"
+    version: "2.3.10"
 sdks:
   dart: ">=3.3.0 <4.0.0"
   flutter: ">=3.19.0"

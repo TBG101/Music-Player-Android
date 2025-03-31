@@ -35,21 +35,18 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   on_audio_query: ^2.9.0
+  flutter_riverpod: ^2.6.1
   permission_handler: ^10.3.0
   just_audio: ^0.9.34
   audio_service: ^0.18.10
   path_provider: ^2.1.1
   get: ^4.6.5
-  flutter_riverpod: ^2.3.6
-  http: ^1.2.0
-  dio: ^4.0.0
   device_info_plus: ^9.0.3
   file_picker: ^5.5.0
-  percent_indicator: ^4.2.3
   awesome_notifications: ^0.8.2
   shared_preferences: ^2.2.2
   media_scanner: ^2.1.0
-  youtube_explode_dart: ^2.2.3
+  youtube_explode_dart: ^2.3.10
   flutter_media_metadata: ^1.0.0+1
   metadata_god: ^0.5.2+1
   ffmpeg_kit_flutter_audio: ^6.0.3

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/expandable_screen.dart';
+import 'package:musicplayer/Pages/HomePage/Widgets/song_playing_docked.dart';
 import 'package:musicplayer/Pages/YoutubePage/youtubeHomePage.dart';
 import 'package:musicplayer/controllers/music_controller.dart';
 import 'package:musicplayer/controllers/youtube_controller.dart';
@@ -121,11 +122,11 @@ class _HomeState extends State<Home> {
               snapshot.data!,
               fit: BoxFit.cover,
               alignment: Alignment.center,
-              cacheHeight: 50,
-              cacheWidth: 50,
+              cacheWidth: 100,
+              gaplessPlayback: true,
               frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
                 return AnimatedOpacity(
-                  duration: const Duration(milliseconds: 500),
+                  duration: const Duration(milliseconds: 250),
                   opacity: frame == null ? 0 : 1,
                   child: child,
                 );
@@ -233,27 +234,37 @@ class _HomeState extends State<Home> {
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: _buildAppBar(),
                   ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: controller.textController.value.text.isEmpty
-                          ? controller.musicList.length + 1
-                          : controller.filteredList.length + 1,
-                      itemBuilder: (context, index) => _buildListTile(index),
-                    ),
-                  ),
+                  Obx(() {
+                    return Expanded(
+                      child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: controller.textController.value.text.isEmpty
+                            ? controller.musicList.length + 1
+                            : controller.filteredList.length + 1,
+                        itemBuilder: (context, index) => _buildListTile(index),
+                      ),
+                    );
+                  }),
                 ],
               ),
-              Obx(() {
-                return Visibility(
-                  visible: controller.visible.value,
-                  child: AnimatedAlign(
-                    curve: Curves.ease,
-                    alignment: _getBoxAlignment(),
-                    duration: const Duration(milliseconds: 500),
-                    child: const ExpandableSongScreen(),
-                  ),
-                );
-              }),
+              Obx(() => Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Visibility(
+                        visible: controller.visible.value,
+                        child: const SongPlayingDocked()),
+                  ))
+
+              // Obx(() {
+              //   return Visibility(
+              //     visible: controller.visible.value,
+              //     child: AnimatedAlign(
+              //       curve: Curves.ease,
+              //       alignment: _getBoxAlignment(),
+              //       duration: const Duration(milliseconds: 500),
+              //       child: const ExpandableSongScreen(),
+              //     ),
+              //   );
+              // }),
             ],
           );
         },
@@ -288,6 +299,7 @@ class NotFoundImage extends StatelessWidget {
       alignment: Alignment.center,
       cacheHeight: 50,
       cacheWidth: 50,
+      gaplessPlayback: true,
     );
   }
 }

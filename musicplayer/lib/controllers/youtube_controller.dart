@@ -107,7 +107,6 @@ class YoutubeController extends GetxController {
           body: e.toString());
     }
     videoQuee.removeLast();
-    
   }
 
   Future<File> _prepareFile(String title, String extension) async {
@@ -184,7 +183,7 @@ class YoutubeController extends GetxController {
   Future<String> _saveThumbnail(Video myVideo) async {
     final c = Get.find<MusicController>();
     final imgBytes =
-        (await http.get(Uri.parse(myVideo.thumbnails.maxResUrl))).bodyBytes;
+        (await http.get(Uri.parse(myVideo.thumbnails.highResUrl))).bodyBytes;
     final imgPath =
         "${c.savePath.path}/${Utils.sanitizeFileName(myVideo.title)}.jpg";
 
