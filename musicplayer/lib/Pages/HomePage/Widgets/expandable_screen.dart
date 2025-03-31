@@ -10,75 +10,67 @@ class ExpandableSongScreen extends StatefulWidget {
 
 class _ExpandableSongScreenState extends State<ExpandableSongScreen>
     with SingleTickerProviderStateMixin {
-  final _sheet = GlobalKey();
-  final _draggableScrollableController = DraggableScrollableController();
-  late final AnimationController animationController;
-
-  DraggableScrollableSheet get sheet =>
-      (_sheet.currentWidget as DraggableScrollableSheet);
+  final _sheetKey = GlobalKey();
+  final _draggableController = DraggableScrollableController();
+  late final AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    _draggableScrollableController.addListener(_onChanged);
-    animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 500));
-
-    animationController.value = 1;
+    _draggableController.addListener(_onScrollChanged);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    )..value = 1; // Initialize animation value to fully collapsed
   }
 
-  void _onChanged() {
-    final currentSize = _draggableScrollableController.size;
-    animationController.value = 1 - currentSize;
-    print(animationController.value);
+  void _onScrollChanged() {
+    final currentSize = _draggableController.size;
+    _animationController.value = 1 - currentSize;
+
     if (currentSize <= 0.05) {
-      animationController.animateTo(1);
-      _collapse();
+      _animationController.animateTo(1);
+      _animateSheetToSize(sheet.snapSizes!.first); // Collapse
     } else if (currentSize >= 0.95) {
-      animationController.animateTo(0);
+      _animationController.animateTo(0); // Fully expanded
     }
   }
 
-  void _collapse() => _animateSheet(sheet.snapSizes!.first);
-
-  void _anchor() => _animateSheet(sheet.snapSizes!.last);
-
-  void _expand() => _animateSheet(sheet.maxChildSize);
-
-  void _hide() => _animateSheet(sheet.minChildSize);
-
-  void _animateSheet(double size) {
-    // _draggableScrollableController.animateTo(
-    //   size,
-    //   duration: const Duration(milliseconds: 50),
-    //   curve: Curves.fastOutSlowIn,
-    // );
-    _draggableScrollableController.jumpTo(size);
+  void _animateSheetToSize(double size) {
+    _draggableController.jumpTo(size);
   }
+
+  DraggableScrollableSheet get sheet =>
+      _sheetKey.currentWidget as DraggableScrollableSheet;
 
   @override
   void dispose() {
-    _draggableScrollableController.dispose();
+    _draggableController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final topBarHeight = MediaQuery.of(context).padding.top;
+    final maxChildSize = 1 - (topBarHeight / MediaQuery.of(context).size.height);
+
     return DraggableScrollableSheet(
-      key: _sheet,
+      key: _sheetKey,
       initialChildSize: 0.09,
       minChildSize: 0.09,
-      expand: true,
+      maxChildSize: maxChildSize,
       snap: true,
-      snapSizes: const [0.09, 1],
-      controller: _draggableScrollableController,
-      builder: (BuildContext context, ScrollController scrollController) {
+      snapSizes: [0.09, maxChildSize],
+      controller: _draggableController,
+      builder: (context, scrollController) {
         return SingleChildScrollView(
-            controller: scrollController,
-            child: SongPlayingWdiget(
-              isFullScreen: true,
-              animationController: animationController,
-            ));
+          controller: scrollController,
+          child: SongPlayingWdiget(
+            isFullScreen: true,
+            animationController: _animationController,
+          ),
+        );
       },
     );
   }

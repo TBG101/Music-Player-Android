@@ -2,7 +2,7 @@ import "dart:io";
 import "dart:ui";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:musicplayer/Pages/HomePage/Widgets/song_full_screen.dart";
+import "package:musicplayer/Pages/SongFullScreen/song_full_screen.dart";
 import 'package:musicplayer/Pages/HomePage/Widgets/song_image_widget.dart';
 import "package:musicplayer/controllers/music_controller.dart";
 
@@ -124,8 +124,7 @@ class _SongPlayingWdigetState extends State<SongPlayingWdiget> {
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom -
-        34;
+        MediaQuery.of(context).padding.bottom;
     return AnimatedBuilder(
         animation: animationController,
         builder: (context, child) {

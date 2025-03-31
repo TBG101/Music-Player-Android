@@ -171,8 +171,13 @@ class MusicController extends GetxController {
   }
 
   Future<void> filterList() async {
-    if (lastFilterTime.difference(DateTime.now()).inMilliseconds < 500) return;
-    lastFilterTime = DateTime.now();
+    final other = DateTime.now();
+
+    if (lastFilterTime.add(const Duration(milliseconds: 250)).isAfter(other)) {
+      return;
+    }
+
+    lastFilterTime = other;
 
     filteredList.clear();
     var text = textController.value.text;
@@ -265,9 +270,9 @@ class MusicController extends GetxController {
     for (int index = 0; index < musicList.length; index++) {
       musicCountcurrent.value = index;
       print(index);
-      var img = await _audioQuery.queryArtwork(
+      final img = await _audioQuery.queryArtwork(
           musicList[index].id, ArtworkType.AUDIO,
-          format: ArtworkFormat.PNG, size: 200, quality: 300);
+          format: ArtworkFormat.PNG, size: 300, quality: 1000);
 
       if (img == null || img.isEmpty) {
         continue;

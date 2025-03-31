@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 class SongImageWidget extends StatelessWidget {
   final String path;
   final double raduis, height, width;
+  final int cacheWidth;
 
-  const SongImageWidget(
-      {super.key,
-      required this.path,
-      this.raduis = 90,
-      this.height = 30,
-      this.width = 30});
+  const SongImageWidget({
+    super.key,
+    required this.path,
+    this.raduis = 90,
+    this.height = 30,
+    this.width = 30,
+    this.cacheWidth = 30,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,20 +22,20 @@ class SongImageWidget extends StatelessWidget {
       child: path.contains("lib")
           ? Image.asset(
               path,
-              width: width,
-              height: height,
               fit: BoxFit.cover,
               filterQuality: FilterQuality.high,
+              isAntiAlias: true,
               gaplessPlayback: true,
+              cacheWidth: cacheWidth,
             )
-          : Image.file(
+            : Image.file(
               File(path),
-              width: height,
-              height: width,
               fit: BoxFit.cover,
+              isAntiAlias: true,
               filterQuality: FilterQuality.high,
               gaplessPlayback: true,
+              cacheWidth: cacheWidth * 2, // Increase cache width for higher quality
             ),
-    );
+        );
   }
 }
