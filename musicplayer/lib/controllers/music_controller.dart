@@ -171,13 +171,14 @@ class MusicController extends GetxController {
   }
 
   Future<void> filterList() async {
-    final other = DateTime.now();
+    final now = DateTime.now();
 
-    if (lastFilterTime.add(const Duration(milliseconds: 250)).isAfter(other)) {
+    // Ensure at least 250ms has passed since the last filter operation
+    if (now.isBefore(lastFilterTime.add(const Duration(milliseconds: 250)))) {
       return;
     }
 
-    lastFilterTime = other;
+    lastFilterTime = now;
 
     filteredList.clear();
     var text = textController.value.text;

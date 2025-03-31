@@ -163,6 +163,9 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
         );
       });
 
+  Stream get audioPlayingStream => _player.playingStream;
+
+
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {
       final playing = _player.playing;

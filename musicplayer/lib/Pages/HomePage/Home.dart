@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart';
@@ -94,12 +96,49 @@ class _HomeState extends State<Home> {
 
     if (index == list.length) return const SizedBox(height: 80);
 
-    return ListTile(
-      onTap: () => controller.playSong(index),
-      onLongPress: () => _showDeleteDialog(index, list[index].title),
-      title: Text(list[index].title),
-      subtitle: Text(_getArtistName(index)),
-      leading: _buildLeadingImage(index),
+    return StreamBuilder(
+        stream: controller.audioHandler.mediaItem,
+        builder: (context, snapshot) {
+          return ListTile(
+            onTap: () => controller.playSong(index),
+            onLongPress: () => _showDeleteDialog(index, list[index].title),
+            title: Text(
+              snapshot.data?.title ?? "",
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              snapshot.data?.artist ?? "",
+            ),
+            leading: _buildLeadingArt(snapshot.data?.artUri),
+          );
+        });
+  }
+
+  Widget _buildLeadingArt(Uri? path) {
+    if (path == null) return const CircularProgressIndicator();
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(90),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Image.file(
+          File(path.path),
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+          cacheWidth: 100,
+          gaplessPlayback: true,
+          filterQuality: FilterQuality.high,
+          isAntiAlias: true,
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            return AnimatedOpacity(
+              duration: const Duration(milliseconds: 100),
+              opacity: frame == null ? 0 : 1,
+              child: child,
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -124,9 +163,11 @@ class _HomeState extends State<Home> {
               alignment: Alignment.center,
               cacheWidth: 100,
               gaplessPlayback: true,
+              filterQuality: FilterQuality.high,
+              isAntiAlias: true,
               frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
                 return AnimatedOpacity(
-                  duration: const Duration(milliseconds: 250),
+                  duration: const Duration(milliseconds: 100),
                   opacity: frame == null ? 0 : 1,
                   child: child,
                 );
@@ -139,24 +180,61 @@ class _HomeState extends State<Home> {
   }
 
   void _showDeleteDialog(int index, String title) {
-    Get.dialog(Dialog(
-      child: SizedBox(
-        height: 140,
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(title, style: const TextStyle(fontSize: 16)),
-              const Divider(),
-              ListTile(
-                title: const Text("Delete song"),
-                onTap: () => controller.deleteSong(index),
+              Text(
+                "Delete Song",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Are you sure you want to delete \"$title\"?",
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () {
+                      controller.deleteSong(index);
+                      Get.back();
+                    },
+                    child: const Text("Delete"),
+                  ),
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.grey),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: () => Get.back(),
+                    child: const Text("Cancel"),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
-    ));
+    );
   }
 
   Widget _buildDrawer() {
@@ -237,6 +315,7 @@ class _HomeState extends State<Home> {
                   Obx(() {
                     return Expanded(
                       child: ListView.builder(
+                        cacheExtent: 500,
                         padding: EdgeInsets.zero,
                         itemCount: controller.textController.value.text.isEmpty
                             ? controller.musicList.length + 1

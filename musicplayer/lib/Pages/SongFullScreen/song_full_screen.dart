@@ -41,39 +41,41 @@ class _SongFullScreenState extends State<SongFullScreen> {
   }
 
   Widget _buildBlurredBackground() {
-    return Obx(() {
-      return Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: FileImage(File(getPath())),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Stack(
-          children: [
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 28),
-              child: Container(
-                color: Colors.transparent,
+    return StreamBuilder(
+        stream: controller.audioHandler.mediaItem.stream,
+        builder: (context, snapshot) {
+          return Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: FileImage(File.fromUri(snapshot.data?.artUri ?? Uri())),
+                fit: BoxFit.cover,
               ),
             ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.black.withOpacity(0.4),
-                    Colors.transparent,
-                  ],
+            child: Stack(
+              children: [
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 28),
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
                 ),
-              ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.8),
+                        Colors.black.withOpacity(0.4),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
-    });
+          );
+        });
   }
 
   Widget _buildContent() {
