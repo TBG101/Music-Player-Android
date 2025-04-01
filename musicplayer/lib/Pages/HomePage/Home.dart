@@ -20,38 +20,6 @@ class _HomeState extends State<Home> {
   final MusicController controller = Get.find<MusicController>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Alignment _getBoxAlignment() => controller.song.value == null
-      ? const Alignment(1.25, 1.25)
-      : Alignment.bottomCenter;
-
-  String _getArtistName(int index) {
-    final list = controller.textController.value.text.isEmpty
-        ? controller.musicList
-        : controller.filteredList;
-    final artist = list[index].artist;
-    return (artist == "<unknown>" || artist == null) ? "No Artist" : artist;
-  }
-
-  RichText _buildTitleWidget() {
-    return RichText(
-      overflow: TextOverflow.clip,
-      textAlign: TextAlign.end,
-      textDirection: TextDirection.rtl,
-      maxLines: 1,
-      text: const TextSpan(
-        text: 'My ',
-        style: TextStyle(color: Colors.white, fontSize: 23),
-        children: [
-          TextSpan(
-            text: 'Music',
-            style: TextStyle(
-                fontWeight: FontWeight.bold, color: Colors.purpleAccent),
-          ),
-        ],
-      ),
-    );
-  }
-
   PreferredSizeWidget _buildAppBar() {
     return PreferredSize(
       preferredSize: const Size(double.infinity, 65),
@@ -84,6 +52,38 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Alignment _getBoxAlignment() => controller.song.value == null
+      ? const Alignment(1.25, 1.25)
+      : Alignment.bottomCenter;
+
+  String _getArtistName(int index) {
+    final list = controller.textController.value.text.isEmpty
+        ? controller.musicList
+        : controller.filteredList;
+    final artist = list[index].artist;
+    return (artist == "<unknown>" || artist == null) ? "No Artist" : artist;
+  }
+
+  RichText _buildTitleWidget() {
+    return RichText(
+      overflow: TextOverflow.clip,
+      textAlign: TextAlign.end,
+      textDirection: TextDirection.rtl,
+      maxLines: 1,
+      text: const TextSpan(
+        text: 'My ',
+        style: TextStyle(color: Colors.white, fontSize: 23),
+        children: [
+          TextSpan(
+            text: 'Music',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.purpleAccent),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _updateSearch() {
     controller.queeUpdate();
     controller.filterList();
@@ -96,23 +96,21 @@ class _HomeState extends State<Home> {
 
     if (index == list.length) return const SizedBox(height: 80);
 
-    return StreamBuilder(
-        stream: controller.audioHandler.mediaItem,
-        builder: (context, snapshot) {
-          return ListTile(
-            onTap: () => controller.playSong(index),
-            onLongPress: () => _showDeleteDialog(index, list[index].title),
-            title: Text(
-              snapshot.data?.title ?? "",
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              snapshot.data?.artist ?? "",
-            ),
-            leading: _buildLeadingArt(snapshot.data?.artUri),
-          );
-        });
+    return ListTile(
+      onTap: () => controller.playSong(index),
+      onLongPress: () => _showDeleteDialog(index, list[index].title),
+      title: Text(
+        list[index].title,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        _getArtistName(index),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      leading: _buildLeadingImage(index),
+    );
   }
 
   Widget _buildLeadingArt(Uri? path) {
@@ -332,18 +330,6 @@ class _HomeState extends State<Home> {
                         visible: controller.visible.value,
                         child: const SongPlayingDocked()),
                   ))
-
-              // Obx(() {
-              //   return Visibility(
-              //     visible: controller.visible.value,
-              //     child: AnimatedAlign(
-              //       curve: Curves.ease,
-              //       alignment: _getBoxAlignment(),
-              //       duration: const Duration(milliseconds: 500),
-              //       child: const ExpandableSongScreen(),
-              //     ),
-              //   );
-              // }),
             ],
           );
         },
