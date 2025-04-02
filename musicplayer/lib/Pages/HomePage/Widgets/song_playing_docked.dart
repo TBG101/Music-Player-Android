@@ -35,9 +35,7 @@ class SongPlayingDocked extends GetView<MusicController> {
                 );
               }
               if (!snapshot.hasData || snapshot.data == null) {
-                return const Center(
-                  child: Text("No Data"),
-                );
+                return Text("No Data");
               }
               return ListTile(
                 onTap: () {

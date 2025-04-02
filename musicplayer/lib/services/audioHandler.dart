@@ -23,6 +23,8 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   final _playlist = ConcatenatingAudioSource(children: []);
 
   bool isShuffle = false;
+  Stream<bool> get shuffleModeStream => _player.shuffleModeEnabledStream;
+  Stream<LoopMode> get repeatModeStream => _player.loopModeStream;
 
   AudioPlayerHandler() {
     initPlayer();
@@ -95,7 +97,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
       },
     );
     _playlist.clear();
-    _playlist.addAll(audioSource.toList());
+    await _playlist.addAll(audioSource.toList());
     queue.value.clear();
     final newQueue = queue.value..addAll(mediaItems);
     queue.add(newQueue);
@@ -154,6 +156,14 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     _player.setShuffleModeEnabled(isShuffle);
   }
 
+  void switchReapeat() {
+    if (_player.loopMode == LoopMode.off) {
+      _player.setLoopMode(LoopMode.all);
+    } else {
+      _player.setLoopMode(LoopMode.off);
+    }
+  }
+
   Stream<dataAudioPosition> get audioPositionStream =>
       Rx.combineLatest2<Duration, Duration?, dataAudioPosition>(
           _player.positionStream, _player.durationStream, (position, duration) {
@@ -164,7 +174,6 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
       });
 
   Stream get audioPlayingStream => _player.playingStream;
-
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {
@@ -208,16 +217,13 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   void _listenForDurationChanges() {
     _player.durationStream.listen((duration) {
       var index = _player.currentIndex;
-      final newQueue = queue.value;
-      if (index == null || newQueue.isEmpty) return;
-      if (_player.shuffleModeEnabled) {
-        index = _player.shuffleIndices!.indexOf(index);
-      }
-      final oldMediaItem = newQueue[index];
-      final newMediaItem = oldMediaItem.copyWith(duration: duration);
+      if (index == null || queue.value.isEmpty) return;
+      final newMediaItem = queue.value[index].copyWith(duration: duration);
+      mediaItem.add(newMediaItem);
+      // Update the queue item with the new duration
+      final newQueue = List<MediaItem>.from(queue.value);
       newQueue[index] = newMediaItem;
       queue.add(newQueue);
-      mediaItem.add(newMediaItem);
     });
   }
 }

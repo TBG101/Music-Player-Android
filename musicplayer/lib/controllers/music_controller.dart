@@ -169,6 +169,10 @@ class MusicController extends GetxController {
     });
   }
 
+  void queeUpdate() {
+    queeUpdated.value = false;
+  }
+
   Future<void> filterList() async {
     final now = DateTime.now();
 
@@ -194,17 +198,12 @@ class MusicController extends GetxController {
     update();
   }
 
-  void queeUpdate() {
-    queeUpdated.value = false;
-  }
-
   void playSong(int index) async {
     visible.value = true;
     var lst = <MediaItem>[];
     var text = textController.value.text;
 
     if (queeUpdated.isFalse) {
-      queeUpdated.value = true;
       if (text.isEmpty) {
         for (var index = 0; index < musicList.length; index++) {
           var art = await artSetter(index, musicList);
@@ -235,6 +234,7 @@ class MusicController extends GetxController {
         }
         await audioHandler.updateQueue(lst);
       }
+      queeUpdated.value = true;
     }
     audioHandler.skipToQueueItem(index);
   }

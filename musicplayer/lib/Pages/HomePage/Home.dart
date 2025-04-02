@@ -283,6 +283,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
+      appBar: _buildAppBar(),
       drawer: Drawer(child: _buildDrawer()),
       body: GetBuilder<MusicController>(
         init: controller,
@@ -306,10 +307,6 @@ class _HomeState extends State<Home> {
             children: [
               Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: _buildAppBar(),
-                  ),
                   Obx(() {
                     return Expanded(
                       child: ListView.builder(
