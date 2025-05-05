@@ -19,7 +19,6 @@ class NotificationManager {
         channelKey: 'basic_channel',
         title: title,
         body: body,
-        customSound: "asset://assets/sound/uwu.mp3",
         category: NotificationCategory.Event,
         color: error == true || error != null ? Colors.red : Colors.blue,
       ),
