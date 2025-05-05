@@ -1,13 +1,12 @@
+import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/searchWidget.dart';
-import 'package:musicplayer/Pages/HomePage/Widgets/expandable_screen.dart';
 import 'package:musicplayer/Pages/HomePage/Widgets/song_playing_docked.dart';
 import 'package:musicplayer/Pages/YoutubePage/youtubeHomePage.dart';
 import 'package:musicplayer/controllers/music_controller.dart';
-import 'package:musicplayer/controllers/youtube_controller.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -19,6 +18,14 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final MusicController controller = Get.find<MusicController>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  Timer? _debounce;
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      _updateSearch();
+    });
+  }
 
   PreferredSizeWidget _buildAppBar() {
     return PreferredSize(
@@ -28,7 +35,7 @@ class _HomeState extends State<Home> {
           color: Colors.transparent,
           alignment: Alignment.center,
           child: AnimationSearchBar(
-            onChanged: (_) => _updateSearch(),
+            onChanged: _onSearchChanged,
             onClosed: () {
               controller.textController.value.clear();
               _updateSearch();
@@ -56,11 +63,8 @@ class _HomeState extends State<Home> {
       ? const Alignment(1.25, 1.25)
       : Alignment.bottomCenter;
 
-  String _getArtistName(int index) {
-    final list = controller.textController.value.text.isEmpty
-        ? controller.musicList
-        : controller.filteredList;
-    final artist = list[index].artist;
+  String _getArtistName(SongModel song) {
+    final artist = song.artist;
     return (artist == "<unknown>" || artist == null) ? "No Artist" : artist;
   }
 
@@ -89,23 +93,21 @@ class _HomeState extends State<Home> {
     controller.filterList();
   }
 
-  Widget _buildListTile(int index) {
-    final list = controller.textController.value.text.isEmpty
-        ? controller.musicList
-        : controller.filteredList;
+  Widget _buildListTile(List<SongModel> activeList, int index) {
+    if (index == activeList.length) return const SizedBox(height: 80);
 
-    if (index == list.length) return const SizedBox(height: 80);
+    final song = activeList[index];
 
     return ListTile(
       onTap: () => controller.playSong(index),
-      onLongPress: () => _showDeleteDialog(index, list[index].title),
+      onLongPress: () => _showDeleteDialog(index, song.title),
       title: Text(
-        list[index].title,
+        song.title,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
       subtitle: Text(
-        _getArtistName(index),
+        _getArtistName(song),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -281,6 +283,12 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final activeList = controller.textController.value.text.isEmpty
+        ? controller.musicList
+        : controller.filteredList;
+
+    final listLength = activeList.length + 1;
+
     return Scaffold(
       key: scaffoldKey,
       appBar: _buildAppBar(),
@@ -307,25 +315,25 @@ class _HomeState extends State<Home> {
             children: [
               Column(
                 children: [
-                  Obx(() {
-                    return Expanded(
-                      child: ListView.builder(
+                  Expanded(
+                    child: Obx(
+                      () => ListView.builder(
                         cacheExtent: 500,
                         padding: EdgeInsets.zero,
-                        itemCount: controller.textController.value.text.isEmpty
-                            ? controller.musicList.length + 1
-                            : controller.filteredList.length + 1,
-                        itemBuilder: (context, index) => _buildListTile(index),
+                        itemCount: listLength,
+                        itemBuilder: (context, index) =>
+                            _buildListTile(activeList, index),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
                 ],
               ),
               Obx(() => Align(
                     alignment: Alignment.bottomCenter,
                     child: Visibility(
-                        visible: controller.visible.value,
-                        child: const SongPlayingDocked()),
+                      visible: controller.visible.value,
+                      child: const SongPlayingDocked(),
+                    ),
                   ))
             ],
           );

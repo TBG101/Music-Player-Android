@@ -126,17 +126,11 @@ class YoutubeController extends GetxController {
     final output = webmFile.openWrite(mode: FileMode.writeOnlyAppend);
     var dataDownloaded = 0;
     final msg = 'Downloading $title.webm';
-    var timePassed = DateTime.now();
 
     await for (final data in audioStream) {
       dataDownloaded += data.length;
       final progress = ((dataDownloaded / fileLength) * 100).ceil();
-
-      if (DateTime.now().isAfter(timePassed.add(const Duration(seconds: 1)))) {
-        notificationManager.notificationUpdate(msg, progress, notificationId);
-        timePassed = DateTime.now();
-      }
-
+      notificationManager.notificationUpdate(msg, progress, notificationId);
       output.add(data);
     }
 
