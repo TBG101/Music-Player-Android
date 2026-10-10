@@ -28,8 +28,6 @@ Future<AudioPlayerHandler> initAudioService() async {
 class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   late final AudioPlayer _player;
 
-  Stream<DataAudioPosition>? _audioPositionStream;
-
   Stream<bool> get shuffleModeStream => _player.shuffleModeEnabledStream;
   Stream<LoopMode> get repeatModeStream => _player.loopModeStream;
 
@@ -122,16 +120,19 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   @override
   Future<void> skipToQueueItem(int index) async {
     _player.seek(Duration.zero, index: index);
+    play();
   }
 
   @override
   Future<void> skipToNext() async {
     _player.seekToNext();
+    play();
   }
 
   @override
   Future<void> skipToPrevious() async {
     _player.seekToPrevious();
+    play();
   }
 
   @override
@@ -178,15 +179,15 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   /// Memoized + shared: the dock and full screen rebuild their StreamBuilder
   /// often, and a fresh combine stream per access would resubscribe the
   /// position/duration listeners every time.
-  Stream<DataAudioPosition> get audioPositionStream => _audioPositionStream ??=
-          Rx.combineLatest2<Duration, Duration?, DataAudioPosition>(
-              _player.positionStream, _player.durationStream,
-              (position, duration) {
-        return DataAudioPosition(
-          duration: duration ?? Duration.zero,
-          position: position,
-        );
-      }).shareValue();
+  late final Stream<DataAudioPosition> audioPositionStream =
+      Rx.combineLatest2<Duration, Duration?, DataAudioPosition>(
+    _player.positionStream,
+    _player.durationStream,
+    (position, duration) => DataAudioPosition(
+      position: position,
+      duration: duration ?? Duration.zero,
+    ),
+  ).shareValue();
 
   // ---------------------------------------------------------------------------
   // Player → audio_service sync

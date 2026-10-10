@@ -45,9 +45,9 @@ class _SongFullScreenState extends State<SongFullScreen>
 
   TextStyle _timeStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ) ??
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      ) ??
       const TextStyle(
         fontSize: 12,
         fontFeatures: [FontFeature.tabularFigures()],
@@ -149,9 +149,8 @@ class _SongFullScreenState extends State<SongFullScreen>
         child: ValueListenableBuilder<double>(
           valueListenable: _dismissOffset,
           builder: (context, offset, child) => AnimatedContainer(
-            duration: offset == 0
-                ? const Duration(milliseconds: 200)
-                : Duration.zero,
+            duration:
+                offset == 0 ? const Duration(milliseconds: 200) : Duration.zero,
             curve: Curves.easeOut,
             transform: Matrix4.translationValues(0, offset, 0),
             child: child,
@@ -226,7 +225,8 @@ class _SongFullScreenState extends State<SongFullScreen>
   }
 
   Widget _buildContent(BuildContext context) {
-    final landscape = MediaQuery.orientationOf(context) == Orientation.landscape;
+    final landscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -284,8 +284,8 @@ class _SongFullScreenState extends State<SongFullScreen>
           iconSize: 32,
           tooltip: 'Close',
           onPressed: () => Navigator.maybePop(context),
-          icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: scheme.onSurface),
+          icon:
+              Icon(Icons.keyboard_arrow_down_rounded, color: scheme.onSurface),
         ),
         Expanded(
           child: Text(
@@ -339,7 +339,8 @@ class _SongFullScreenState extends State<SongFullScreen>
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: _isPlaying ? 0.55 : 0.3),
+                    color:
+                        Colors.black.withValues(alpha: _isPlaying ? 0.55 : 0.3),
                     blurRadius: _isPlaying ? 40 : 20,
                     offset: const Offset(0, 16),
                   ),
@@ -438,17 +439,15 @@ class _SongFullScreenState extends State<SongFullScreen>
         // here (instead of when the seek future completes) avoids the
         // snap-back to the stale position while just_audio is still seeking.
         final pendingTarget = _seekTarget;
-        if (_dragValue.value != null &&
-            pendingTarget != null &&
-            !disabled) {
-          final landed = (position.inMilliseconds -
-                      pendingTarget.inMilliseconds)
-                  .abs() <=
-              _seekTolerance.inMilliseconds;
+        if (_dragValue.value != null && pendingTarget != null && !disabled) {
+          final landed =
+              (position.inMilliseconds - pendingTarget.inMilliseconds).abs() <=
+                  _seekTolerance.inMilliseconds;
           // The seek future completing early while the position is already
           // (almost) there — e.g. tiny seeks — also counts as landed.
           if (landed) {
-            WidgetsBinding.instance.addPostFrameCallback((_) => _clearSeekHold());
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => _clearSeekHold());
           }
         }
 
@@ -699,8 +698,7 @@ class _ToggleButton extends StatelessWidget {
           iconSize: 28,
           tooltip: tooltip,
           onPressed: onPressed,
-          icon: Icon(icon,
-              color: active ? accent : scheme.onSurfaceVariant),
+          icon: Icon(icon, color: active ? accent : scheme.onSurfaceVariant),
         ),
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
