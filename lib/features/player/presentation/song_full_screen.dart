@@ -427,7 +427,7 @@ class _SongFullScreenState extends State<SongFullScreen>
     return StreamBuilder<DataAudioPosition>(
       initialData:
           DataAudioPosition(duration: Duration.zero, position: Duration.zero),
-      stream: controller.audioHandler.audioPositionStream,
+      stream: controller.audioHandler.positionStream(),
       builder: (context, snapshot) {
         final scheme = Theme.of(context).colorScheme;
         final duration = snapshot.data?.duration ?? Duration.zero;

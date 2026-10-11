@@ -47,7 +47,6 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     ]).listen((_) => _broadcastState());
 
     _player.currentIndexStream.listen(_syncMediaItem);
-    _listenForDurationChanges();
   }
 
   // ---------------------------------------------------------------------------
@@ -93,7 +92,8 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     );
 
     queue.value = items;
-    _player.seek(Duration.zero, index: index);
+    await _player.seek(Duration.zero, index: index);
+    await play();
   }
 
   /// Removes [id] from the queue and the loaded playlist. Callers must not
@@ -179,15 +179,15 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   /// Memoized + shared: the dock and full screen rebuild their StreamBuilder
   /// often, and a fresh combine stream per access would resubscribe the
   /// position/duration listeners every time.
-  late final Stream<DataAudioPosition> audioPositionStream =
+  Stream<DataAudioPosition> positionStream() =>
       Rx.combineLatest2<Duration, Duration?, DataAudioPosition>(
-    _player.positionStream,
-    _player.durationStream,
-    (position, duration) => DataAudioPosition(
-      position: position,
-      duration: duration ?? Duration.zero,
-    ),
-  ).shareValue();
+        _player.positionStream,
+        _player.durationStream,
+        (position, duration) => DataAudioPosition(
+          position: position,
+          duration: duration ?? Duration.zero,
+        ),
+      );
 
   // ---------------------------------------------------------------------------
   // Player → audio_service sync
@@ -246,33 +246,16 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
     mediaItem.add(i >= 0 ? queue.value[i] : tag);
   }
 
-  void _listenForDurationChanges() {
-    _player.durationStream.listen((duration) {
-      final current = mediaItem.value;
-      final index = _player.currentIndex;
+  // void _listenForDurationChanges() {
+  //   _player.durationStream.listen((d) {
+  //     final i = _player.currentIndex;
+  //     final item = mediaItem.value;
+  //     if (d == null || i == null || item == null || item.duration == d) return;
+  //     if (i >= queue.value.length || queue.value[i].id != item.id) return;
 
-      if (duration == null ||
-          current == null ||
-          index == null ||
-          index < 0 ||
-          index >= _player.sequence.length) {
-        return;
-      }
-
-      final tag = _player.sequence[index].tag;
-      if (tag is! MediaItem ||
-          tag.id != current.id ||
-          current.duration == duration) {
-        return;
-      }
-
-      final updated = current.copyWith(duration: duration);
-      mediaItem.add(updated);
-
-      final queueIndex = queue.value.indexWhere((m) => m.id == current.id);
-      if (queueIndex != -1) {
-        queue.add(List<MediaItem>.of(queue.value)..[queueIndex] = updated);
-      }
-    });
-  }
+  //     final updated = item.copyWith(duration: d);
+  //     mediaItem.add(updated);
+  //     queue.add(List.of(queue.value)..[i] = updated);
+  //   });
+  // }
 }

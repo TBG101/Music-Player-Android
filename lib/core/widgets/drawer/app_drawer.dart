@@ -67,7 +67,9 @@ class AppDrawer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              header ?? _DefaultHeader(colorScheme: colorScheme, textTheme: textTheme),
+              header ??
+                  _DefaultHeader(
+                      colorScheme: colorScheme, textTheme: textTheme),
               const SizedBox(height: 12),
               Text(
                 'Browse',
@@ -152,7 +154,8 @@ class _DefaultHeader extends StatelessWidget {
                 Text(
                   'Local & YouTube player',
                   style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onPrimaryContainer.withValues(alpha: 0.75),
+                    color:
+                        colorScheme.onPrimaryContainer.withValues(alpha: 0.75),
                   ),
                 ),
               ],
@@ -185,7 +188,8 @@ class _NavTile extends StatelessWidget {
       leading: Icon(selected ? (item.selectedIcon ?? item.icon) : item.icon),
       title: Text(
         item.label,
-        style: TextStyle(fontWeight: selected ? FontWeight.w600 : FontWeight.w500),
+        style:
+            TextStyle(fontWeight: selected ? FontWeight.w600 : FontWeight.w500),
       ),
       subtitle: item.subtitle == null ? null : Text(item.subtitle!),
       trailing: Icon(
@@ -215,7 +219,8 @@ class _BottomTile extends StatelessWidget {
       textColor: colorScheme.onSurfaceVariant,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
       leading: Icon(item.icon, size: 22),
-      title: Text(item.label, style: const TextStyle(fontWeight: FontWeight.w500)),
+      title:
+          Text(item.label, style: const TextStyle(fontWeight: FontWeight.w500)),
       subtitle: item.subtitle == null ? null : Text(item.subtitle!),
       onTap: item.onTap,
     );

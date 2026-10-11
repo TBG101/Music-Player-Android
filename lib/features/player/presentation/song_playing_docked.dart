@@ -233,7 +233,7 @@ class _MiniProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: StreamBuilder<DataAudioPosition>(
-        stream: controller.audioHandler.audioPositionStream,
+        stream: controller.audioHandler.positionStream(),
         builder: (context, snapshot) {
           final scheme = Theme.of(context).colorScheme;
           final duration =

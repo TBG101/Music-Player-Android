@@ -11,7 +11,7 @@ class HomeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Obx (not GetBuilder): the branch below reads Rx values (doneInit,
+    // Obx: the branch below reads Rx values (doneInit,
     // hasError, musicList) and LibraryController never calls update(), so a
     // GetBuilder here would build the loading view once and never leave it.
     return Obx(() {
