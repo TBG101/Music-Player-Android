@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'package:musicplayer/core/utils/utils.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -13,6 +14,7 @@ class DownloadCancelledException implements Exception {
 
 class AudioDownloader {
   final http.Client _http = http.Client();
+  final _log = Logger('AudioDownloader');
 
   File prepareFile(String savePath, String title, String extension) {
     final filePath = "$savePath/${Utils.sanitizeFileName('$title.$extension')}";
@@ -53,7 +55,7 @@ class AudioDownloader {
     Object? lastError;
     for (final stream in candidateStreams) {
       final serving = await isServing(stream);
-      print(
+      _log.fine(
           "Stream ${stream.tag} (${stream.container.name}): serving=$serving");
       if (!serving) {
         lastError = "Stream ${stream.tag} is not serving bytes";
@@ -74,7 +76,7 @@ class AudioDownloader {
         rethrow;
       } catch (e) {
         lastError = "Stream ${stream.tag} failed: $e";
-        print(lastError);
+        _log.warning(lastError);
       }
     }
     throw Exception("Download failed: $lastError");
@@ -101,7 +103,7 @@ class AudioDownloader {
         }
         final output = file.openWrite();
         var dataDownloaded = 0;
-        print(
+        _log.fine(
             "Attempt $attempt: starting download of ${file.path} with expected size $fileLength bytes");
 
         try {
@@ -120,7 +122,7 @@ class AudioDownloader {
         if (dataDownloaded < fileLength) {
           lastError =
               "Incomplete download: received $dataDownloaded of $fileLength bytes";
-          print(lastError);
+          _log.warning(lastError);
           continue;
         }
         return;
@@ -131,7 +133,7 @@ class AudioDownloader {
         rethrow;
       } catch (e) {
         lastError = "Attempt $attempt error: $e";
-        print(lastError);
+        _log.warning(lastError);
       }
     }
 

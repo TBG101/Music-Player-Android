@@ -7,12 +7,11 @@ class KCustomButton extends StatelessWidget {
   final double? radius;
 
   const KCustomButton(
-      {Key? key,
+      {super.key,
       required this.widget,
       required this.onPressed,
       this.radius,
-      this.onLongPress})
-      : super(key: key);
+      this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +40,11 @@ class KBackButton extends StatelessWidget {
   final IconData? icon;
   final void Function() onDrawerOpen;
   const KBackButton(
-      {Key? key,
+      {super.key,
       required this.previousScreen,
       required this.iconColor,
       required this.icon,
-      required this.onDrawerOpen})
-      : super(key: key);
+      required this.onDrawerOpen});
 
   @override
   Widget build(BuildContext context) {

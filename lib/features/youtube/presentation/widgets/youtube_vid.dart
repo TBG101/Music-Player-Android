@@ -63,7 +63,7 @@ class YouTubeVid extends GetView<YoutubeController> {
                             height: 30,
                             width: 60,
                             decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.9),
+                                color: Colors.black.withValues(alpha: 0.9),
                                 borderRadius: const BorderRadius.only(
                                     topLeft: Radius.circular(8))),
                           ),

@@ -14,10 +14,12 @@ import 'package:musicplayer/features/youtube/data/youtube_stream_client.dart';
 import 'package:musicplayer/core/services/notification_manager.dart';
 import 'package:musicplayer/core/utils/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:logging/logging.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class YoutubeController extends GetxController {
+  final _log = Logger('YoutubeController');
   final c = Get.find<LibraryController>();
   var notificationManager = NotificationManager();
   final _audioDownloader = AudioDownloader();
@@ -116,7 +118,7 @@ class YoutubeController extends GetxController {
           final progress = totalBytes > 0
               ? ((downloadedBytes / totalBytes) * 100).clamp(0, 100).toInt()
               : 0;
-          print(
+          _log.fine(
               "Download progress: $downloadedBytes of $totalBytes bytes ($progress%)");
           downloadQueue.updateProgress(videoId,
               percent: progress,
@@ -218,7 +220,8 @@ class YoutubeController extends GetxController {
     await prefs.setString('downloadPath', newValue);
 
     debugPrint(newValue);
-    Permission.manageExternalStorage.status.then((value) => print(value));
+    Permission.manageExternalStorage.status
+        .then((value) => _log.fine('Storage permission status: $value'));
   }
 
   /// Opens the system folder picker, persists the choice and returns it.

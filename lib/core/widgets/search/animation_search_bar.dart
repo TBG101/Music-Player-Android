@@ -5,7 +5,7 @@ import 'package:musicplayer/core/widgets/search/search_bar_buttons.dart';
 
 class AnimationSearchBar extends StatefulWidget {
   const AnimationSearchBar({
-    Key? key,
+    super.key,
     this.searchBarWidth,
     this.searchBarHeight,
     this.previousScreen,
@@ -31,7 +31,7 @@ class AnimationSearchBar extends StatefulWidget {
     this.duration,
     required this.onDrawerOpen,
     this.searchYoutube,
-  }) : super(key: key);
+  });
 
   ///
   final double? searchBarWidth;

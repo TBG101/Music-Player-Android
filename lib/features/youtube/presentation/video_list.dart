@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logging/logging.dart';
 import 'package:musicplayer/features/youtube/presentation/widgets/youtube_vid.dart';
 import 'package:musicplayer/features/youtube/controller/youtube_controller.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+
+final _log = Logger('VideoList');
 
 class VideoList extends GetView<YoutubeController> {
   const VideoList({super.key});
@@ -14,7 +17,7 @@ class VideoList extends GetView<YoutubeController> {
           ? FutureBuilder(
               future: controller.findMusicRecomendation(),
               builder: (context, snapshot) {
-                print(snapshot.data);
+                _log.finer('Recommendation snapshot: ${snapshot.data}');
                 if (snapshot.hasError) {
                   return const Text("error occured while fetching recommended");
                 }

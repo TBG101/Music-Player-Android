@@ -54,13 +54,13 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   // ---------------------------------------------------------------------------
 
   @override
-  Future<void> updateQueue(List<MediaItem> mediaItems) async {
-    final items = List<MediaItem>.of(mediaItems);
+  Future<void> updateQueue(List<MediaItem> queue) async {
+    final items = List<MediaItem>.of(queue);
     final wasPlaying = _player.playing;
 
     if (items.isEmpty) {
       await stop();
-      queue.value = [];
+      super.queue.value = [];
       return;
     }
 
@@ -72,7 +72,7 @@ class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
           .toList(),
     );
 
-    queue.value = items;
+    super.queue.value = items;
 
     if (wasPlaying) {
       unawaited(_player.play());

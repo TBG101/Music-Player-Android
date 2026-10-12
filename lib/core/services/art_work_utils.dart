@@ -6,10 +6,10 @@ import 'package:musicplayer/core/paths/app_paths.dart';
 import 'package:musicplayer/core/services/media_scanner.dart';
 
 class ArtWorkUtils {
-  static const DEFAULT_IMAGE = "NotFound.jpg";
+  static const defaultImage = "NotFound.jpg";
 
   static Future<void> saveDefaultArt() async {
-    final defaultArtPath = "${(await AppPaths.artworkDir).path}/$DEFAULT_IMAGE";
+    final defaultArtPath = "${(await AppPaths.artworkDir).path}/$defaultImage";
 
     final ByteData data = await rootBundle.load("assets/img/NotFound.jpg");
     final Uint8List bytes = data.buffer.asUint8List();
@@ -18,7 +18,7 @@ class ArtWorkUtils {
   }
 
   static Future<String> getDefaultArtPath() async {
-    return "${(await AppPaths.artworkDir).path}/$DEFAULT_IMAGE";
+    return "${(await AppPaths.artworkDir).path}/$defaultImage";
   }
 
   static Future<String> getCachePath() async {
@@ -82,7 +82,7 @@ class ArtWorkUtils {
     if (!await dir.exists()) return;
 
     await for (final entity in dir.list()) {
-      if (entity is File && !entity.path.endsWith("/$DEFAULT_IMAGE")) {
+      if (entity is File && !entity.path.endsWith("/$defaultImage")) {
         try {
           await entity.delete();
         } catch (e) {
