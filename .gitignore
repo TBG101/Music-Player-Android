@@ -46,3 +46,7 @@ app.*.map.json
 .commandcode-legacy-taste
 .vscode
 .fvm
+
+*.jks
+*.keystore
+android/key.properties
