@@ -65,9 +65,8 @@ class _HomeTitle extends StatelessWidget {
       maxLines: 1,
       text: TextSpan(
         text: 'My ',
-        style: (textTheme.headlineSmall ??
-                const TextStyle(fontSize: 23))
-            .copyWith(
+        style:
+            (textTheme.headlineSmall ?? const TextStyle(fontSize: 23)).copyWith(
           color: scheme.onSurface,
           fontWeight: FontWeight.w400,
         ),

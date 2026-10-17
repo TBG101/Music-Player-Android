@@ -154,9 +154,7 @@ class YoutubeController extends GetxController {
         coverFile: file != null ? File(file) : null,
         artist: myVideo.author,
         year: myVideo.publishDate?.year,
-        album: myVideo.musicData.isNotEmpty
-    ? myVideo.musicData[0].album
-    : null,
+        album: myVideo.musicData.isNotEmpty ? myVideo.musicData[0].album : null,
         isCancelled: () => downloadQueue.isCancelled(videoId),
         onProgress: (percent) {
           notificationManager.showConverting(
@@ -169,12 +167,9 @@ class YoutubeController extends GetxController {
         },
       );
 
-
-
       if (downloadQueue.isCancelled(videoId)) {
         throw const DownloadCancelledException();
       }
-
 
       final previousPath = prefs.getString(_downloadedPathKey(videoId));
       if (previousPath != null && previousPath != mp3File.path) {

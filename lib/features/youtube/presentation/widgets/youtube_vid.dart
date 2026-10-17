@@ -74,7 +74,6 @@ class YouTubeVid extends GetView<YoutubeController> {
                             alignment: Alignment.bottomRight,
                             child: Stack(
                               children: [
-                              
                                 Text(
                                   vidDuration,
                                   style: const TextStyle(

@@ -20,9 +20,8 @@ class SongPlayingDocked extends GetView<LibraryController> {
   // Helpers
   // ---------------------------------------------------------------------------
 
-  static String _artPath(Uri? uri) => (uri == null || uri.path.isEmpty)
-      ? _fallbackArt
-      : File.fromUri(uri).path;
+  static String _artPath(Uri? uri) =>
+      (uri == null || uri.path.isEmpty) ? _fallbackArt : File.fromUri(uri).path;
 
   void _openPlayer() {
     // A builder (not an instance) so the screen is only constructed when the

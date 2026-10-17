@@ -33,8 +33,7 @@ class AudioConverter {
       await tempFile.delete();
     }
 
-    final hasCover =
-        coverFile != null && await coverFile.exists();
+    final hasCover = coverFile != null && await coverFile.exists();
 
     final totalMs = duration?.inMilliseconds ?? 0;
     var lastPercent = -1;
@@ -112,9 +111,8 @@ class AudioConverter {
         (statistics) {
           if (onProgress == null || totalMs <= 0) return;
 
-          final percent = ((statistics.getTime() / totalMs) * 100)
-              .clamp(0, 100)
-              .toInt();
+          final percent =
+              ((statistics.getTime() / totalMs) * 100).clamp(0, 100).toInt();
 
           if (percent == lastPercent) return;
 

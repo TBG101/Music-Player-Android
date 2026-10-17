@@ -87,8 +87,8 @@ class _AnimationSearchBarState extends State<AnimationSearchBar> {
     final _searchFieldHeight = widget.searchFieldHeight ?? 40;
     final _hPadding =
         widget.horizontalPadding != null ? widget.horizontalPadding! * 2 : 0;
-    final _searchBarWidth = widget.searchBarWidth ??
-        MediaQuery.of(context).size.width - _hPadding;
+    final _searchBarWidth =
+        widget.searchBarWidth ?? MediaQuery.of(context).size.width - _hPadding;
     final _isBackButtonVisible = widget.isBackButtonVisible ?? true;
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -173,15 +173,14 @@ class _AnimationSearchBarState extends State<AnimationSearchBar> {
                     : 0,
                 height: _isSearching ? _searchFieldHeight : 20,
                 margin: EdgeInsets.only(
-                    left: _isSearching ? 5 : 0,
-                    right: _isSearching ? 10 : 0),
+                    left: _isSearching ? 5 : 0, right: _isSearching ? 10 : 0),
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 alignment: Alignment.center,
                 decoration: widget.searchFieldDecoration ??
                     BoxDecoration(
                         color: scheme.surface,
-                        border: Border.all(
-                            color: scheme.outlineVariant, width: .5),
+                        border:
+                            Border.all(color: scheme.outlineVariant, width: .5),
                         borderRadius: BorderRadius.circular(15)),
                 child: TextField(
                   controller: widget.searchTextEditingController,
@@ -197,8 +196,7 @@ class _AnimationSearchBarState extends State<AnimationSearchBar> {
                   },
                   style: widget.textStyle ??
                       TextStyle(
-                          color: scheme.onSurface,
-                          fontWeight: FontWeight.w400),
+                          color: scheme.onSurface, fontWeight: FontWeight.w400),
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.zero,
                     hintText: widget.hintText ?? 'Search here...',
@@ -206,14 +204,14 @@ class _AnimationSearchBarState extends State<AnimationSearchBar> {
                         TextStyle(
                             color: scheme.onSurfaceVariant,
                             fontWeight: FontWeight.w400),
-                    disabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide.none),
-                    focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide.none),
-                    enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide.none),
-                    border: const OutlineInputBorder(
-                        borderSide: BorderSide.none),
+                    disabledBorder:
+                        const OutlineInputBorder(borderSide: BorderSide.none),
+                    focusedBorder:
+                        const OutlineInputBorder(borderSide: BorderSide.none),
+                    enabledBorder:
+                        const OutlineInputBorder(borderSide: BorderSide.none),
+                    border:
+                        const OutlineInputBorder(borderSide: BorderSide.none),
                   ),
                   onChanged: widget.onChanged,
                 ),
@@ -233,11 +231,10 @@ class _AnimationSearchBarState extends State<AnimationSearchBar> {
                   child: KCustomButton(
                       widget: Padding(
                           padding: const EdgeInsets.all(10),
-                          child: Icon(
-                              Icons.search_rounded,
+                          child: Icon(Icons.search_rounded,
                               size: 60,
-                              color: widget.searchIconColor ??
-                                  scheme.onSurface)),
+                              color:
+                                  widget.searchIconColor ?? scheme.onSurface)),
                       onPressed: () {
                         setState(() => _isSearching = true);
                         _focusNode.requestFocus();

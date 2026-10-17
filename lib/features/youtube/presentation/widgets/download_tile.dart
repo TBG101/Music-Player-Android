@@ -130,8 +130,7 @@ class DownloadTile extends StatelessWidget {
                     IconButton(
                       tooltip: 'Cancel download',
                       icon: const Icon(Icons.close),
-                      onPressed: () =>
-                          DownloadQueue().cancelTask(task.videoId),
+                      onPressed: () => DownloadQueue().cancelTask(task.videoId),
                     ),
                 ],
               ),

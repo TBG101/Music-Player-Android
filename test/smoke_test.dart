@@ -9,8 +9,7 @@ void main() {
   test('smoke: Utils.formatDurationToMinutesAndSeconds pads seconds', () {
     expect(Utils.formatDurationToMinutesAndSeconds(const Duration(seconds: 5)),
         '0:05');
-    expect(
-        Utils.formatDurationToMinutesAndSeconds(const Duration(minutes: 61)),
+    expect(Utils.formatDurationToMinutesAndSeconds(const Duration(minutes: 61)),
         '61:00');
   });
 }

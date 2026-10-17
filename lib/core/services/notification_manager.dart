@@ -106,8 +106,8 @@ class NotificationManager {
         channelKey: downloadChannelKey,
         actionType: ActionType.Default,
         title: videoTitle,
-        body: _progressBody(notificationId, downloadedBytes, totalBytes, now,
-            stageLabel),
+        body: _progressBody(
+            notificationId, downloadedBytes, totalBytes, now, stageLabel),
         notificationLayout: NotificationLayout.ProgressBar,
         category: NotificationCategory.Progress,
         progress: progress.toDouble(),
@@ -134,7 +134,9 @@ class NotificationManager {
         channelKey: downloadChannelKey,
         actionType: ActionType.Default,
         title: videoTitle,
-        body: percent == null ? 'Converting to MP3' : 'Converting to MP3 · $percent%',
+        body: percent == null
+            ? 'Converting to MP3'
+            : 'Converting to MP3 · $percent%',
         notificationLayout: NotificationLayout.ProgressBar,
         category: NotificationCategory.Progress,
         progress: percent?.toDouble(),
@@ -224,7 +226,8 @@ class NotificationManager {
     _lastSampleByNotificationId[notificationId] =
         _ProgressSample(downloadedBytes, now);
 
-    final ofTotal = '${_formatBytes(downloadedBytes)} of ${_formatBytes(totalBytes)}';
+    final ofTotal =
+        '${_formatBytes(downloadedBytes)} of ${_formatBytes(totalBytes)}';
     if (previous == null) return ofTotal;
 
     final seconds = now.difference(previous.time).inMilliseconds / 1000;

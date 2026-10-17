@@ -1,4 +1,11 @@
-enum DownloadStatus { queued, downloading, converting, completed, failed, cancelled }
+enum DownloadStatus {
+  queued,
+  downloading,
+  converting,
+  completed,
+  failed,
+  cancelled
+}
 
 class DownloadTask {
   DownloadTask({

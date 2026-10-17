@@ -29,8 +29,8 @@ class YoutubeHomePage extends StatelessWidget {
         children: <TextSpan>[
           TextSpan(
               text: 'Tube',
-              style: TextStyle(
-                  fontWeight: FontWeight.w700, color: scheme.error)),
+              style:
+                  TextStyle(fontWeight: FontWeight.w700, color: scheme.error)),
         ],
       ),
       textScaler: const TextScaler.linear(1),
@@ -60,9 +60,9 @@ class YoutubeHomePage extends StatelessWidget {
             backIconColor: scheme.onSurface,
             centerTitle: 'YouTube',
             searchIconColor: scheme.onSurface,
-            centerTitleStyle: textTheme.titleMedium
-                    ?.copyWith(color: scheme.onSurface) ??
-                TextStyle(color: scheme.onSurface, fontSize: 18),
+            centerTitleStyle:
+                textTheme.titleMedium?.copyWith(color: scheme.onSurface) ??
+                    TextStyle(color: scheme.onSurface, fontSize: 18),
             searchTextEditingController: controller.textController.value,
             horizontalPadding: 5,
             centerWidget: titleWidget(context),

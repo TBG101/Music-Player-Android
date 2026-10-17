@@ -60,13 +60,13 @@ class PermissionService {
     }
 
     final storageGranted = audioStatus.isGranted && manageGranted;
-    final managePermanentlyDenied =
-        !manageGranted && await Permission.manageExternalStorage.isPermanentlyDenied;
+    final managePermanentlyDenied = !manageGranted &&
+        await Permission.manageExternalStorage.isPermanentlyDenied;
     return PermissionResult(
       storageGranted: storageGranted,
       notificationGranted: notificationGranted,
-      permanentlyDenied:
-          !storageGranted && (audioStatus.isPermanentlyDenied || managePermanentlyDenied),
+      permanentlyDenied: !storageGranted &&
+          (audioStatus.isPermanentlyDenied || managePermanentlyDenied),
     );
   }
 
